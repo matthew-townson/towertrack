@@ -1,0 +1,822 @@
+﻿ID,Name,Abbreviation,Type,Category,ParentID
+100,City of Aberdeen,C Aberdeen,Council area,Geographical,7
+767,Aberdeenshire,Aberdeenshire,Council area,Geographical,7
+768,Angus,Angus,Council area,Geographical,7
+101,Argyll and Bute,Argyll & Bute,Council area,Geographical,7
+386,East Ayrshire,E Ayrs,Council area,Geographical,7
+386,East Ayrshire,E Ayrs,Council area,Geographical,815
+769,North Ayrshire,N Ayrs,Council area,Geographical,815
+335,South Ayrshire,S Ayrs,Council area,Geographical,7
+335,South Ayrshire,S Ayrs,Council area,Geographical,815
+102,Clackmannanshire,Clackman,Council area,Geographical,7
+106,Dumfries and Galloway,DumfGallwy,Council area,Geographical,7
+773,East Dunbartonshire,E Duns,Council area,Geographical,807
+387,West Dunbartonshire,W Duns,Council area,Geographical,807
+103,City of Dundee,C Dundee,Council area,Geographical,7
+104,City of Edinburgh,C Edin,Council area,Geographical,811
+302,Falkirk,Falkirk,Council area,Geographical,806
+107,Fife,Fife,Council area,Geographical,7
+105,City of Glasgow,C Glas,Council area,Geographical,810
+108,Highland,Highland,Council area,Geographical,7
+771,Inverclyde,Inverclyde,Council area,Geographical,808
+776,North Lanarkshire,N Lanarks,Council area,Geographical,7
+777,South Lanarkshire,S Lanarks,Council area,Geographical,809
+777,South Lanarkshire,S Lanarks,Council area,Geographical,7
+109,East Lothian,E Loth,Council area,Geographical,814
+775,Midlothian,M Loth,Council area,Geographical,813
+774,West Lothian,W Loth,Council area,Geographical,812
+766,Moray,Moray,Council area,Geographical,7
+764,Orkney,Orkney,Council area,Geographical,7
+110,Perth and Kinross,Perth & Kinross,Council area,Geographical,7
+306,Renfrewshire,Renfrews,Council area,Geographical,808
+772,East Renfrewshire,E Renfrews,Council area,Geographical,808
+770,Scottish Borders,Borders,Council area,Geographical,7
+763,Shetland,Shetland,Council area,Geographical,7
+111,Stirling,Stirling,Council area,Geographical,806
+765,Western Isles,Western Isles,Council area,Geographical,7
+5,England,England,Country,Geographical,
+6,Wales,Wales,Country,Geographical,
+7,Scotland,Scotland,Country,Geographical,
+9,Channel Islands,Channel Is,Country,Geographical,
+10,Isle of Man,Isle of Man,Country,Geographical,
+322,Argentina,Argentina,Country,Geographical,
+14,Australia,Australia,Country,Geographical,
+22,Belgium,Belgium,Country,Geographical,
+17,Canada,Canada,Country,Geographical,
+307,Falkland Islands,Falklands,Country,Geographical,
+24,France,France,Country,Geographical,
+830,Germany,Germany,Country,Geographical,
+169,Grenada,Grenada,Country,Geographical,
+26,India,India,Country,Geographical,
+21,Kenya,Kenya,Country,Geographical,
+301,Malta,Malta,Country,Geographical,
+23,Netherlands,Netherlands,Country,Geographical,
+15,New Zealand,New Zealand,Country,Geographical,
+12,Northern Ireland,N Ireland,Country,Geographical,
+27,Pakistan,Pakistan,Country,Geographical,
+11,Republic of Ireland,Republic of Ireland,Country,Geographical,
+28,Singapore,Singapore,Country,Geographical,
+19,South Africa,South Africa,Country,Geographical,
+25,Spain,Spain,Country,Geographical,
+170,St Vincent,St Vincent,Country,Geographical,
+16,United States of America,USA,Country,Geographical,
+20,Zimbabwe,Zimbabwe,Country,Geographical,
+112,Antrim,Antrim,County,Geographical,12
+113,Armagh,Armagh,County,Geographical,12
+117,Cork,Cork,County,Geographical,11
+114,Derry,Derry,County,Geographical,12
+844,Donegal,Donegal,County,Geographical,11
+115,Down,Down,County,Geographical,12
+118,Dublin,Dublin,County,Geographical,11
+116,Fermanagh,Ferman,County,Geographical,12
+890,Kildare,Kildare,County,Geographical,11
+119,Kilkenny,Kilk,County,Geographical,11
+120,Limerick,Lim,County,Geographical,11
+841,Longford,Longford,County,Geographical,11
+121,Louth,Louth,County,Geographical,11
+839,Mayo,Mayo,County,Geographical,11
+840,Monaghan,Monaghan,County,Geographical,11
+892,Roscommon,Roscommon,County,Geographical,11
+122,Tipperary,Tip,County,Geographical,11
+823,Tyrone,Tyrone,County,Geographical,12
+123,Waterford,Waterfd,County,Geographical,11
+894,Westmeath,Westmeath,County,Geographical,11
+124,Wexford,Wexford,County,Geographical,11
+125,Wicklow,Wicklow,County,Geographical,11
+684,City of Belfast,Belfast CB,County borough,Geographical,12
+683,City of Derry,Derry CB,County borough,Geographical,114
+687,Antrim and Newtownabbey,Antrim and Newtownabbey,District,Geographical,12
+688,Ards and North Down,Ards and North Down,District,Geographical,12
+689,"Armagh City, Banbridge and Craigavon","Armagh, Banbridge & Craigavon",District,Geographical,12
+690,Belfast,Belfast dist,District,Geographical,12
+691,Causeway Coast and Glens,Causeway Coast and Glens,District,Geographical,12
+692,Derry and Strabane,Derry and Strabane,District,Geographical,12
+132,District of Columbia,DC,District,Geographical,16
+693,Fermanagh and Omagh,Fermanagh and Omagh,District,Geographical,12
+694,Lisburn and Castlereagh,Lisburn and Castlereagh,District,Geographical,12
+695,Mid and East Antrim,Mid and East Antrim,District,Geographical,12
+696,Mid Ulster,Mid Ulster,District,Geographical,12
+697,"Newry, Mourne and Down","Newry, Mourne and Down",District,Geographical,12
+126,Alderney,Alderney,Island,Geographical,9
+127,Guernsey,Guernsey,Island,Geographical,9
+833,Herm,Herm,Island,Geographical,9
+128,Jersey,Jersey,Island,Geographical,9
+167,North Island,NI,Island,Geographical,15
+379,Sark,Sark,Island,Geographical,9
+168,South Island,SI,Island,Geographical,15
+789,City of Aberdeen,Aberdeen,Lieutenancy area,Geographical,100
+788,Aberdeenshire,Aberdeenshire,Lieutenancy area,Geographical,767
+793,Angus,Angus,Lieutenancy area,Geographical,768
+798,Argyll and Bute,Argyll & Bute,Lieutenancy area,Geographical,101
+798,Argyll and Bute,Argyll & Bute,Lieutenancy area,Geographical,7
+815,Ayrshire and Arran,Ayrs & Arran,Lieutenancy area,Geographical,7
+787,Banffshire,Banff,Lieutenancy area,Geographical,7
+29,Bedfordshire,Beds,Lieutenancy area,Geographical,5
+30,Berkshire,Berks,Lieutenancy area,Geographical,5
+800,Berwickshire,Berwicks,Lieutenancy area,Geographical,770
+31,City of Bristol,C Bris,Lieutenancy area,Geographical,5
+32,Buckinghamshire,Bucks,Lieutenancy area,Geographical,5
+781,Caithness,Caithness,Lieutenancy area,Geographical,108
+33,Cambridgeshire,Cambs,Lieutenancy area,Geographical,5
+34,Cheshire,Cheshire,Lieutenancy area,Geographical,5
+796,Clackmannanshire,Clackman,Lieutenancy area,Geographical,102
+35,Cornwall,Cornwall,Lieutenancy area,Geographical,5
+36,Cumbria,Cumbria,Lieutenancy area,Geographical,5
+37,Derbyshire,Derbys,Lieutenancy area,Geographical,5
+38,Devon,Devon,Lieutenancy area,Geographical,5
+39,Dorset,Dorset,Lieutenancy area,Geographical,5
+803,Dumfries,Dumfries,Lieutenancy area,Geographical,106
+807,Dunbartonshire,Duns,Lieutenancy area,Geographical,7
+794,City of Dundee,Dundee,Lieutenancy area,Geographical,103
+40,Durham,Durham,Lieutenancy area,Geographical,5
+811,City of Edinburgh,C Edin,Lieutenancy area,Geographical,7
+41,Essex,Essex,Lieutenancy area,Geographical,5
+797,Fife,Fife,Lieutenancy area,Geographical,107
+810,City of Glasgow,Glasgow,Lieutenancy area,Geographical,7
+42,Gloucestershire,Glos,Lieutenancy area,Geographical,5
+43,Hampshire,Hants,Lieutenancy area,Geographical,5
+44,Herefordshire,Herefs,Lieutenancy area,Geographical,5
+45,Hertfordshire,Herts,Lieutenancy area,Geographical,5
+784,Inverness,Inverness,Lieutenancy area,Geographical,108
+46,Isle of Wight,IoW,Lieutenancy area,Geographical,5
+48,Kent,Kent,Lieutenancy area,Geographical,5
+790,Kincardineshire,Kincardineshire,Lieutenancy area,Geographical,767
+809,Lanarkshire,Lanarks,Lieutenancy area,Geographical,7
+49,Lancashire,Lancs,Lieutenancy area,Geographical,5
+50,Leicestershire,Leics,Lieutenancy area,Geographical,5
+51,Lincolnshire,Lincs,Lieutenancy area,Geographical,5
+52,City of London,C London,Lieutenancy area,Geographical,5
+53,Greater London,Gr London,Lieutenancy area,Geographical,5
+814,East Lothian,E Loth,Lieutenancy area,Geographical,7
+813,Midlothian,M Loth,Lieutenancy area,Geographical,7
+812,West Lothian,W Loth,Lieutenancy area,Geographical,7
+54,Greater Manchester,Gr Man,Lieutenancy area,Geographical,5
+55,Merseyside,Mers,Lieutenancy area,Geographical,5
+786,Moray,Moray,Lieutenancy area,Geographical,766
+785,Nairn,Nairn,Lieutenancy area,Geographical,108
+56,Norfolk,Norfolk,Lieutenancy area,Geographical,5
+57,Northamptonshire,Northants,Lieutenancy area,Geographical,5
+58,Northumberland,Northumb,Lieutenancy area,Geographical,5
+59,Nottinghamshire,Notts,Lieutenancy area,Geographical,5
+779,Orkney,Orkney,Lieutenancy area,Geographical,764
+60,Oxfordshire,Oxon,Lieutenancy area,Geographical,5
+795,Perth and Kinross,Perth & Kinross,Lieutenancy area,Geographical,110
+808,Renfrewshire,Renfrews,Lieutenancy area,Geographical,7
+783,Ross and Cromarty,Ross & Cromarty,Lieutenancy area,Geographical,108
+801,"Roxburgh, Ettrick and Lauderdale","Roxburgh, Ettrick & Lauderdale",Lieutenancy area,Geographical,770
+61,Rutland,Rutland,Lieutenancy area,Geographical,5
+778,Shetland,Shetland,Lieutenancy area,Geographical,763
+62,Shropshire,Shrops,Lieutenancy area,Geographical,5
+63,Somerset,Som,Lieutenancy area,Geographical,5
+64,Staffordshire,Staffs,Lieutenancy area,Geographical,5
+804,Stewartry of Kirkcudbright,Kirkcudbright,Lieutenancy area,Geographical,106
+806,Stirling and Falkirk,Stirling & Falkirk,Lieutenancy area,Geographical,7
+65,Suffolk,Suffolk,Lieutenancy area,Geographical,5
+66,Surrey,Surrey,Lieutenancy area,Geographical,5
+67,East Sussex,E Sussex,Lieutenancy area,Geographical,5
+68,West Sussex,W Sussex,Lieutenancy area,Geographical,5
+782,Sutherland,Sutherland,Lieutenancy area,Geographical,108
+802,Tweeddale,Tweeddale,Lieutenancy area,Geographical,770
+69,Tyne and Wear,Tyne+Wear,Lieutenancy area,Geographical,5
+70,Warwickshire,Warks,Lieutenancy area,Geographical,5
+71,West Midlands,W Mids,Lieutenancy area,Geographical,5
+780,Western Isles,W Isles,Lieutenancy area,Geographical,765
+805,Wigtown,Wigtown,Lieutenancy area,Geographical,106
+72,Wiltshire,Wilts,Lieutenancy area,Geographical,5
+73,Worcestershire,Worcs,Lieutenancy area,Geographical,5
+74,East Riding of Yorkshire,ER Yorks,Lieutenancy area,Geographical,5
+75,North Yorkshire,N Yorks,Lieutenancy area,Geographical,5
+76,South Yorkshire,S Yorks,Lieutenancy area,Geographical,5
+77,West Yorkshire,W Yorks,Lieutenancy area,Geographical,5
+560,Barking and Dagenham,Barking & Dagenham,London borough,Geographical,53
+560,Barking and Dagenham,Barking & Dagenham,London borough,Geographical,5
+566,Barnet,Barnet,London borough,Geographical,53
+566,Barnet,Barnet,London borough,Geographical,5
+578,Bexley,Bexley,London borough,Geographical,53
+578,Bexley,Bexley,London borough,Geographical,5
+568,Brent,Brent,London borough,Geographical,53
+568,Brent,Brent,London borough,Geographical,5
+577,Bromley,Bromley,London borough,Geographical,53
+577,Bromley,Bromley,London borough,Geographical,5
+587,Camden,Camden,London borough,Geographical,53
+587,Camden,Camden,London borough,Geographical,5
+576,Croydon,Croydon,London borough,Geographical,53
+576,Croydon,Croydon,London borough,Geographical,5
+570,Ealing,Ealing,London borough,Geographical,53
+570,Ealing,Ealing,London borough,Geographical,5
+564,Enfield,Enfield,London borough,Geographical,53
+564,Enfield,Enfield,London borough,Geographical,5
+579,Greenwich,Greenwich,London borough,Geographical,53
+579,Greenwich,Greenwich,London borough,Geographical,5
+589,Hackney,Hackney,London borough,Geographical,53
+589,Hackney,Hackney,London borough,Geographical,5
+584,Hammersmith and Fulham,Hammersmith,London borough,Geographical,53
+584,Hammersmith and Fulham,Hammersmith,London borough,Geographical,5
+565,Haringey,Haringey,London borough,Geographical,5
+565,Haringey,Haringey,London borough,Geographical,53
+567,Harrow,Harrow,London borough,Geographical,5
+567,Harrow,Harrow,London borough,Geographical,53
+559,Havering,Havering,London borough,Geographical,5
+559,Havering,Havering,London borough,Geographical,53
+569,Hillingdon,Hillingdon,London borough,Geographical,5
+569,Hillingdon,Hillingdon,London borough,Geographical,53
+571,Hounslow,Hounslow,London borough,Geographical,5
+571,Hounslow,Hounslow,London borough,Geographical,53
+588,Islington,Islington,London borough,Geographical,5
+588,Islington,Islington,London borough,Geographical,53
+585,Kensington and Chelsea,Kensington,London borough,Geographical,5
+585,Kensington and Chelsea,Kensington,London borough,Geographical,53
+573,Kingston upon Thames,Kingston,London borough,Geographical,5
+573,Kingston upon Thames,Kingston,London borough,Geographical,53
+582,Lambeth,Lambeth,London borough,Geographical,5
+582,Lambeth,Lambeth,London borough,Geographical,53
+580,Lewisham,Lewisham,London borough,Geographical,5
+580,Lewisham,Lewisham,London borough,Geographical,53
+575,Merton,Merton,London borough,Geographical,5
+575,Merton,Merton,London borough,Geographical,53
+562,Newham,Newham,London borough,Geographical,5
+562,Newham,Newham,London borough,Geographical,53
+561,Redbridge,Redbridge,London borough,Geographical,5
+561,Redbridge,Redbridge,London borough,Geographical,53
+572,Richmond upon Thames,Richmond,London borough,Geographical,5
+572,Richmond upon Thames,Richmond,London borough,Geographical,53
+581,Southwark,Southwark,London borough,Geographical,5
+581,Southwark,Southwark,London borough,Geographical,53
+574,Sutton,Sutton,London borough,Geographical,5
+574,Sutton,Sutton,London borough,Geographical,53
+590,Tower Hamlets,Tower Hamlets,London borough,Geographical,5
+590,Tower Hamlets,Tower Hamlets,London borough,Geographical,53
+563,Waltham Forest,Waltham Forest,London borough,Geographical,5
+563,Waltham Forest,Waltham Forest,London borough,Geographical,53
+583,Wandsworth,Wandsworth,London borough,Geographical,5
+583,Wandsworth,Wandsworth,London borough,Geographical,53
+586,City of Westminster,Westminster,London borough,Geographical,5
+586,City of Westminster,Westminster,London borough,Geographical,53
+480,Barnsley,Barnsley,Metropolitan borough,Geographical,76
+443,City of Birmingham,Birmingham,Metropolitan borough,Geographical,71
+536,Bolton,Bolton,Metropolitan borough,Geographical,54
+475,City of Bradford,Bradford,Metropolitan borough,Geographical,77
+537,Bury,Bury,Metropolitan borough,Geographical,54
+474,Calderdale,Calderdale,Metropolitan borough,Geographical,77
+446,City of Coventry,Coventry,Metropolitan borough,Geographical,71
+479,City of Doncaster,Doncaster,Metropolitan borough,Geographical,76
+451,Dudley,Dudley,Metropolitan borough,Geographical,71
+466,Gateshead,Gateshead,Metropolitan borough,Geographical,69
+473,Kirklees,Kirklees,Metropolitan borough,Geographical,77
+531,Knowsley,Knowsley,Metropolitan borough,Geographical,55
+471,City of Leeds,Leeds,Metropolitan borough,Geographical,77
+530,City of Liverpool,Liverpool,Metropolitan borough,Geographical,55
+540,City of Manchester,Manchester,Metropolitan borough,Geographical,54
+467,City of Newcastle upon Tyne,Newcastle,Metropolitan borough,Geographical,69
+543,Oldham,Oldham,Metropolitan borough,Geographical,54
+544,Rochdale,Rochdale,Metropolitan borough,Geographical,54
+478,Rotherham,Rotherham,Metropolitan borough,Geographical,76
+538,City of Salford,Salford,Metropolitan borough,Geographical,54
+450,Sandwell,Sandwell,Metropolitan borough,Geographical,71
+533,Sefton,Sefton,Metropolitan borough,Geographical,55
+477,City of Sheffield,Sheffield,Metropolitan borough,Geographical,76
+447,Solihull,Solihull,Metropolitan borough,Geographical,71
+532,St Helens,St Helens,Metropolitan borough,Geographical,55
+541,Stockport,Stockport,Metropolitan borough,Geographical,54
+464,City of Sunderland,Sunderland,Metropolitan borough,Geographical,69
+542,Tameside,Tameside,Metropolitan borough,Geographical,54
+539,Trafford,Trafford,Metropolitan borough,Geographical,54
+468,North Tyneside,N Tyneside,Metropolitan borough,Geographical,69
+465,South Tyneside,S Tyneside,Metropolitan borough,Geographical,69
+472,City of Wakefield,Wakefield,Metropolitan borough,Geographical,77
+449,Walsall,Walsall,Metropolitan borough,Geographical,71
+535,Wigan,Wigan,Metropolitan borough,Geographical,54
+534,Wirral,Wirral,Metropolitan borough,Geographical,55
+448,City of Wolverhampton,Wolverhampton,Metropolitan borough,Geographical,71
+309,Clwyd,Clwyd,Preserved county,Geographical,6
+310,Dyfed,Dyfed,Preserved county,Geographical,6
+311,Gwent,Gwent,Preserved county,Geographical,6
+312,Gwynedd,Gwynedd,Preserved county,Geographical,6
+313,Mid Glamorgan,Mid Glamorgan,Preserved county,Geographical,6
+314,Powys,Powys,Preserved county,Geographical,6
+315,South Glamorgan,South Glamorgan,Preserved county,Geographical,6
+316,West Glamorgan,West Glamorgan,Preserved county,Geographical,6
+78,Blaenau Gwent,Bl Gwent,Principal area,Geographical,6
+79,Bridgend,Bridgend,Principal area,Geographical,313
+80,Caerphilly,Caerphilly,Principal area,Geographical,6
+81,Cardiff,Cardiff,Principal area,Geographical,315
+82,Carmarthenshire,Carms,Principal area,Geographical,310
+83,Ceredigion,Ceredigion,Principal area,Geographical,310
+84,Conwy,Conwy,Principal area,Geographical,6
+85,Denbighshire,Denbighs,Principal area,Geographical,6
+86,Flintshire,Flints,Principal area,Geographical,6
+87,Gwynedd,Gwynedd,Principal area,Geographical,312
+88,Merthyr Tydfil,Merthyr,Principal area,Geographical,313
+89,Monmouthshire,Monmths,Principal area,Geographical,6
+90,Neath Port Talbot,Neath PT,Principal area,Geographical,316
+91,Newport,Newport,Principal area,Geographical,6
+92,Pembrokeshire,Pembs,Principal area,Geographical,310
+93,Powys,Powys,Principal area,Geographical,314
+94,Rhondda Cynon Taff,RhonddaCT,Principal area,Geographical,313
+95,Swansea,Swansea,Principal area,Geographical,316
+96,Torfaen,Torfaen,Principal area,Geographical,6
+97,The Vale of Glamorgan,ValeGlam,Principal area,Geographical,315
+98,Wrexham,Wrexham,Principal area,Geographical,6
+99,Ynys Mon,Ynys Mon,Principal area,Geographical,312
+158,Alberta,AB,Province,Geographical,17
+159,British Columbia,BC,Province,Geographical,17
+162,Eastern Cape,EC,Province,Geographical,19
+163,Gauteng,GP,Province,Geographical,19
+164,KwaZulu-Natal,KZN,Province,Geographical,19
+165,North West,NW,Province,Geographical,19
+303,Northern Cape,NC,Province,Geographical,19
+160,Ontario,ON,Province,Geographical,17
+161,Quebec,QC,Province,Geographical,17
+166,Western Cape,WC,Province,Geographical,19
+129,Alabama,AL,State,Geographical,16
+130,Arkansas,AR,State,Geographical,16
+131,Connecticut,CT,State,Geographical,16
+133,Delaware,DE,State,Geographical,16
+134,Florida,FL,State,Geographical,16
+135,Georgia,GA,State,Geographical,16
+136,Hawaii,HI,State,Geographical,16
+137,Illinois,IL,State,Geographical,16
+334,Indiana,IN,State,Geographical,16
+138,Louisiana,LA,State,Geographical,16
+140,Maryland,MD,State,Geographical,16
+139,Massachusetts,MA,State,Geographical,16
+141,Michigan,MI,State,Geographical,16
+305,Minnesota,MN,State,Geographical,16
+143,New Jersey,NJ,State,Geographical,16
+152,New South Wales,NSW,State,Geographical,14
+144,New York,NY,State,Geographical,16
+142,North Carolina,NC,State,Geographical,16
+308,Oregon,OR,State,Geographical,16
+145,Pennsylvania,PA,State,Geographical,16
+153,Queensland,Qld,State,Geographical,14
+154,South Australia,SA,State,Geographical,14
+146,South Carolina,SC,State,Geographical,16
+155,Tasmania,Tas,State,Geographical,14
+147,Tennessee,TN,State,Geographical,16
+148,Texas,TX,State,Geographical,16
+156,Victoria,Vic,State,Geographical,14
+149,Virginia,VA,State,Geographical,16
+150,Washington,WA,State,Geographical,16
+157,Western Australia,WA,State,Geographical,14
+304,Wisconsin,WI,State,Geographical,16
+151,Australian Capital Territory,ACT,Territory,Geographical,14
+383,Northern Territory,NTerritory,Territory,Geographical,14
+519,Bath and North East Somerset,Bath & NE Somerset,Unitary authority,Geographical,63
+519,Bath and North East Somerset,Bath & NE Somerset,Unitary authority,Geographical,5
+490,Bedford,Bedford,Unitary authority,Geographical,29
+491,Central Bedfordshire,C Beds,Unitary authority,Geographical,29
+507,West Berkshire,W Berks,Unitary authority,Geographical,30
+545,Blackburn with Darwen,Blackburn,Unitary authority,Geographical,49
+547,Blackpool,Blackpool,Unitary authority,Geographical,49
+510,"Bournemouth, Christchurch and Poole","Bmouth, Chch & Poole",Unitary authority,Geographical,39
+504,Bracknell Forest,Bracknell Forest,Unitary authority,Geographical,30
+496,City of Brighton and Hove,Brighton & Hove,Unitary authority,Geographical,67
+555,City of Bristol,C Bris,Unitary authority,Geographical,31
+499,Buckinghamshire,Bucks,Unitary authority,Geographical,32
+528,Cheshire East,Cheshire E,Unitary authority,Geographical,34
+529,Cheshire West and Chester,Cheshire W,Unitary authority,Geographical,34
+515,Cornwall,Cornwall,Unitary authority,Geographical,35
+550,Cumberland,Cumberland,Unitary authority,Geographical,36
+458,Darlington,Darlington,Unitary authority,Geographical,40
+458,Darlington,Darlington,Unitary authority,Geographical,5
+482,City of Derby,Derby,Unitary authority,Geographical,37
+512,Dorset,Dorset,Unitary authority,Geographical,39
+461,Durham,Durham (excluding Cleveland),Unitary authority,Geographical,40
+521,South Gloucestershire,S Glos,Unitary authority,Geographical,42
+526,Halton,Halton,Unitary authority,Geographical,34
+459,Hartlepool,Hartlepool,Unitary authority,Geographical,5
+459,Hartlepool,Hartlepool,Unitary authority,Geographical,40
+556,Herefordshire,Herefs,Unitary authority,Geographical,44
+554,Isle of Wight,IoW,Unitary authority,Geographical,46
+469,City of Kingston upon Hull,Hull,Unitary authority,Geographical,74
+483,City of Leicester,Leicester,Unitary authority,Geographical,50
+427,North Lincolnshire,N Lincs,Unitary authority,Geographical,51
+427,North Lincolnshire,N Lincs,Unitary authority,Geographical,5
+426,North East Lincolnshire,NE Lincs,Unitary authority,Geographical,51
+426,North East Lincolnshire,NE Lincs,Unitary authority,Geographical,5
+489,Luton,Luton,Unitary authority,Geographical,29
+497,Medway,Medway,Unitary authority,Geographical,48
+454,Middlesbrough,Middlesbrough,Unitary authority,Geographical,75
+454,Middlesbrough,Middlesbrough,Unitary authority,Geographical,5
+498,City of Milton Keynes,Milton Keynes,Unitary authority,Geographical,32
+484,North Northamptonshire,N Northants,Unitary authority,Geographical,57
+485,West Northamptonshire,W Northants,Unitary authority,Geographical,57
+557,Northumberland,Northumb,Unitary authority,Geographical,58
+481,City of Nottingham,Nottingham,Unitary authority,Geographical,59
+462,City of Peterborough,Peterborough,Unitary authority,Geographical,33
+514,City of Plymouth,Plymouth,Unitary authority,Geographical,38
+501,City of Portsmouth,Portsmouth,Unitary authority,Geographical,43
+506,Reading,Reading,Unitary authority,Geographical,30
+453,Redcar and Cleveland,Redcar and Cleveland,Unitary authority,Geographical,75
+453,Redcar and Cleveland,Redcar and Cleveland,Unitary authority,Geographical,5
+558,Rutland,Rutland,Unitary authority,Geographical,61
+47,Isles of Scilly,Scilly,Unitary authority,Geographical,35
+524,Shropshire,Shropshire,Unitary authority,Geographical,62
+502,Slough,Slough,Unitary authority,Geographical,30
+520,Somerset,Somerset,Unitary authority,Geographical,63
+520,Somerset,Somerset,Unitary authority,Geographical,5
+518,North Somerset,N Somerset,Unitary authority,Geographical,63
+518,North Somerset,N Somerset,Unitary authority,Geographical,5
+500,City of Southampton,Soton,Unitary authority,Geographical,43
+488,City of Southend on Sea,Southend,Unitary authority,Geographical,41
+455,Stockton on Tees,Stockton,Unitary authority,Geographical,5
+525,City of Stoke on Trent,Stoke on Trent,Unitary authority,Geographical,64
+508,Swindon,Swindon,Unitary authority,Geographical,72
+523,Telford and Wrekin,Telford & Wrekin,Unitary authority,Geographical,62
+487,Thurrock,Thurrock,Unitary authority,Geographical,41
+513,Torbay,Torbay,Unitary authority,Geographical,38
+527,Warrington,Warrington,Unitary authority,Geographical,34
+553,Westmorland and Furness,Westmorland & Furness,Unitary authority,Geographical,36
+511,Wiltshire,Wilts,Unitary authority,Geographical,72
+503,Windsor and Maidenhead,Windsor & Maidenhead,Unitary authority,Geographical,30
+505,Wokingham,Wokingham,Unitary authority,Geographical,30
+452,City of York,York,Unitary authority,Geographical,75
+452,City of York,York,Unitary authority,Geographical,5
+470,East Riding of Yorkshire,ER Yorks,Unitary authority,Geographical,74
+389,North Yorkshire,N Yorks,Unitary authority,Geographical,75
+389,North Yorkshire,N Yorks,Unitary authority,Geographical,5
+338,Adelaide,Adelaide,Archdiocese,Ecclesiastical,177
+380,Armagh,Armagh,Archdiocese,Ecclesiastical,177
+347,Birmingham,Birmingham (RC),Archdiocese,Ecclesiastical,177
+429,Cardiff-Menevia,Cardiff-Menevia,Archdiocese,Ecclesiastical,177
+364,Cashel and Emly,Cashel and Emly,Archdiocese,Ecclesiastical,177
+357,Dublin,Dublin,Archdiocese,Ecclesiastical,177
+382,Glasgow,Glasgow,Archdiocese,Ecclesiastical,177
+356,Liverpool,Liverpool (RC),Archdiocese,Ecclesiastical,177
+368,Madrid,Madrid,Archdiocese,Ecclesiastical,177
+342,Melbourne,Melbourne,Archdiocese,Ecclesiastical,177
+828,Montreal,Montreal,Archdiocese,Ecclesiastical,177
+353,Southwark,Southwark (RC),Archdiocese,Ecclesiastical,177
+898,St Andrews and Edinburgh,St Andrews and Edinburgh,Archdiocese,Ecclesiastical,177
+431,St Paul and Minneapolis,St Paul and Minneapolis,Archdiocese,Ecclesiastical,177
+343,Sydney,Sydney,Archdiocese,Ecclesiastical,177
+836,Tuam,Tuam,Archdiocese,Ecclesiastical,177
+370,Vancouver,Vancouver,Archdiocese,Ecclesiastical,177
+369,Westminster,Westminster,Archdiocese,Ecclesiastical,177
+422,"Anglican Church in Aotearoa, New Zealand and Polynesia",Anglican Ch in New Zealand,Church,Ecclesiastical,
+414,Anglican Church in North America,ACNA,Church,Ecclesiastical,
+421,Anglican Church of Australia,Anglican Ch of Australia,Church,Ecclesiastical,
+415,Anglican Church of Canada,Anglican Ch of Canada,Church,Ecclesiastical,
+412,Anglican Church of Kenya,Anglican Ch of Kenya,Church,Ecclesiastical,
+410,Anglican Church of Southern Africa,Anglican Ch of S Africa,Church,Ecclesiastical,
+416,Church in the Province of the West Indies,Ch in the W Indies,Church,Ecclesiastical,
+172,Church of England,Church of England,Church,Ecclesiastical,
+419,Church of North India,Ch of N India,Church,Ecclesiastical,
+420,Church of Pakistan,Ch of Pakistan,Church,Ecclesiastical,
+300,Church of Scotland,CS,Church,Ecclesiastical,
+411,Church of the Province of Central Africa,Ch of C Africa,Church,Ecclesiastical,
+418,Church of the Province of South East Asia,SE Asia,Church,Ecclesiastical,
+173,Church in Wales,Church in Wales,Church,Ecclesiastical,
+409,Coptic Orthodox,Coptic Orth,Church,Ecclesiastical,
+413,Episcopal Church of the United States,Episcopal Ch of the US,Church,Ecclesiastical,
+417,Extra-Provincial Parish of the Falkland Islands,Falklands,Church,Ecclesiastical,
+385,Greek Orthodox,Gk Orth,Church,Ecclesiastical,
+408,Indian Orthodox,Indian Orth,Church,Ecclesiastical,
+175,Church of Ireland,CI,Church,Ecclesiastical,
+843,Presbyterian Church in Ireland,PCI,Church,Ecclesiastical,
+324,Protestant Church in the Netherlands,Prot Ch in the Netherlands,Church,Ecclesiastical,
+177,Roman Catholic Church,RC,Church,Ecclesiastical,
+174,Scottish Episcopal Church,Episc,Church,Ecclesiastical,
+407,Serbian Orthodox,Serb Orth,Church,Ecclesiastical,
+344,Aberdeen,Aberdeen,Diocese,Ecclesiastical,177
+901,Aberdeen and Orkney,Aberdeen and Orkney,Diocese,Ecclesiastical,174
+743,Adelaide,Adelaide,Diocese,Ecclesiastical,421
+835,Ardagh and Clonmacnois,Ardagh and Clonmacnois,Diocese,Ecclesiastical,177
+896,Argyll and the Isles,Argyll and the Isles,Diocese,Ecclesiastical,177
+394,Argyll and the Isles,Argyll,Diocese,Ecclesiastical,174
+712,Arkansas,Arkansas,Diocese,Ecclesiastical,413
+398,Armagh,Armagh,Diocese,Ecclesiastical,175
+745,Armidale,Armidale,Diocese,Ecclesiastical,421
+363,Arundel and Brighton,Arundel and Brighton,Diocese,Ecclesiastical,177
+700,Atlanta,Atlanta,Diocese,Ecclesiastical,413
+759,Auckland,Auckland,Diocese,Ecclesiastical,422
+753,Ballarat,Ballarat,Diocese,Ecclesiastical,421
+222,Bangor,Bangor,Diocese,Ecclesiastical,173
+179,Bath and Wells,Bath+Wells,Diocese,Ecclesiastical,172
+747,Bathurst,Bathurst,Diocese,Ecclesiastical,421
+754,Bendigo,Bendigo,Diocese,Ecclesiastical,421
+180,Birmingham,Birmingham,Diocese,Ecclesiastical,172
+366,Birmingham in Alabama,Birmingham in Alabama,Diocese,Ecclesiastical,177
+181,Blackburn,Blackburn,Diocese,Ecclesiastical,172
+395,Brechin,Brechin,Diocese,Ecclesiastical,174
+362,Brentwood,Brentwood,Diocese,Ecclesiastical,177
+755,Brisbane,Brisbane,Diocese,Ecclesiastical,421
+182,Bristol,Bristol,Diocese,Ecclesiastical,172
+742,British Columbia,British Columbia,Diocese,Ecclesiastical,415
+341,Broken Bay,Broken Bay,Diocese,Ecclesiastical,177
+339,Bunbury,Bunbury,Diocese,Ecclesiastical,177
+757,Bunbury,Bunbury,Diocese,Ecclesiastical,421
+738,Calgary,Calgary,Diocese,Ecclesiastical,415
+750,Canberra and Goulburn,Canberra and Goulburn,Diocese,Ecclesiastical,421
+183,Canterbury,Canterbury,Diocese,Ecclesiastical,172
+731,Cape Town,Cape Town,Diocese,Ecclesiastical,410
+184,Carlisle,Carlisle,Diocese,Ecclesiastical,172
+405,"Cashel, Ferns and Ossory",Cashel,Diocese,Ecclesiastical,175
+725,Central Zimbabwe,Central Zimbabwe,Diocese,Ecclesiastical,411
+367,Charleston,Charleston,Diocese,Ecclesiastical,177
+185,Chelmsford,Chelmsford,Diocese,Ecclesiastical,172
+186,Chester,Chester,Diocese,Ecclesiastical,172
+706,Chicago,Chicago,Diocese,Ecclesiastical,413
+187,Chichester,Chichester,Diocese,Ecclesiastical,172
+762,Christchurch,Christchurch,Diocese,Ecclesiastical,422
+349,Clifton,Clifton,Diocese,Ecclesiastical,177
+838,Clogher,Clogher,Diocese,Ecclesiastical,177
+399,Clogher,Clogher,Diocese,Ecclesiastical,175
+381,Cloyne,Cloyne,Diocese,Ecclesiastical,177
+401,Connor,Connor,Diocese,Ecclesiastical,175
+355,Cork and Ross,Cork and Ross,Diocese,Ecclesiastical,177
+404,"Cork, Cloyne and Ross",Cork,Diocese,Ecclesiastical,175
+188,Coventry,Coventry,Diocese,Ecclesiastical,172
+707,Dallas,Dallas,Diocese,Ecclesiastical,413
+384,Darwin,Darwin,Diocese,Ecclesiastical,177
+716,Delaware,Delaware,Diocese,Ecclesiastical,413
+189,Derby,Derby,Diocese,Ecclesiastical,172
+837,Derry,Derry,Diocese,Ecclesiastical,177
+400,Derry and Raphoe,Derry,Diocese,Ecclesiastical,175
+428,Down and Connor,Down and Connor,Diocese,Ecclesiastical,177
+402,Down and Dromore,Down,Diocese,Ecclesiastical,175
+889,Dromore,Dromore,Diocese,Ecclesiastical,177
+406,Dublin and Glendalough,Dublin,Diocese,Ecclesiastical,175
+430,Dunkeld,Dunkeld,Diocese,Ecclesiastical,177
+732,Durban,Durban,Diocese,Ecclesiastical,410
+190,Durham,Durham,Diocese,Ecclesiastical,172
+351,East Anglia,East Anglia,Diocese,Ecclesiastical,177
+718,Easton,Easton,Diocese,Ecclesiastical,413
+711,Eau Claire,Eau Claire,Diocese,Ecclesiastical,413
+393,Edinburgh,Edinburgh,Diocese,Ecclesiastical,174
+893,Elphin,Elphin,Diocese,Ecclesiastical,177
+191,Ely,Ely,Diocese,Ecclesiastical,172
+192,Europe,Europe,Diocese,Ecclesiastical,172
+193,Exeter,Exeter,Diocese,Ecclesiastical,172
+365,Ferns,Ferns,Diocese,Ecclesiastical,177
+897,Galloway,Galloway,Diocese,Ecclesiastical,177
+701,Georgia,Georgia,Diocese,Ecclesiastical,413
+392,Glasgow and Galloway,Glasgow,Diocese,Ecclesiastical,174
+194,Gloucester,Gloucester,Diocese,Ecclesiastical,172
+746,Grafton,Grafton,Diocese,Ecclesiastical,421
+735,Grahamstown,Grahamstown,Diocese,Ecclesiastical,410
+195,Guildford,Guildford,Diocese,Ecclesiastical,172
+361,Hallam,Hallam,Diocese,Ecclesiastical,177
+724,Harare,Harare,Diocese,Ecclesiastical,411
+709,Hawaii,Hawaii,Diocese,Ecclesiastical,413
+196,Hereford,Hereford,Diocese,Ecclesiastical,172
+345,Hexham and Newcastle,Hexham and Newcastle,Diocese,Ecclesiastical,177
+739,Huron,Huron,Diocese,Ecclesiastical,415
+734,Johannesburg,Johannesburg,Diocese,Ecclesiastical,410
+891,Kildare and Leighlin,Kildare & Leighlin,Diocese,Ecclesiastical,177
+888,Killaloe,Killaloe,Diocese,Ecclesiastical,177
+831,"Kilmore, Elphin and Ardagh",Kilmore,Diocese,Ecclesiastical,175
+733,Kimberley and Kuruman,Kimberley & Kuruman,Diocese,Ecclesiastical,410
+726,Lahore,Lahore,Diocese,Ecclesiastical,420
+346,Lancaster,Lancaster,Diocese,Ecclesiastical,177
+358,Leeds,Leeds (RC),Diocese,Ecclesiastical,177
+197,Leeds,Leeds,Diocese,Ecclesiastical,172
+198,Leicester,Leicester,Diocese,Ecclesiastical,172
+199,Lichfield,Lichfield,Diocese,Ecclesiastical,172
+359,Limerick,Limerick,Diocese,Ecclesiastical,177
+200,Lincoln,Lincoln,Diocese,Ecclesiastical,172
+201,Liverpool,Liverpool,Diocese,Ecclesiastical,172
+223,Llandaff,Llandaff,Diocese,Ecclesiastical,173
+202,London,London,Diocese,Ecclesiastical,172
+737,Malindi,Malindi,Diocese,Ecclesiastical,412
+203,Manchester,Manchester,Diocese,Ecclesiastical,172
+702,Massachusetts,Massachusetts,Diocese,Ecclesiastical,413
+895,Meath,Meath,Diocese,Ecclesiastical,177
+832,Meath and Kildare,Meath,Diocese,Ecclesiastical,175
+751,Melbourne,Melbourne,Diocese,Ecclesiastical,421
+360,Middlesbrough,Middlesbrough,Diocese,Ecclesiastical,177
+715,Milwaukee,Milwaukee,Diocese,Ecclesiastical,413
+714,Minnesota,Minnesota,Diocese,Ecclesiastical,413
+224,Monmouth,Monmouth,Diocese,Ecclesiastical,173
+396,"Moray, Ross and Caithness","Moray, Ross and Caithness",Diocese,Ecclesiastical,174
+899,Motherwell,Motherwell,Diocese,Ecclesiastical,177
+727,Mumbai,Mumbai,Diocese,Ecclesiastical,419
+704,New Jersey,New Jersey,Diocese,Ecclesiastical,413
+703,New York,New York,Diocese,Ecclesiastical,413
+748,Newcastle,Newcastle,Diocese,Ecclesiastical,421
+204,Newcastle,Newcastle,Diocese,Ecclesiastical,172
+719,North Carolina,N Carolina,Diocese,Ecclesiastical,413
+730,North East Caribbean and Aruba,NE Caribbean & Aruba,Diocese,Ecclesiastical,416
+434,Northampton,Northampton,Diocese,Ecclesiastical,177
+698,Northwest Texas,NW Texas,Diocese,Ecclesiastical,413
+205,Norwich,Norwich,Diocese,Ecclesiastical,172
+354,Nottingham,Nottingham,Diocese,Ecclesiastical,177
+829,Ottawa,Ottawa,Diocese,Ecclesiastical,415
+206,Oxford,Oxford,Diocese,Ecclesiastical,172
+900,Paisley,Paisley,Diocese,Ecclesiastical,177
+337,Parramatta,Parramatta,Diocese,Ecclesiastical,177
+717,Pennsylvania,Pennsylvania,Diocese,Ecclesiastical,413
+756,Perth,Perth,Diocese,Ecclesiastical,421
+207,Peterborough,Peterborough,Diocese,Ecclesiastical,172
+350,Plymouth,Plymouth,Diocese,Ecclesiastical,177
+208,Portsmouth,Portsmouth,Diocese,Ecclesiastical,172
+348,Portsmouth,Portsmouth (RC),Diocese,Ecclesiastical,177
+728,Pune,Pune,Diocese,Ecclesiastical,419
+740,Quebec,Quebec,Diocese,Ecclesiastical,415
+834,Raphoe,Raphoe,Diocese,Ecclesiastical,177
+744,Riverina,Riverina,Diocese,Ecclesiastical,421
+720,Rochester,Rochester,Diocese,Ecclesiastical,413
+209,Rochester,Rochester,Diocese,Ecclesiastical,172
+371,Salford,Salford,Diocese,Ecclesiastical,177
+210,Salisbury,Salisbury,Diocese,Ecclesiastical,172
+211,Sheffield,Sheffield,Diocese,Ecclesiastical,172
+352,Shrewsbury,Shrewsbury,Diocese,Ecclesiastical,177
+723,Singapore,Singapore,Diocese,Ecclesiastical,418
+212,Sodor and Man,Sodor+Man,Diocese,Ecclesiastical,172
+705,South Carolina,South Carolina,Diocese,Ecclesiastical,413
+713,Southeast Florida,SE Florida,Diocese,Ecclesiastical,413
+213,Southwark,Southwark,Diocese,Ecclesiastical,172
+214,Southwell and Nottingham,SouthwellNottm,Diocese,Ecclesiastical,172
+215,St Albans,St Albans,Diocese,Ecclesiastical,172
+397,"St Andrews, Dunkeld and Dunblane",St Andrews,Diocese,Ecclesiastical,174
+225,St Asaph,St Asaph,Diocese,Ecclesiastical,173
+226,St Davids,St Davids,Diocese,Ecclesiastical,173
+216,St Edmundsbury and Ipswich,StEds+Ipswich,Diocese,Ecclesiastical,172
+227,Swansea and Brecon,Swansea+Brecon,Diocese,Ecclesiastical,173
+749,Sydney,Sydney,Diocese,Ecclesiastical,421
+758,Tasmania,Tasmania,Diocese,Ecclesiastical,421
+710,Texas,Texas,Diocese,Ecclesiastical,413
+741,Toronto,Toronto,Diocese,Ecclesiastical,415
+217,Truro,Truro,Diocese,Ecclesiastical,172
+403,"Tuam, Limerick and Killaloe",Tuam,Diocese,Ecclesiastical,175
+736,Ukhahlamba,Ukhahlamba,Diocese,Ecclesiastical,410
+699,Virginia,Virginia,Diocese,Ecclesiastical,413
+760,Waikato and Taranaki,Waikato & Taranaki,Diocese,Ecclesiastical,422
+752,Wangaratta,Wangaratta,Diocese,Ecclesiastical,421
+722,Washington,Washington,Diocese,Ecclesiastical,413
+761,Wellington,Wellington,Diocese,Ecclesiastical,422
+721,Western Louisiana,W Louisiana,Diocese,Ecclesiastical,413
+708,Western North Carolina,W N Carolina,Diocese,Ecclesiastical,413
+218,Winchester,Winchester,Diocese,Ecclesiastical,172
+729,Windward Islands,Windward Islands,Diocese,Ecclesiastical,416
+340,Wollongong,Wollongong,Diocese,Ecclesiastical,177
+219,Worcester,Worcester,Diocese,Ecclesiastical,172
+436,Wrexham,Wrexham,Diocese,Ecclesiastical,177
+220,York,York,Diocese,Ecclesiastical,172
+842,Central government,Central gov,Ownership,Ecclesiastical,
+231,Churches Conservation Trust,ChConsvnTrust,Ownership,Ecclesiastical,
+375,English Heritage,English Heritage,Ownership,Ecclesiastical,
+232,Friends of Friendless Churches,FriendsOfFC,Ownership,Ecclesiastical,
+827,Ickworth Church Conservation Trust,ICCT,Ownership,Ecclesiastical,
+372,Ipswich Historic Churches Trust,Ipswich HCT,Ownership,Ecclesiastical,
+228,Local Authority (church),LocalAuthority,Ownership,Ecclesiastical,
+230,Local Authority (secular),Secular tower,Ownership,Ecclesiastical,
+377,National Trust,National Trust,Ownership,Ecclesiastical,
+378,Norfolk Churches Trust,Norfolk Churches Trust,Ownership,Ecclesiastical,
+373,Norwich Historic Churches Trust,Norwich HCT,Ownership,Ecclesiastical,
+233,Trust ownership,Trust (other),Ownership,Ecclesiastical,
+229,Private ownership,PrivOwnership,Ownership,Ecclesiastical,
+374,Romney Marsh Historic Churches Trust,Romney Marsh HCT,Ownership,Ecclesiastical,
+376,Yorkshire Wolds Heritage Trust,Yorkshire Wolds HT,Ownership,Ecclesiastical,
+221,Royal Peculiar,Royal Peculiar,Status,Ecclesiastical,172
+235,Ancient Society of College Youths,ASCY,Association,Association,
+234,Australian and New Zealand Association,ANZAB,Association,Association,
+236,Bath and Wells Diocesan Association,B&W,Association,Association,
+237,Bedfordshire Association,Beds,Association,Association,
+238,Beverley and District Society,Bev&D,Association,Association,
+292,University of Bristol Society,UBSCR,Association,Association,
+243,Cambridge University Guild,CUG,Association,Association,
+239,Carlisle Diocesan Guild,CarDG,Association,Association,
+241,Chester Diocesan Guild,CheDG,Association,Association,
+248,East Cornwall Bellringers Association,ECBA,Association,Association,
+242,Coventry Diocesan Guild,CovDG,Association,Association,
+285,Society of Royal Cumberland Youths,SRCY,Association,Association,
+246,Derby Diocesan Association,DDA,Association,Association,
+247,Devon Association,DevAs,Association,Association,
+255,Guild of Devonshire Ringers,GDR,Association,Association,
+245,Dorset County Association,DCA,Association,Association,
+244,Durham and Newcastle Diocesan Association,D&N,Association,Association,
+249,East Derbyshire and West Nottinghamshire Association,EDWNA,Association,Association,
+250,East Grinstead and District Guild,EGDG,Association,Association,
+251,Ely Diocesan Association,Ely,Association,Association,
+252,Essex Association,Essex,Association,Association,
+240,Central European Association,CEA,Association,Association,
+253,Gloucester and Bristol Diocesan Association,G&B,Association,Association,
+254,Guildford Diocesan Guild,GDG,Association,Association,
+257,Hereford Diocesan Guild,HDG,Association,Association,
+256,Hertford County Association,HCA,Association,Association,
+258,Irish Association,Irish,Association,Association,
+259,Kent County Association,KCA,Association,Association,
+264,Ladies' Guild,LG,Association,Association,
+261,Lancashire Association,Lancs,Association,Association,
+424,Leeds University Society,LUSCR,Association,Association,
+263,Leicester Diocesan Guild,LeiDG,Association,Association,
+268,Lichfield and Walsall Archdeaconries Society,LWAS,Association,Association,
+265,Lincoln Diocesan Guild,LinDG,Association,Association,
+266,Liverpool Universities Society,LivUS,Association,Association,
+260,Llandaff and Monmouth Diocesan Association,L&M,Association,Association,
+293,University of London Society,ULSCR,Association,Association,
+267,Lundy Island Society,Lundy,Association,Association,
+299,Manchester Universities Guild,MUG,Association,Association,
+269,Middlesex County Association and London Diocesan Guild,Middx,Association,Association,
+270,North American Guild,NAG,Association,Association,
+272,North Staffordshire Association,NSA,Association,Association,
+273,North Wales Association,NWA,Association,Association,
+271,Norwich Diocesan Association,NDA,Association,Association,
+274,Oxford Diocesan Guild,ODG,Association,Association,
+275,Oxford Society,OS,Association,Association,
+276,Oxford University Society,OUS,Association,Association,
+277,Peterborough Diocesan Guild,PDG,Association,Association,
+280,Salisbury Diocesan Guild,Salis,Association,Association,
+282,Scottish Association,Scot,Association,Association,
+281,Shropshire Association,Salop,Association,Association,
+279,South African Guild,SAG,Association,Association,
+289,Southwell and Nottingham Diocesan Guild,Swell,Association,Association,
+283,St Davids Diocesan Guild,SDDG,Association,Association,
+284,St Martin's Guild,SMB,Association,Association,
+286,Suffolk Guild,Suff,Association,Association,
+287,Surrey Association,Surr,Association,Association,
+288,Sussex County Association,SuxCA,Association,Association,
+278,Swansea and Brecon Diocesan Guild,S&B,Association,Association,
+290,Truro Diocesan Guild,TruDG,Association,Association,
+294,Veronese Association,Veron,Association,Association,
+295,Winchester and Portsmouth Diocesan Guild,W&P,Association,Association,
+296,Worcestershire and Districts Association,WDA,Association,Association,
+297,Yorkshire Association,YACR,Association,Association,
+298,Zimbabwe Guild,Zimb,Association,Association,
+643,Aberdeenshire,,Historic county,Historical,7
+630,Anglesey,,Historic county,Historical,6
+644,Angus,,Historic county,Historical,7
+645,Argyllshire,,Historic county,Historical,7
+646,Ayrshire,,Historic county,Historical,7
+647,Banffshire,,Historic county,Historical,7
+591,Bedfordshire,,Historic county,Historical,5
+592,Berkshire,,Historic county,Historical,5
+648,Berwickshire,,Historic county,Historical,7
+631,Brecknockshire,,Historic county,Historical,6
+593,Buckinghamshire,,Historic county,Historical,5
+649,Buteshire,,Historic county,Historical,7
+632,Caernarfonshire,,Historic county,Historical,6
+650,Caithness,,Historic county,Historical,7
+594,Cambridgeshire,,Historic county,Historical,5
+633,Cardiganshire,,Historic county,Historical,6
+634,Carmarthenshire,,Historic county,Historical,6
+595,Cheshire,,Historic county,Historical,5
+651,Clackmannanshire,,Historic county,Historical,7
+596,Cornwall,,Historic county,Historical,5
+652,Cromartyshire,,Historic county,Historical,7
+597,Cumberland,,Historic county,Historical,5
+635,Denbighshire,,Historic county,Historical,6
+598,Derbyshire,,Historic county,Historical,5
+599,Devon,,Historic county,Historical,5
+600,Dorset,,Historic county,Historical,5
+653,Dumfriesshire,,Historic county,Historical,7
+654,Dunbartonshire,,Historic county,Historical,7
+601,Durham,,Historic county,Historical,5
+655,East Lothian,,Historic county,Historical,7
+602,Essex,,Historic county,Historical,5
+656,Fife,,Historic county,Historical,7
+636,Flintshire,,Historic county,Historical,6
+637,Glamorgan,,Historic county,Historical,6
+603,Gloucestershire,,Historic county,Historical,5
+604,Hampshire,,Historic county,Historical,5
+605,Herefordshire,,Historic county,Historical,5
+606,Hertfordshire,,Historic county,Historical,5
+607,Huntingdonshire,,Historic county,Historical,5
+657,Inverness-shire,,Historic county,Historical,7
+608,Kent,,Historic county,Historical,5
+658,Kincardineshire,,Historic county,Historical,7
+659,Kinross-shire,,Historic county,Historical,7
+660,Kirkcudbrightshire,,Historic county,Historical,7
+661,Lanarkshire,,Historic county,Historical,7
+609,Lancashire,,Historic county,Historical,5
+610,Leicestershire,,Historic county,Historical,5
+611,Lincolnshire,,Historic county,Historical,5
+638,Merionethshire,,Historic county,Historical,6
+612,Middlesex,,Historic county,Historical,5
+662,Midlothian,,Historic county,Historical,7
+639,Monmouthshire,,Historic county,Historical,6
+640,Montgomeryshire,,Historic county,Historical,6
+663,Morayshire,,Historic county,Historical,7
+664,Nairnshire,,Historic county,Historical,7
+613,Norfolk,,Historic county,Historical,5
+614,Northamptonshire,,Historic county,Historical,5
+615,Northumberland,,Historic county,Historical,5
+616,Nottinghamshire,,Historic county,Historical,5
+665,Orkney,,Historic county,Historical,7
+617,Oxfordshire,,Historic county,Historical,5
+666,Peeblesshire,,Historic county,Historical,7
+641,Pembrokeshire,,Historic county,Historical,6
+667,Perthshire,,Historic county,Historical,7
+642,Radnorshire,,Historic county,Historical,6
+668,Renfrewshire,,Historic county,Historical,7
+669,Ross-shire,,Historic county,Historical,7
+670,Roxburghshire,,Historic county,Historical,7
+618,Rutland,,Historic county,Historical,5
+671,Selkirkshire,,Historic county,Historical,7
+672,Shetland,,Historic county,Historical,7
+619,Shropshire,,Historic county,Historical,5
+620,Somerset,,Historic county,Historical,5
+621,Staffordshire,,Historic county,Historical,5
+673,Stirlingshire,,Historic county,Historical,7
+622,Suffolk,,Historic county,Historical,5
+623,Surrey,,Historic county,Historical,5
+624,Sussex,,Historic county,Historical,5
+674,Sutherland,,Historic county,Historical,7
+625,Warwickshire,,Historic county,Historical,5
+675,West Lothian,,Historic county,Historical,7
+626,Westmorland,,Historic county,Historical,5
+676,Wigtownshire,,Historic county,Historical,7
+627,Wiltshire,,Historic county,Historical,5
+628,Worcestershire,,Historic county,Historical,5
+629,Yorkshire,,Historic county,Historical,5
