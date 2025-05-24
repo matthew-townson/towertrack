@@ -1,0 +1,97 @@
+/* Font Faces */
+@font-face {
+    font-family: 'Inter';
+    src: url('/assets/fonts/Inter/Inter-Regular.woff2') format('woff2'),
+         url('/assets/fonts/Inter/Inter-Regular.woff') format('woff'),
+         url('/assets/fonts/Inter/Inter-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('/assets/fonts/IBMPlexSans/IBMPlexSans-Medium.woff2') format('woff2'),
+         url('/assets/fonts/IBMPlexSans/IBMPlexSans-Medium.woff') format('woff'),
+         url('/assets/fonts/IBMPlexSans/IBMPlexSans-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'IBM Plex Sans';
+    src: url('/assets/fonts/IBMPlexSans/IBMPlexSans-SemiBold.woff2') format('woff2'),
+         url('/assets/fonts/IBMPlexSans/IBMPlexSans-SemiBold.woff') format('woff'),
+         url('/assets/fonts/IBMPlexSans/IBMPlexSans-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+main, footer {
+    border: none;
+}
+:global(html, body) {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Inter', Arial, sans-serif;
+}
+.banner {
+    background: #C33C54;
+    background: linear-gradient(160deg, rgba(195, 60, 84, 1) 56%, rgba(142, 227, 239, 1) 100%, rgba(174, 243, 231, 1) 100%);
+    color: white;
+    padding: 2rem 1rem 1rem 1rem;
+    text-align: center;
+}
+.banner nav {
+    margin-top: 1rem;
+}
+.banner nav a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 1rem;
+    font-weight: 500;
+    transition: text-decoration 0.2s;
+}
+.banner nav a:hover {
+    text-decoration: underline;
+}
+main {
+    padding: 2rem 1rem;
+    text-align: center;
+    font-size: 1.2rem;
+    font-family: 'Inter', Arial, sans-serif;
+    font-weight: 600;
+}
+footer {
+    background: #f3f4f6;
+    color: #374151;
+    text-align: center;
+    padding: 1rem 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+    font-family: 'Inter', Arial, sans-serif;
+    font-weight: 600;
+}
+
+/* Use IBM Plex Sans for headings and nav */
+.banner h1,
+.banner nav,
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'IBM Plex Sans', 'Inter', Arial, sans-serif;
+    font-weight: 600;
+}
