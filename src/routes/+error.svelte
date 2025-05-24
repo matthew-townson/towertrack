@@ -1,40 +1,29 @@
 <script>
+  import Header from '$lib/components/Header.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	const currentYear = new Date().getFullYear();
   export let error;
   export let status;
+
+  // If both undefined, assume 404
+  $: displayStatus = status ?? 404;
+  $: errorMessage = error?.message ?? (status === 404 || displayStatus === 404 ? 'Page not found' : 'Unexpected error occurred');
 </script>
 
-<div class="error-page">
-  <h1>ERROR {status ?? 500}</h1>
-  <h2>Oops! Something went wrong.</h2>
-  <p>{error?.message ?? 'An unexpected error occurred.'}</p>
-  <a href="/">Go home</a>
-</div>
+<svelte:head>
+  <title>error {displayStatus} | towertracker</title>
+</svelte:head>
 
-<footer>
-	<p>&copy; {new Date().getFullYear()} <a href="https://mtownson.com" target="_blank">Matthew Townson</a>. All rights reserved.<br><br>
-	<a href="https://mtownson.com" target="_blank"><img src="/assets/image/matthewnow.gif" alt="Matthew NOW!" title="Matthew NOW!"/></a>
-    <img src="/assets/image/linuxpowered.gif" alt="Powered by Linux" title="Powered by Linux"/>
-    </p>
-</footer>
+<Header />
 
-<style>
-.error-page {
-  text-align: center;
-  padding: 4rem 1rem;
-}
-.error-page h1 {
-  font-size: 5rem;
-  color: #C33C54;
-}
-.error-page h2 {
-  margin-top: 1rem;
-  color: #374151;
-}
-.error-page a {
-  display: inline-block;
-  margin-top: 2rem;
-  color: #C33C54;
-  text-decoration: underline;
-  font-weight: bold;
-}
-</style>
+<main style="padding: 2rem; text-align: center;">
+  <h1>Error {displayStatus}</h1>
+  <p style="color: red; margin-top: 1rem;">
+    {errorMessage}
+  </p>
+  <p style="color: gray; font-size: 0.8rem; margin-top: 1rem;">
+    Debug: status={status}, error.message={error?.message}
+  </p>
+</main>
+
+<Footer />

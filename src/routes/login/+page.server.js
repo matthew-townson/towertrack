@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+//import sqlite3 from 'sqlite3';
+//import { open } from 'sqlite';
 
 export const actions = {
   default: async ({ request, cookies }) => {
