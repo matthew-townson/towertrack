@@ -15,5 +15,9 @@
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"svelte": "^5.33.1",
 		"vite": "^6.2.6"
+	},
+	"dependencies": {
+		"argon2": "^0.43.0",
+		"mysql2": "^3.14.1"
 	}
 }

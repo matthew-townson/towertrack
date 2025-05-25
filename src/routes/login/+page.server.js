@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
-//import sqlite3 from 'sqlite3';
-//import { open } from 'sqlite';
+import { validateUser } from '$lib/validation.js';
+import { createSession } from '$lib/session.js';
 
 export const actions = {
   default: async ({ request, cookies }) => {
@@ -8,20 +8,26 @@ export const actions = {
     const username = data.get('username');
     const password = data.get('password');
 
-    // TODO: Replace with DB query
-    if (username === 'admin' && password === 'password') {
-
-      // set cookie
-      cookies.set('session', 'some-session-token', {
-        path: '/',
-        httpOnly: true,
-        sameSite: 'strict',
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24
-      });
-      throw redirect(303, '/');
+    if (!username || !password) {
+      return fail(400, { error: true, message: 'Please enter your username and password', username });
     }
 
-    return fail(400, { error: true, message: 'Invalid username or password' });
+    const result = await validateUser(username, password);
+    
+    if (!result.success) {
+      return fail(400, { error: true, message: result.message, username });
+    }
+
+    const sessionId = createSession(result.user.id, result.user.username, result.user.permission);
+    
+    cookies.set('session', sessionId, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    });
+
+    throw redirect(303, '/');
   }
 };

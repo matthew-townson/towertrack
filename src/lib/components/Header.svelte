@@ -1,5 +1,5 @@
 <script>
-    // maybe later...
+	export let user = null;
 </script>
 
 <div class="banner">
@@ -7,7 +7,11 @@
 	<nav>
 		<a href="/">Home</a>
 		<a href="/about">About</a>
-        <a href="/register">Register</a>
-		<a href="/login">Login</a>
+		{#if user}
+			<a href="/logout">Logout</a>
+		{:else}
+			<a href="/register">Register</a>
+			<a href="/login">Login</a>
+		{/if}
 	</nav>
 </div>

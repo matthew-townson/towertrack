@@ -4,6 +4,7 @@
 	const currentYear = new Date().getFullYear();
   export let error;
   export let status;
+  export let data;
 
   // If both undefined, assume 404
   $: displayStatus = status ?? 404;
@@ -14,7 +15,7 @@
   <title>error {displayStatus} | towertracker</title>
 </svelte:head>
 
-<Header />
+<Header user={data?.user} />
 
 <main style="padding: 2rem; text-align: center;">
   <h1>Error {displayStatus}</h1>
