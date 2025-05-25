@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { validateUser } from '$lib/validation.js';
 import { createSession } from '$lib/session.js';
+import log from '$lib/log.js';
 
 export const actions = {
   default: async ({ request, cookies }) => {
@@ -27,6 +28,9 @@ export const actions = {
       secure: process.env.NODE_ENV === 'production',
       maxAge: 60 * 60 * 24 * 7 // 7 days
     });
+
+    //debug print session information
+    log.info(`User logged in: ${result.user.username}, Session ID: ${sessionId}, Permission Level: ${result.user.permission}`);
 
     throw redirect(303, '/');
   }

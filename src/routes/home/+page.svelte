@@ -5,13 +5,14 @@
 </script>
 
 <svelte:head>
-	<title>Admin | towertracker</title>
+	<title>Home | towertracker</title>
 </svelte:head>
 
 <Header user={data.user} />
 
 <main>
-	<h1>Admin Panel</h1>
+	<h1>Home</h1>
+	<p>Welcome back {data.user.username}!</p>
 </main>
 
 <Footer />
