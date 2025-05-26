@@ -81,7 +81,7 @@ async function initialiseDatabase() {
                     \`Affiliations\` TEXT,
                     \`Postcode\` VARCHAR(20),
                     \`LGrade\` VARCHAR(10),
-                    PRIMARY KEY (\`TowerID\`)
+                    PRIMARY KEY (\`TowerID\`, \`RingID\`)
                 )
             `);
             console.log('[ INFO ] Tower table created successfully or already exists');
@@ -106,8 +106,7 @@ async function initialiseDatabase() {
                     \`Founder\` VARCHAR(255),
                     \`FounderUncertain\` BOOLEAN,
                     \`Canons\` VARCHAR(50),
-                    PRIMARY KEY (\`BellID\`),
-                    FOREIGN KEY (\`TowerID\`) REFERENCES \`Tower\`(\`TowerID\`) ON DELETE CASCADE
+                    PRIMARY KEY (\`BellID\`)
                 )
             `);
             console.log('[ INFO ] Bell table created successfully or already exists');

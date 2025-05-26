@@ -17,8 +17,6 @@ export const handle = async ({ event, resolve }) => {
 				permission: session.permission
 			};
 
-			// Debug: log what we're setting
-			log.info(`Setting locals.user: ${JSON.stringify(event.locals.user)}`);
 		} else {
 			// Clean up invalid session cookie
 			event.cookies.delete('session', { path: '/' });
