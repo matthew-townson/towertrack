@@ -24,3 +24,6 @@ vite.config.ts.timestamp-*
 
 # Dove data
 dovedata/*.csv
+
+# BellBoard data
+bbdata/*.csv
