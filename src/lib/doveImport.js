@@ -114,10 +114,6 @@ export async function importDoveData() {
 		}
 	}
 
-	// DEBUG: Print first few lines of towers and bells data
-	log.info(`First 5 towers data: ${JSON.stringify(towersData.slice(0, 1), null, 2)}`);
-	log.info(`First 5 bells data: ${JSON.stringify(bellsData.slice(0, 1), null, 2)}`);
-
 	// If different, overwrite database with new data
 	log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
 	try {
