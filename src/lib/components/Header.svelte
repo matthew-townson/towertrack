@@ -28,10 +28,10 @@
 			{#if user.permission === 0}
 				<a href="/admin">Admin</a>
 			{/if}
-			<a href="/logout">Logout</a>
+			<a href="/account/logout">Logout</a>
 		{:else}
-			<a href="/register">Register</a>
-			<a href="/login">Login</a>
+			<a href="/account/register">Register</a>
+			<a href="/account/login">Login</a>
 		{/if}
 	</nav>
 </div>

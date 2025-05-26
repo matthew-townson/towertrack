@@ -1,9 +1,13 @@
 import { initialiseDatabase } from '$lib/db.js';
 import { getSession } from '$lib/session.js';
 import log from '$lib/log.js';
+import { startDailyImport } from '$lib/scheduler.js';
 
 // Initialise database when server starts
 await initialiseDatabase();
+
+// Start the daily import scheduler when the server starts
+startDailyImport();
 
 export const handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get('session');

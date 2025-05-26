@@ -125,9 +125,10 @@ export async function importDoveData() {
 		await pool.query('DELETE FROM Bell');
 		await pool.query('DELETE FROM Tower');
 		
-		// Insert towers data
+		// Insert towers data, only import if RingType is full-circle ring
+        const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
 		log.info('Inserting towers data');
-		for (const tower of towersData) {
+		for (const tower of filteredTowersData) {
 			await pool.query('INSERT INTO Tower (`TowerID`, `RingID`, `Place`, `Place2`, `PlaceCL`, `BareDedicn`, `AltName`, `RingName`, `Region`, `County`, `Country`, `HistRegion`, `ISO3166code`, `Diocese`, `Lat`, `Long`, `Bells`, `UR`, `Semitones`, `Wt`, `Note`, `GF`, `ExtraInfo`, `WebPage`, `Affiliations`, `Postcode`, `LGrade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
 				tower.TowerID ? parseInt(tower.TowerID) : null,
 				tower.RingID ? parseInt(tower.RingID) : null,
@@ -158,7 +159,8 @@ export async function importDoveData() {
 				tower.LGrade || null
 			]);
 		}
-		
+		log.success(`Inserted ${filteredTowersData.length} towers into the database`);
+
 		// Insert bells data
 		log.info('Inserting bells data');
 		for (const bell of bellsData) {
@@ -178,6 +180,7 @@ export async function importDoveData() {
 				bell['Canons'] || null
 			]);
 		}
+        log.success(`Inserted ${bellsData.length} bells into the database`);
 		
 		// Copy current CSV files to archive
 		fs.copyFileSync(`${tempDir}/towers.csv`, archiveTowersFile);
@@ -196,8 +199,9 @@ export async function importDoveData() {
 
 		// Commit transaction
 		await pool.query('COMMIT');
-		log.info('Database import completed successfully');
-		
+        log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
+        log.info(`Last import time saved: ${lastImportTime}`);
+
 	} catch (error) {
 		// Rollback transaction on error
 		await pool.query('ROLLBACK');
