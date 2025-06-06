@@ -1,17 +1,17 @@
 <script>
-	import Header from '$lib/components/Header.svelte';
-	import Footer from '$lib/components/Footer.svelte';
-	export let data;
+    import Header from '$lib/components/Header.svelte';
+    import Footer from '$lib/components/Footer.svelte';
+    export let data;
 </script>
 
 <svelte:head>
-	<title>towertracker</title>
+    <title>towertracker</title>
 </svelte:head>
 
 <Header user={data.user} />
 
 <main>
-	<p>Homepage</p>
+    <p>Homepage</p>
 </main>
 
 <Footer />

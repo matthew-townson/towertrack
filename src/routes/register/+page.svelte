@@ -29,7 +29,10 @@
 		<br>
 		<button type="submit">Register</button>
 		{#if form?.error}
-			<p class="error">{form.message}</p>
+			<div class="error">
+				<h3>❗Error</h3>
+				<p>{form.message}</p>
+			</div>
 		{/if}
 	</form>
 </main>

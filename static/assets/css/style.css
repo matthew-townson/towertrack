@@ -173,3 +173,92 @@ h1, h2, h3, h4, h5, h6 {
     padding-right: 4rem;
 }
 
+.import-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.import-section {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.import-section h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.info {
+    background: #e8f4f8;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+    margin-bottom: 1rem;
+}
+
+.info h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #2980b9;
+}
+
+.info p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #34495e;
+}
+
+.error {
+    background: #fbe9e7;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 4px solid #e74c3c;
+    margin-bottom: 1rem;
+}
+
+.error h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #c0392b;
+}
+
+.error p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.success {
+    background: #e8f4f8;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 4px solid #1db937;
+    margin-bottom: 1rem;
+}
+
+.success h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #248d35;
+}
+
+.success p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    color: #345e4e;
+}
+
+@media (max-width: 768px) {
+    .import-options {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+

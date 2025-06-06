@@ -20,6 +20,7 @@
 			<a href="/home">Home</a>
 			<a href="/profile">Profile</a>
 			<a href="/map">Map</a>
+			<a href="/account/settings">Settings</a>
 		{:else}
 			<a href="/">Home</a>
 			<a href="/about">About</a>

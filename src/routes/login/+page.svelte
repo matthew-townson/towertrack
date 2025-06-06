@@ -21,14 +21,13 @@
 		<label for="password">Password</label>
 		<input type="password" id="password" name="password" autocomplete="off" required />
 		<br>
-		<a href="/register">Don't have an account? Register here</a>
-		<br>
 		<button type="submit">Login</button>
 
 		{#if form?.error}
 			<p class="error">{form.message}</p>
 		{/if}
 	</form>
+	<a href="/register">Don't have an account? Register here</a>
 </main>
 
 <Footer />
