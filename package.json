@@ -18,6 +18,7 @@
 	},
 	"dependencies": {
 		"argon2": "^0.43.0",
+		"leaflet": "^1.9.4",
 		"mysql2": "^3.14.1"
 	}
 }

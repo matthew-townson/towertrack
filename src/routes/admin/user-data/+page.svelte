@@ -130,7 +130,7 @@
                                             
                                             <form method="POST" action="?/deleteUser" use:enhance class="detail-form delete-form">
                                                 <input type="hidden" name="userId" value={user.id} />
-                                                <label>Delete User:</label>
+                                                <label for="delete">Delete User:</label>
                                                 <p class="warning-text">This action cannot be undone!</p>
                                                 <button type="submit" class="delete-btn" on:click={(e) => {
                                                     if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {

@@ -59,6 +59,7 @@ async function initialiseDatabase() {
                     \`Place\` VARCHAR(255),
                     \`Place2\` VARCHAR(255),
                     \`PlaceCL\` VARCHAR(255),
+                    \`Dedicn\` VARCHAR(255),
                     \`BareDedicn\` VARCHAR(255),
                     \`AltName\` VARCHAR(255),
                     \`RingName\` VARCHAR(255),
@@ -80,6 +81,7 @@ async function initialiseDatabase() {
                     \`WebPage\` TEXT,
                     \`Affiliations\` TEXT,
                     \`Postcode\` VARCHAR(20),
+                    \`Practice\` VARCHAR(255),
                     \`LGrade\` VARCHAR(10),
                     PRIMARY KEY (\`TowerID\`, \`RingID\`)
                 )
