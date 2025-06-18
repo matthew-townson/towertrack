@@ -15,6 +15,28 @@
     let watchId = null;
     let isProgrammaticMove = false;
     
+    function convertToHundredweight(weight) {
+        if (!weight) return 'Unknown';
+        const weightValue = parseFloat(weight);
+        
+        if (isNaN(weightValue)) return 'Unknown';
+
+        const totalPounds = Math.round(weightValue);
+        const hundredweight = Math.floor(totalPounds / 112); // 1 British hundredweight = 112 pounds
+        const remainingAfterCwt = totalPounds % 112;
+        const quarters = Math.floor(remainingAfterCwt / 28); // 1 quarter = 28 pounds
+        const pounds = remainingAfterCwt % 28;
+
+        if (hundredweight > 0) {
+            return `${hundredweight}-${quarters}-${pounds}`;
+        } else {
+            let result = '';
+            if (quarters > 0) result += `${quarters}-`;
+            if (pounds > 0 || result === '') result += `${pounds}`;
+            return result.trim();
+        }
+    }
+
     function toggleLocationTracking() {
         if (!navigator.geolocation) {
             console.warn('Geolocation is not supported by this browser.');
@@ -170,13 +192,15 @@
         towersToShow.forEach(tower => {
             const marker = window.L.marker([tower.Lat, tower.Long]).addTo(map);
             
+            // Convert weight to hundredweight format
+            tower.Wt = convertToHundredweight(tower.Wt);
+
             // Create popup content
             const popupContent = `
                 <div class="tower-popup">
-                    <h4>${tower.Place}, ${tower.PlaceCL || tower.Dedicn }</h4>
-                    <p><strong>County:</strong> ${tower.County || 'Unknown'}</p>
-                    <p><strong>Country:</strong> ${tower.Country || 'Unknown'}</p>
-                    <p><strong>Bells:</strong> ${tower.Bells || 'Unknown'}</p>
+                    <h4><strong><a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank">${tower.Place}, ${tower.Dedicn || 'Unknown Dedication'}</a></strong></h4>
+                    <p>${tower.County || 'Unknown'}</br>
+                    <strong>${tower.Bells || 'Unknown'}</strong>, ${tower.Wt || ''} in ${tower.Note || ''}</p>
                 </div>
             `;
             

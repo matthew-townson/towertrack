@@ -7,7 +7,7 @@ export async function load({ locals }) {
     }
     
     try {
-        const [towers] = await db.execute('SELECT TowerID, Place, PlaceCL, County, Country, Lat, `Long`, Bells FROM Tower WHERE Lat IS NOT NULL AND `Long` IS NOT NULL ORDER BY Place');
+        const [towers] = await db.execute('SELECT TowerID, Place, PlaceCL, Dedicn, County, Country, Lat, `Long`, Bells, Wt, Note FROM Tower WHERE Lat IS NOT NULL AND `Long` IS NOT NULL ORDER BY Place');
         
         return {
             user: locals.user,

@@ -9,9 +9,10 @@ services:
       - NODE_ENV=production
       - HOST=0.0.0.0
       - PORT=3000
+      - INIT_ADMIN=true
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -29,6 +30,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+      - INIT_ADMIN=true
     command: npm run dev -- --host 0.0.0.0
     profiles:
       - dev
