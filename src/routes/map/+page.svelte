@@ -14,6 +14,11 @@
     let isTrackingLocation = false;
     let watchId = null;
     let isProgrammaticMove = false;
+    let sidebarOpen = false;
+    
+    function toggleSidebar() {
+        sidebarOpen = !sidebarOpen;
+    }
     
     function convertToHundredweight(weight) {
         if (!weight) return 'Unknown';
@@ -272,251 +277,76 @@
             <p>{data.error}</p>
         </div>
     {:else}
-        <div class="map-controls">
-            <div class="map-info">
-                <p><strong>Showing {currentlyDisplayed} of {data.towers.length} towers</strong> with location data</p>
+        <div class="map-wrapper">
+            <div class="map-container">
+                <div bind:this={mapContainer} class="map"></div>
+                
+                <!-- Tower count display at top -->
+                <div class="tower-count-display">
+                    <p><strong>Showing {currentlyDisplayed} of {data.towers.length} towers</strong> with location data</p>
+                </div>
+                
+                <!-- Floating controls -->
+                <button 
+                    class="floating-location-btn {isTrackingLocation ? 'tracking' : ''}" 
+                    on:click={toggleLocationTracking} 
+                    title={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'} 
+                    aria-label={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'}
+                >
+                    <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <use href="/assets/image/location.svg"></use>
+                    </svg>
+                </button>
+                
+                <button 
+                    class="floating-sidebar-btn" 
+                    on:click={toggleSidebar}
+                    title="Toggle Controls"
+                    aria-label="Toggle Controls"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+                    </svg>
+                </button>
             </div>
             
-            <div class="limit-controls">
-                <label for="displayLimit">Number of towers to display: {displayLimit}</label>
-                <input 
-                    type="range" 
-                    id="displayLimit" 
-                    bind:value={displayLimit}
-                    min="10"
-                    max={Math.min(data.towers.length, 5000)}
-                    step="10"
-                    class="tower-slider"
-                />
-                <div class="slider-labels">
-                    <span>10</span>
-                    <span>{Math.min(data.towers.length, 5000)}</span>
+            <!-- Sidebar -->
+            <div class="sidebar {sidebarOpen ? 'open' : ''}">
+                <div class="sidebar-header">
+                    <h3>Map Controls</h3>
+                    <button class="close-btn" on:click={toggleSidebar} aria-label="Close sidebar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.88c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="sidebar-content">
+                    <div class="control-section">
+                        <label for="displayLimit">Number of towers to display: {displayLimit}</label>
+                        <input 
+                            type="range" 
+                            id="displayLimit" 
+                            bind:value={displayLimit}
+                            min="10"
+                            max={Math.min(data.towers.length, 5000)}
+                            step="10"
+                            class="tower-slider"
+                        />
+                        <div class="slider-labels">
+                            <span>10</span>
+                            <span>{Math.min(data.towers.length, 5000)}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="map-container">
-            <div bind:this={mapContainer} class="map"></div>
-            <button 
-                class="floating-location-btn {isTrackingLocation ? 'tracking' : ''}" 
-                on:click={toggleLocationTracking} 
-                title={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'} 
-                aria-label={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'}
-            >
-                <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <use href="/assets/image/location.svg"></use>
-                </svg>
-            </button>
+            
+            <!-- Sidebar overlay -->
+            {#if sidebarOpen}
+                <div class="sidebar-overlay" on:click={toggleSidebar}></div>
+            {/if}
         </div>
     {/if}
 </main>
 
 <Footer />
-
-<style>
-    .map-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f5f5f5;
-        padding: 1rem;
-        border-radius: 4px;
-        margin-bottom: 1rem;
-        gap: 1rem;
-    }
-    
-    .map-info {
-        background: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .limit-controls {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 0.5rem;
-    }
-    
-    .limit-controls label {
-        font-weight: bold;
-        color: #495057;
-    }
-    
-    .tower-slider {
-        width: 200px;
-        height: 6px;
-        border-radius: 3px;
-        background: #ddd;
-        outline: none;
-        -webkit-appearance: none;
-    }
-    
-    .tower-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #007bff;
-        cursor: pointer;
-    }
-    
-    .tower-slider::-moz-range-thumb {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background: #007bff;
-        cursor: pointer;
-        border: none;
-    }
-    
-    .slider-labels {
-        display: flex;
-        justify-content: space-between;
-        width: 200px;
-        font-size: 0.8rem;
-        color: #6c757d;
-    }
-    
-    .map-container {
-        width: 100%;
-        height: calc(100vh - 400px);
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-        min-height: 400px;
-        position: relative;
-    }
-    
-    .floating-location-btn {
-        position: absolute;
-        bottom: 20px;
-        left: 10px;
-        width: 40px;
-        height: 40px;
-        background: white;
-        border: 2px solid rgba(0,0,0,0.2);
-        border-radius: 4px;
-        cursor: pointer;
-        z-index: 1000;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        color: #007bff;
-    }
-    
-    .floating-location-btn:hover {
-        background: #f8f9fa;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-        color: #0056b3;
-    }
-    
-    .floating-location-btn:active {
-        transform: scale(0.95);
-    }
-    
-    .floating-location-btn.tracking {
-        background: #007bff;
-        color: white;
-        border-color: #0056b3;
-    }
-    
-    .floating-location-btn.tracking:hover {
-        background: #0056b3;
-        color: white;
-    }
-    
-    .map {
-        width: 100%;
-        height: 100%;
-    }
-    
-    .error {
-        background: #f8d7da;
-        padding: 1rem;
-        border-radius: 6px;
-        border-left: 4px solid #dc3545;
-        margin-bottom: 1rem;
-    }
-    
-    .error h3 {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-        color: #721c24;
-    }
-    
-    .error p {
-        margin-bottom: 0;
-        color: #721c24;
-    }
-    
-    :global(.tower-popup h4) {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-        color: #333;
-    }
-    
-    :global(.tower-popup p) {
-        margin: 0.25rem 0;
-        font-size: 0.9rem;
-    }
-    
-    :global(.user-location-marker) {
-        background: transparent;
-        border: none;
-    }
-    
-    :global(.user-location-dot) {
-        width: 20px;
-        height: 20px;
-        background-color: #007bff;
-        border: 3px solid white;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    :global(.user-popup h4) {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
-        color: #007bff;
-        font-weight: bold;
-    }
-    
-    @media (max-width: 768px) {
-        .map-controls {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .limit-controls {
-            align-items: flex-start;
-            width: 100%;
-        }
-        
-        .tower-slider,
-        .slider-labels {
-            width: 100%;
-        }
-        
-        .map-container {
-            height: calc(100vh - 450px);
-            min-height: 300px;
-        }
-        
-        .floating-location-btn {
-            bottom: 15px;
-            left: 10px;
-            width: 36px;
-            height: 36px;
-        }
-        
-        .floating-location-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-    }
-</style>
