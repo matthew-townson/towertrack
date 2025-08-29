@@ -50,6 +50,22 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create User table:', error.message);
         }
 
+        // create user other names table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`OtherNames\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`Name\` VARCHAR(255) NOT NULL,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
+                )
+            `);
+            console.log('[ INFO ] OtherNames table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create OtherNames table:', error.message);
+        }
+
         // create tower data table
         try {
             await connection.query(`
@@ -114,6 +130,29 @@ async function initialiseDatabase() {
             console.log('[ INFO ] Bell table created successfully or already exists');
         } catch (error) {
             console.error('[ ERROR ] Failed to create Bell table:', error.message);
+        }
+
+        // create BB performances table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`Performance\` (
+                    \`PerformanceID\` INTEGER UNSIGNED NOT NULL,
+                    \`Association\` VARCHAR(255),
+                    \`Place\` VARCHAR(255),
+                    \`Dedication\` VARCHAR(255),
+                    \`County\` VARCHAR(255),
+                    \`Date\` DATE,
+                    \`Duration\` VARCHAR(32),
+                    \`Changes\` INTEGER,
+                    \`Method\` VARCHAR(255),
+                    \`Ringers\` JSON,
+                    \`Timestamp\` TIMESTAMP,
+                    PRIMARY KEY (\`PerformanceID\`)
+                )
+            `);
+            console.log('[ INFO ] Performance table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create Performance table:', error.message);
         }
         
         console.log('[ SUCCESS ] Database and tables initialisation completed');
