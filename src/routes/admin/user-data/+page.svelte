@@ -33,7 +33,7 @@
 </script>
 
 <svelte:head>
-    <title>User Data | Admin | towertracker</title>
+    <title>User Data | towertracker</title>
 </svelte:head>
 
 <main>
@@ -81,6 +81,11 @@
                             <td>
                                 {#if user.id === data.user.id}
                                     <span class="self-user">Cannot modify own permissions</span>
+                                    <div class="action-buttons">
+                                        <button type="button" class="expand-btn" on:click={() => toggleUserDetails(user.id)}>
+                                            {expandedUser === user.id ? 'Hide Details' : 'Edit Details'}
+                                        </button>
+                                    </div>
                                 {:else}
                                     <div class="action-buttons">
                                         <form method="POST" action="?/updatePermission" use:enhance class="permission-form">
