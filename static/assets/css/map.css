@@ -1,17 +1,63 @@
+.map-page {
+    height: calc(100vh - 120px); /* Adjust based on header/footer height */
+    display: flex;
+    flex-direction: column;
+}
+
+.map-page h1 {
+    margin: 1rem 0 0.5rem 0;
+    flex-shrink: 0;
+}
+
 .map-wrapper {
+    flex: 1;
     position: relative;
-    width: 100%;
-    height: calc(100vh - 200px);
-    min-height: 500px;
+    min-height: 400px;
 }
 
 .map-container {
+    position: relative;
     width: 100%;
     height: 100%;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    position: relative;
+}
+
+.map {
+    width: 100%;
+    height: 100%;
+}
+
+/* Custom pin styling */
+.tower-pin {
+    background: none !important;
+    border: none !important;
+}
+
+.inline-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.inline-number-input {
+    width: 70px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+}
+
+.input-group {
+    margin-top: 10px;
+}
+
+.number-input {
+    width: 80px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    margin-left: 8px;
 }
 
 .tower-count-display {
@@ -49,6 +95,8 @@
     justify-content: center;
     transition: all 0.2s ease;
     color: #007bff;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 .floating-location-btn:hover {
@@ -248,36 +296,145 @@
     font-weight: bold;
 }
 
+.closest-tower-display {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 300px;
+    z-index: 1000;
+    border: 1px solid #ddd;
+}
+
+.closest-tower-display h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.closest-tower-display p {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.closest-tower-display a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.closest-tower-display a:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     .tower-count-display {
         font-size: 0.8rem;
         padding: 6px 10px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        width: auto;
+        max-width: none;
     }
     
     .sidebar {
-        width: 100%;
-        right: -100%;
+        width: 100vw;
+        right: -100vw;
+        height: 100vh;
+        top: 0;
     }
     
     .floating-location-btn {
-        bottom: 15px;
-        left: 10px;
-        width: 36px;
-        height: 36px;
+        bottom: 80px;
+        left: 15px;
+        width: 44px;
+        height: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
     }
     
     .floating-location-btn svg {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
     }
     
     .floating-sidebar-btn {
-        width: 36px;
-        height: 36px;
+        width: 44px;
+        height: 44px;
+        top: 15px;
+        right: 15px;
+        touch-action: manipulation;
     }
     
     .floating-sidebar-btn svg {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .closest-tower-display {
+        display: none;
+    }
+    
+    .map-wrapper {
+        height: calc(100vh - 280px);
+        min-height: calc(100vh - 280px);
+    }
+    
+    .sidebar-content {
+        padding: 0.75rem;
+    }
+    
+    .control-section {
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+    }
+    
+    .tower-slider {
+        height: 8px;
+        margin: 0.75rem 0 0.5rem 0;
+    }
+    
+    .tower-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .tower-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tower-count-display {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    
+    .floating-location-btn,
+    .floating-sidebar-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .closest-tower-display {
+        display: none;
+    }
+    
+    .sidebar-header {
+        padding: 0.75rem;
+    }
+    
+    .sidebar-header h3 {
+        font-size: 1rem;
+    }
+    
+    .map-wrapper {
+        height: calc(100vh - 260px);
+        min-height: calc(100vh - 260px);
     }
 }
