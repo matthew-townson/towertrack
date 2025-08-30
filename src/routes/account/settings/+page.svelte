@@ -5,6 +5,11 @@
 	export let data;
 	
 	let newAlias = '';
+	let activeSection = 'profile'; // Default to profile section
+	
+	function setActiveSection(section) {
+		activeSection = section;
+	}
 	
 	function addAlias() {
 		if (newAlias.trim()) {
@@ -40,106 +45,204 @@
 
 <Header user={data.user} />
 
-<main>
-    <h1>Settings</h1>
+<main class="settings-container">
+    <div class="settings-sidebar">
+        <h2>Settings</h2>
+        <nav class="settings-nav">
+            <button 
+                class="nav-item {activeSection === 'profile' ? 'active' : ''}"
+                on:click={() => setActiveSection('profile')}
+            >
+                Profile
+            </button>
+            <button 
+                class="nav-item {activeSection === 'aliases' ? 'active' : ''}"
+                on:click={() => setActiveSection('aliases')}
+            >
+                Additional Names
+            </button>
+            <button 
+                class="nav-item {activeSection === 'privacy' ? 'active' : ''}"
+                on:click={() => setActiveSection('privacy')}
+            >
+                Privacy
+            </button>
+            <button 
+                class="nav-item {activeSection === 'password' ? 'active' : ''}"
+                on:click={() => setActiveSection('password')}
+            >
+                Password
+            </button>
+            <button 
+                class="nav-item {activeSection === 'grabs' ? 'active' : ''}"
+                on:click={() => setActiveSection('grabs')}
+            >
+                Grab Settings
+            </button>
+        </nav>
+    </div>
     
-    <!-- Email Section -->
-    <form class="login-box" method="post" action="?/updateEmail">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" value={data.user?.username ?? ''} readonly disabled />
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email address" value={data.user?.email ?? ''} autocomplete="off" required />
-        <br>
-        <button type="submit">Update Email</button>
-        <br>
-        {#if form?.action === 'updateEmail' && form?.error}
-            <div class="error">
-                <h3>❗Error</h3>
-                <p>{form.message}</p>
-            </div>
-        {:else if form?.action === 'updateEmail' && form?.success}
-            <div class="success">
-                <h3>❕Success</h3>
-                <p>{form.message}</p>
-            </div>
+    <div class="settings-content">
+        {#if activeSection === 'profile'}
+            <form class="settings-section" method="post" action="?/updateEmail">
+                <h2>Profile Settings</h2>
+                <div class="login-box">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value={data.user?.username ?? ''} readonly disabled />
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email address" value={data.user?.email ?? ''} autocomplete="off" required />
+                    <button type="submit">Update Email</button>
+                    {#if form?.action === 'updateEmail' && form?.error}
+                        <div class="error">
+                            <h3>❗Error</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {:else if form?.action === 'updateEmail' && form?.success}
+                        <div class="success">
+                            <h3>❕Success</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {/if}
+                </div>
+            </form>
         {/if}
-    </form>
 
-    <!-- Additional Names Section -->
-    <form id="alias-form" class="login-box" method="post" action="?/updateAlias">
-        <h2>Additional Names</h2>
-        <div class="alias-edit">
-			{#if data.aliases && data.aliases.length > 0}
-				<div class="alias-list">
-					{#each data.aliases as alias}
-						<div class="alias-item">
-							<span>{alias.Name}</span>
-							<button type="button" on:click={() => removeAlias(alias.id)} class="remove-btn">Remove</button>
-						</div>
-					{/each}
-				</div>
-			{:else}
-                <br>
-				<p class="no-aliases">No additional names added yet.</p>
-                <br>
-			{/if}
-			
-			<div class="add-alias">
-				<input 
-					type="text" 
-					bind:value={newAlias} 
-					placeholder="Enter additional name/alias" 
-					on:keydown={(e) => e.key === 'Enter' && (e.preventDefault(), addAlias())}
-				/>
-                <br><br>
-				<button type="button" on:click={addAlias} disabled={!newAlias.trim()}>Add Name</button>
-			</div>
-			<div class="info">
-				<p>Add other variations of your name as they may appear on BellBoard or other ringing records</p>
-			</div>
-		</div>
-        {#if form?.action === 'updateAlias' && form?.error}
-            <div class="error">
-                <h3>❗Error</h3>
-                <p>{form.message}</p>
-            </div>
-        {:else if form?.action === 'updateAlias' && form?.success}
-            <div class="success">
-                <h3>❕Success</h3>
-                <p>{form.message}</p>
-            </div>
+        {#if activeSection === 'aliases'}
+            <form id="alias-form" class="settings-section" method="post" action="?/updateAlias">
+                <h2>Additional Names</h2>
+                    <div class="info">
+                        <p>Add other variations of your name as they may appear on BellBoard or other ringing records</p>
+                    </div>
+                <div class="alias-edit">
+                    <div class="alias-list">
+                        <!-- Show username as non-removable item -->
+                        <div class="alias-item username-item" title="Your username is included by default in all searches">
+                            <span>{data.user?.username ?? ''} - <a href="https://bb.ringingworld.co.uk/search.php?ringer={data.user?.username ?? ''}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank">Link</a></span>
+                            <span>Username</span>
+                        </div>
+                        
+                        {#if data.aliases && data.aliases.length > 0}
+                            {#each data.aliases as alias}
+                                <div class="alias-item">
+                                    <span>{alias.Name} - <a href="https://bb.ringingworld.co.uk/search.php?ringer={alias.Name}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank">Link</a></span>
+                                    <button type="button" on:click={() => removeAlias(alias.id)} class="remove-btn">Remove</button>
+                                </div>
+                            {/each}
+                        {/if}
+                    </div>
+                    
+                    <div class="add-alias">
+                        <input 
+                            type="text" 
+                            bind:value={newAlias} 
+                            placeholder="Enter name/alias" 
+                            on:keydown={(e) => e.key === 'Enter' && (e.preventDefault(), addAlias())}
+                        />
+                        <button type="button" on:click={addAlias} disabled={!newAlias.trim()}>Add</button>
+                    </div>
+                </div>
+                {#if form?.action === 'updateAlias' && form?.error}
+                    <div class="error">
+                        <h3>❗Error</h3>
+                        <p>{form.message}</p>
+                    </div>
+                {:else if form?.action === 'updateAlias' && form?.success}
+                    <div class="success">
+                        <h3>❕Success</h3>
+                        <p>{form.message}</p>
+                    </div>
+                {/if}
+            </form>
         {/if}
-    </form>
 
-    <!-- Password Section -->
-    <form class="login-box" method="post" action="?/changePassword">
-        <h2>Change Password</h2>
-        <label for="currentPassword">Current Password</label>
-        <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password" autocomplete="off" required />
-        <br>
-        <label for="newPassword">New Password</label>
-        <input type="password" id="newPassword" name="newPassword" placeholder="8 character minimum (At least one letter and one number)" autocomplete="off" required />
-        <br>
-        <label for="confirmNewPassword">Confirm New Password</label>
-        <input type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm your new password" autocomplete="off" required />
-        <div class="info">
-            <p>All fields are required to change your password</p>
-        </div>
-        <br>
-        
-        <button type="submit">Change Password</button>
-        <br>
-        {#if form?.action === 'changePassword' && form?.error}
-            <div class="error">
-                <h3>❗Error</h3>
-                <p>{form.message}</p>
-            </div>
-        {:else if form?.action === 'changePassword' && form?.success}
-            <div class="success">
-                <p>{form.message}</p>
-            </div>
+        {#if activeSection === 'privacy'}
+            <form class="settings-section" method="post" action="?/updatePrivacy">
+                <h2>Privacy Settings</h2>
+                <div class="login-box">
+                    <label for="profileVisibility">Profile Visibility</label>
+                    <select id="profileVisibility" name="profileVisibility">
+                        <option value="1" selected={data.privacy?.profileVisibility}>Public</option>
+                        <option value="0" selected={!data.privacy?.profileVisibility}>Private</option>
+                    </select>
+                    <label for="dataVisibility">Data Visibility</label>
+                    <select id="dataVisibility" name="dataVisibility">
+                        <option value="1" selected={data.privacy?.dataVisibility}>Visible</option>
+                        <option value="0" selected={!data.privacy?.dataVisibility}>Hidden</option>
+                    </select>
+                    <br>
+                    <br>
+                    <button type="submit">Update Privacy Settings</button>
+                    {#if form?.action === 'updatePrivacy' && form?.error}
+                        <div class="error">
+                            <h3>❗Error</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {:else if form?.action === 'updatePrivacy' && form?.success}
+                        <div class="success">
+                            <h3>❕Success</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {/if}
+                </div>
+            </form>
         {/if}
-    </form>
+
+        {#if activeSection === 'password'}
+            <form class="settings-section" method="post" action="?/changePassword">
+                <h2>Change Password</h2>
+                <div class="login-box">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password" autocomplete="off" required />
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" placeholder="8 character minimum (At least one letter and one number)" autocomplete="off" required />
+                    <label for="confirmNewPassword">Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm your new password" autocomplete="off" required />
+                    <button type="submit">Change Password</button>
+                    {#if form?.action === 'changePassword' && form?.error}
+                        <div class="error">
+                            <h3>❗Error</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {:else if form?.action === 'changePassword' && form?.success}
+                        <div class="success">
+                            <p>{form.message}</p>
+                        </div>
+                    {/if}
+                </div>
+            </form>
+        {/if}
+
+        {#if activeSection === 'grabs'}
+            <form class="settings-section" method="post" action="?/updateGrabSettings">
+                <h2>Grab Settings</h2>
+                <div class="login-box">
+                    <div class="info">
+                        <p>Configure what qualifies as a "grab" when importing BellBoard data</p>
+                    </div>
+
+                    <br>
+                    
+                    <label for="bellsPercent">Percentage of Bells</label>
+                    <input type="number" id="bellsPercent" name="bellsPercent" 
+                           value={data.grabSettings?.bellsPercent} 
+                           min="1" max="100" required />
+                    
+                    <button type="submit">Update Grab Settings</button>
+                    {#if form?.action === 'updateGrabSettings' && form?.error}
+                        <div class="error">
+                            <h3>❗Error</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {:else if form?.action === 'updateGrabSettings' && form?.success}
+                        <div class="success">
+                            <h3>❕Success</h3>
+                            <p>{form.message}</p>
+                        </div>
+                    {/if}
+                </div>
+            </form>
+        {/if}
+    </div>
 </main>
 
 <Footer />

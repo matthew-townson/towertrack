@@ -20,26 +20,46 @@
             <h2>Build a search</h2>
             <form method="POST" action="?/import" use:enhance>
                 <label for="username">BellBoard name</label>
-                <input type="text" id="username" name="username" placeholder="Enter your name as it appears on BellBoard" value={data.user?.username ?? ''} autocomplete="off" required />
-                <br>
-                <label for="length">Length</label>
-                <select id="length" name="length">
-                    <option value="all">All lengths</option>
-                    <option value="quarters">Quarter peals</option>
-                    <option value="quarters+">Quarters and longer</option>
-                    <option value="peals">Peals</option>
-                    <option value="peals+">Peals and longer</option>
-                    <option value="long">Long length</option>
+                <select id="username" name="username" required>
+                    <option value={data.user.username} selected>{data.user.username}</option>
+                    {#each data.aliases as alias}
+                        <option value={alias.Name}>{alias.Name}</option>
+                    {/each}
                 </select>
                 <br>
-                <label for="type">Type (Tower or Hand)</label>
-                <select id="type" name="type">
-                    <option value="all">All</option>
-                    <option value="tower">Tower bells</option>
-                    <option value="hand">Handbells</option>
-                </select>
+                <label for="exclude-length">Exclude lengths</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="short_touches" />
+                        Short Touches
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="eighth-peals" />
+                        Eighth Peals
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="quarter-peals" />
+                        Quarter Peals
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="date-touches" />
+                        Date Touches
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="half-peals" />
+                        Half Peals
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="peals" />
+                        Peals
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="exclude-length" value="long-lengths" />
+                        Long Lengths
+                    </label>
+                </div>
                 <br>
-                <button type="submit">Import BellBoard Data</button>
+                <button type="submit">Add this search</button>
             </form>
         </div>
         
@@ -49,7 +69,7 @@
             <form method="POST" action="?/import-saved-search" use:enhance>
                 <label for="search">Saved search ID/link</label>
                 <input type="text" id="search" name="search" placeholder="https://bb.ringingworld.co.uk/search.php?id=6205" autocomplete="off" required />
-                <button type="submit">Import Saved Search</button>
+                <button type="submit">Import a Saved Search</button>
             </form>
             <br>
             <div class="info">

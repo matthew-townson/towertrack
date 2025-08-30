@@ -16,10 +16,20 @@ export async function load({ locals }) {
     
     // Get user's aliases
     const [aliases] = await db.execute('SELECT id, Name FROM OtherNames WHERE userId = ?', [locals.user.id]);
+
+    // Get user privacy settings
+    const [privacy] = await db.execute('SELECT profileVisibility, dataVisibility FROM PrivacyControl WHERE userId = ?', [locals.user.id]);
+
+    // Get user grab settings (create default if doesn't exist)
+    const [grabSettings] = await db.execute('SELECT bellsPercent FROM GrabSettings WHERE userId = ?', [locals.user.id]);
     
     return {
         user: rows[0],
-        aliases: aliases
+        aliases: aliases,
+        privacy: privacy[0],
+        grabSettings: grabSettings[0] || {
+            bellsPercent: 100
+        }
     };
 }
 
@@ -65,6 +75,37 @@ export const actions = {
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: true, message: 'Internal server error', action: 'updateEmail' });
+        }
+    },
+
+    updatePrivacy: async ({ request, locals }) => {
+        if (!locals.user) {
+            throw redirect(303, '/account/login');
+        }
+
+        const data = await request.formData();
+        const profileVisibility = data.get('profileVisibility');
+        const dataVisibility = data.get('dataVisibility');
+
+        // Validate inputs
+        if (profileVisibility === null || dataVisibility === null) {
+            return fail(400, { error: true, message: 'Invalid privacy settings', action: 'updatePrivacy' });
+        }
+
+        if (profileVisibility !== '0' && profileVisibility !== '1') {
+            return fail(400, { error: true, message: 'Invalid profile visibility setting', action: 'updatePrivacy' });
+        }
+
+        if (dataVisibility !== '0' && dataVisibility !== '1') {
+            return fail(400, { error: true, message: 'Invalid data visibility setting', action: 'updatePrivacy' });
+        }
+
+        try {
+            await db.execute('UPDATE PrivacyControl SET profileVisibility = ?, dataVisibility = ? WHERE userId = ?', [profileVisibility, dataVisibility, locals.user.id]);
+            return { success: true, message: 'Privacy settings updated successfully', action: 'updatePrivacy' };
+        } catch (error) {
+            console.error('Database error:', error);
+            return fail(500, { error: true, message: 'Internal server error', action: 'updatePrivacy' });
         }
     },
 
@@ -153,10 +194,10 @@ export const actions = {
             return fail(400, { error: true, message: 'New passwords do not match', action: 'changePassword' });
         }
 
-        // Check if new password is different from current
+        // Check if new password is different to current
         const isSamePassword = await argon2.verify(userRows[0].password, newPassword);
         if (isSamePassword) {
-            return fail(400, { error: true, message: 'New password must be different from current password', action: 'changePassword' });
+            return fail(400, { error: true, message: 'New password must be different to current password', action: 'changePassword' });
         }
 
         try {
@@ -166,6 +207,34 @@ export const actions = {
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: true, message: 'Internal server error', action: 'changePassword' });
+        }
+    },
+
+    updateGrabSettings: async ({ request, locals }) => {
+        if (!locals.user) {
+            throw redirect(303, '/account/login');
+        }
+
+        const data = await request.formData();
+        const bellsPercent = data.get('bellsPercent');
+
+        if (isNaN(bellsPercent) || bellsPercent < 1 || bellsPercent > 100) {
+            return fail(400, { error: true, message: 'Percentage must be between 1 and 100', action: 'updateGrabSettings' });
+        }
+
+        try {
+            // Insert or update grab settings
+            await db.execute(`
+                INSERT INTO GrabSettings (userId, bellsPercent)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE
+                bellsPercent = VALUES(bellsPercent)
+            `, [locals.user.id, bellsPercent]);
+            
+            return { success: true, message: 'Grab settings updated successfully', action: 'updateGrabSettings' };
+        } catch (error) {
+            console.error('Database error:', error);
+            return fail(500, { error: true, message: 'Internal server error', action: 'updateGrabSettings' });
         }
     }
 };
