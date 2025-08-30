@@ -50,6 +50,22 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create User table:', error.message);
         }
 
+        // create user privacy table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`PrivacyControl\` (
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`profileVisibility\` BOOLEAN NOT NULL DEFAULT 1,
+                    \`dataVisibility\` BOOLEAN NOT NULL DEFAULT 1,
+                    PRIMARY KEY (\`userId\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
+                )
+            `);
+            console.log('[ INFO ] PrivacyControl table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create PrivacyControl table:', error.message);
+        }
+
         // create user other names table
         try {
             await connection.query(`
@@ -153,6 +169,21 @@ async function initialiseDatabase() {
             console.log('[ INFO ] Performance table created successfully or already exists');
         } catch (error) {
             console.error('[ ERROR ] Failed to create Performance table:', error.message);
+        }
+
+        // create grab settings table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`GrabSettings\` (
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`bellsPercent\` TINYINT NOT NULL DEFAULT 100,
+                    PRIMARY KEY (\`userId\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
+                )
+            `);
+            console.log('[ INFO ] GrabSettings table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create GrabSettings table:', error.message);
         }
         
         console.log('[ SUCCESS ] Database and tables initialisation completed');
