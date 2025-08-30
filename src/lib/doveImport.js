@@ -105,7 +105,7 @@ export async function importDoveData() {
             // Delete temporary CSV files
             fs.unlinkSync(`${tempDir}/towers.csv`);
             fs.unlinkSync(`${tempDir}/bells.csv`);
-            fs.rmdirSync(tempDir, { recursive: true });
+            fs.rmSync(tempDir, { recursive: true });
             log.info('Deleted temporary CSV files');
             return {
                 success: false,
@@ -191,7 +191,7 @@ export async function importDoveData() {
         // Delete temporary CSV files
         fs.unlinkSync(`${tempDir}/towers.csv`);
         fs.unlinkSync(`${tempDir}/bells.csv`);
-        fs.rmdirSync(tempDir, { recursive: true });
+        fs.rmSync(tempDir, { recursive: true });
         log.info('Deleted temporary CSV files');
         
         // Save current timestamp to indicate last import time to a txt file
