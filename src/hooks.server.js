@@ -49,24 +49,9 @@ export const handle = async ({ event, resolve }) => {
         });
     }
     
-    // Handle POST requests
-    if (event.request.method === 'POST') {
-        const formData = await event.request.formData();
-        const csrfToken = formData.get('csrf_token');
-        
-        if (csrfToken !== event.cookies.get('csrf_token')) {
-            return new Response('CSRF token validation failed', { status: 403 });
-        }
-    }
-	
-	// Add CSP headers
+    // CSRF verification removed temporarily
+
+	// Remove CSP headers
 	const response = await resolve(event);
-	const headers = response.headers;
-
-	headers.set(
-		'Content-Security-Policy',
-		"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';"
-	);
-
 	return response;
 };
