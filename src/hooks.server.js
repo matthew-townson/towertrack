@@ -2,6 +2,8 @@ import { initialiseDatabase } from '$lib/db.js';
 import { getSession } from '$lib/session.js';
 import { startDailyImport } from '$lib/scheduler.js';
 import { initializeAdmin } from '$lib/server/setup.js';
+import { dev } from '$app/environment';
+import crypto from 'crypto';
 
 // Initialise database when server starts
 await initialiseDatabase();
@@ -35,5 +37,36 @@ export const handle = async ({ event, resolve }) => {
 		}
 	}
 
-	return await resolve(event);
+    // Set up CSRF token if not already present
+    if (!event.cookies.get('csrf_token')) {
+        const token = crypto.randomBytes(32).toString('hex');
+        event.cookies.set('csrf_token', token, {
+            path: '/',
+            httpOnly: true,
+            secure: !dev,
+            sameSite: 'strict',
+            maxAge: 60 * 60 * 24 // 24 hours
+        });
+    }
+    
+    // Handle POST requests
+    if (event.request.method === 'POST') {
+        const formData = await event.request.formData();
+        const csrfToken = formData.get('csrf_token');
+        
+        if (csrfToken !== event.cookies.get('csrf_token')) {
+            return new Response('CSRF token validation failed', { status: 403 });
+        }
+    }
+	
+	// Add CSP headers
+	const response = await resolve(event);
+	const headers = response.headers;
+
+	headers.set(
+		'Content-Security-Policy',
+		"default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'self'; frame-src 'none';"
+	);
+
+	return response;
 };

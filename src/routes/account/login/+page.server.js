@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { validateUser } from '$lib/validation.js';
 import { createSession } from '$lib/session.js';
 import log from '$lib/log.js';
+import { checkRateLimit } from '$lib/rateLimit';
 
 export const actions = {
     default: async ({ request, cookies }) => {
@@ -17,6 +18,11 @@ export const actions = {
         
         if (!result.success) {
             return fail(400, { error: true, message: result.message, username });
+        }
+
+        const { limited, message } = checkRateLimit(request.headers.get('x-forwarded-for') || 'localhost');
+        if (limited) {
+            return fail(429, { error: true, message });
         }
 
         const sessionId = createSession(result.user.id, result.user.username, result.user.permission);
