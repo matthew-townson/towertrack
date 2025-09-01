@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
-import { importDoveData } from '$lib/doveImport.js';
-import { getLastImportTime, getSchedulerState, enableScheduler, disableScheduler } from '$lib/scheduler.js';
+import { importDoveData } from '$lib/server/doveImport.js';
+import { getLastImportTime, getSchedulerState, enableScheduler, disableScheduler } from '$lib/server/scheduler.js';
 
 export function load({ locals }) {
     // Check if user is logged in and has admin permission (0)

@@ -1,5 +1,5 @@
 import { redirect, fail } from '@sveltejs/kit';
-import db from '$lib/db.js';
+import db from '$lib/server/db.js';
 import argon2 from 'argon2';
 
 export async function load({ locals }) {

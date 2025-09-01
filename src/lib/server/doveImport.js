@@ -1,5 +1,5 @@
-import log from '$lib/log.js';
-import pool from '$lib/db.js';
+import log from '$lib/server/log.js';
+import pool from '$lib/server/db.js';
 import fs from 'fs';
 
 export async function importDoveData() {

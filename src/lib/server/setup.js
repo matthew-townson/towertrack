@@ -1,5 +1,5 @@
 import { hash } from 'argon2';
-import db from '$lib/db.js';
+import db from '$lib/server/db.js';
 
 export async function initializeAdmin() {
     try {

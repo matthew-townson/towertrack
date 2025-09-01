@@ -1,5 +1,5 @@
-import { importDoveData } from '$lib/doveImport.js';
-import log from '$lib/log.js';
+import { importDoveData } from '$lib/server/doveImport.js';
+import log from '$lib/server/log.js';
 import fs from 'fs';
 
 let importInterval = null;

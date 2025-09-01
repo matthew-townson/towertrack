@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { validateUser } from '$lib/validation.js';
-import { createSession } from '$lib/session.js';
-import log from '$lib/log.js';
-import { checkRateLimit } from '$lib/rateLimit';
+import { validateUser } from '$lib/server/validation.js';
+import { createSession } from '$lib/server/session.js';
+import log from '$lib/server/log.js';
+import { checkRateLimit } from '$lib/server/rateLimit';
 
 export const actions = {
     default: async ({ request, cookies }) => {
