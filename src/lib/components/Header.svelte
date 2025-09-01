@@ -1,31 +1,64 @@
 <script>
 	export let user = null;
+	let menuOpen = false;
 </script>
 
-<div class="banner">
-	{#if user}
-		<a href="/home"><h1>towertracker</h1></a>
-	{:else}
-		<a href="/"><h1>towertracker</h1></a>
-	{/if}
-	<nav>
+<nav class="navbar has-shadow is-spaced custom-banner-bg" aria-label="main navigation">
+	<div class="navbar-brand">
 		{#if user}
-			<a href="/home">Home</a>
-			<a href="/profile">Profile</a>
-			<a href="/map">Map</a>
-			<a href="/account/settings">Settings</a>
+			<a class="navbar-item" href="/home">
+				<h1 class="title is-4 has-text-white">towertracker</h1>
+			</a>
 		{:else}
-			<a href="/">Home</a>
-			<a href="/about">About</a>
+			<a class="navbar-item" href="/">
+				<h1 class="title is-4 has-text-white">towertracker</h1>
+			</a>
 		{/if}
-		{#if user}
-			{#if user.permission === 0}
-				<a href="/admin">Admin</a>
+		<button type="button"
+			class="navbar-burger has-text-white"
+			aria-label="menu"
+			aria-expanded={menuOpen}
+			on:click={() => menuOpen = !menuOpen}
+		>
+			<span aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
+			<span aria-hidden="true"></span>
+		</button>
+	</div>
+	<div class="navbar-menu" class:is-active={menuOpen}>
+		<div class="navbar-start">
+			{#if user}
+				<a class="navbar-item has-text-white" href="/home">Home</a>
+				<a class="navbar-item has-text-white" href="/profile">Profile</a>
+				<a class="navbar-item has-text-white" href="/map">Map</a>
+				<a class="navbar-item has-text-white" href="/account/settings">Settings</a>
+			{:else}
+				<a class="navbar-item has-text-white" href="/">Home</a>
+				<a class="navbar-item has-text-white" href="/about">About</a>
 			{/if}
-			<a href="/account/logout">Logout</a>
-		{:else}
-			<a href="/account/register">Register</a>
-			<a href="/account/login">Login</a>
-		{/if}
-	</nav>
-</div>
+		</div>
+		<div class="navbar-end">
+			{#if user}
+				{#if user.permission === 0}
+					<a class="navbar-item has-text-white" href="/admin">Admin</a>
+				{/if}
+				<a class="navbar-item has-text-white" href="/account/logout">Logout</a>
+			{:else}
+				<a class="navbar-item has-text-white" href="/account/register">Register</a>
+				<a class="navbar-item has-text-white" href="/account/login">Login</a>
+			{/if}
+		</div>
+	</div>
+</nav>
+
+<style>
+	.custom-banner-bg {
+		background: linear-gradient(160deg, #c33c54 56%, #8ee3ef 100%, #aef3e7 100%);
+	}
+	.navbar {
+		border-bottom: none;
+	}
+	.navbar-item h1 {
+		margin: 0;
+	}
+</style>

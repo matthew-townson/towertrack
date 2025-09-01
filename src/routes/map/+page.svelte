@@ -427,8 +427,6 @@
 <Header user={data.user} />
 
 <main class="map-page">
-    <h1>Tower Map</h1>
-    
     {#if data.error}
         <div class="error">
             <h3>❗Error</h3>

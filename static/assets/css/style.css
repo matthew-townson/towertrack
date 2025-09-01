@@ -61,43 +61,24 @@ main, footer {
     font-family: 'Inter', Arial, sans-serif;
     overflow-x: hidden;
 }
-.banner {
-    background: #C33C54;
+.custom-banner-bg {
     background: linear-gradient(160deg, #c33c54 56%, #8ee3ef 100%, #aef3e7 100%);
-    color: white;
-    padding: 1rem;
-    text-align: center;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 1rem;
 }
-.banner h1 {
+.navbar {
+    border-bottom: none;
+}
+.navbar-item h1 {
     margin: 0;
-    align-self: center;
 }
-.banner a {
-    text-decoration: none;
-    color: inherit;
-}
-.banner nav {
-    display: flex;
-    gap: 1rem;
-}
-.banner nav a {
-    color: #fff;
-    text-decoration: none;
-    margin: 0 .25rem;
-    padding: 0 .25rem;
-    font-weight: 500;
-    box-shadow: inset 0 0 0 0 #8ee3ef;
-    transition: color .3s ease-in-out, box-shadow .3s ease-in-out;
-}
+.banner,
+.banner h1,
+.banner nav,
+.banner nav a,
 .banner nav a:hover {
-    box-shadow: inset 0 -100px 0 0 #8ee3ef;
-    color: #c33c54;
+    /* Removed: replaced by Bulma navbar */
+    display: none !important;
 }
+
 main {
     padding: 2rem 1rem;
     text-align: center;
@@ -106,16 +87,23 @@ main {
     font-weight: 600;
 }
 footer {
+    /* Remove position: fixed and bottom: 0 */
     background: #f3f4f6;
     color: #374151;
     text-align: center;
     padding: 1rem 0;
-    position: fixed;
-    bottom: 0;
     width: 100%;
     box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
     font-family: 'Inter', Arial, sans-serif;
     font-weight: 600;
+    margin-top: auto; /* Push footer to bottom if content is short */
+}
+.footer {
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+    font-weight: 600;
+}
+.custom-footer-bg {
+    background: #c33c54 !important;
 }
 
 .banner h1,
@@ -1130,47 +1118,33 @@ h1, h2, h3, h4, h5, h6 {
         padding: 7px;
         font-size: 0.85rem;
     }
-    
-    .banner {
-        padding: 0.5rem;
-    }
-    
-    main {
-        padding: 0.5rem 0.25rem;
-    }
-    
-    .floating-location-btn,
-    .floating-sidebar-btn {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .floating-location-btn svg,
-    .floating-sidebar-btn svg {
-        width: 16px;
-        height: 16px;
+}
+
+.logs-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    color: #991b1b;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .logs-table th,
+    .logs-table td {
+        padding: 7px;
+        font-size: 0.85rem;
     }
 }
 
-/* Touch improvements */
+.footer.custom-footer-compact {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+}
+
 @media (hover: none) and (pointer: coarse) {
-    .banner nav a:hover {
-        box-shadow: inset 0 0 0 0 #8ee3ef;
-        color: inherit;
-    }
-    
-    .banner nav a:active {
-        box-shadow: inset 0 -100px 0 0 #8ee3ef;
-        color: #c33c54;
-    }
-    
-    .floating-location-btn:hover,
-    .floating-sidebar-btn:hover,
-    .close-btn:hover {
-        background: white;
-        color: initial;
-    }
-    
     .floating-location-btn:active,
     .floating-sidebar-btn:active {
         background: #f8f9fa;
@@ -1833,6 +1807,25 @@ h1, h2, h3, h4, h5, h6 {
 .logs-table .log-type-SUCCESS {
     color: #22c55e;
     font-weight: bold;
+}
+
+.logs-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    color: #991b1b;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .logs-table th,
+    .logs-table td {
+        padding: 7px;
+        font-size: 0.85rem;
+    }
 }
 
 .logs-error {
