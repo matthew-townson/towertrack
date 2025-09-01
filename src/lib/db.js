@@ -50,20 +50,21 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create User table:', error.message);
         }
 
-        // create user privacy table
+        // create user settings table
         try {
             await connection.query(`
-                CREATE TABLE IF NOT EXISTS \`PrivacyControl\` (
+                CREATE TABLE IF NOT EXISTS \`UserSettings\` (
                     \`userId\` INTEGER UNSIGNED NOT NULL,
                     \`profileVisibility\` BOOLEAN NOT NULL DEFAULT 1,
                     \`dataVisibility\` BOOLEAN NOT NULL DEFAULT 1,
+                    \`bellsPercent\` TINYINT NOT NULL DEFAULT 100,
                     PRIMARY KEY (\`userId\`),
                     FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
                 )
             `);
-            console.log('[ INFO ] PrivacyControl table created successfully or already exists');
+            console.log(`[ INFO ] UserSettings table created successfully or already exists`);
         } catch (error) {
-            console.error('[ ERROR ] Failed to create PrivacyControl table:', error.message);
+            console.error(`[ ERROR ] Failed to create UserSettings table: ${error.message}`);
         }
 
         // create user other names table
@@ -171,19 +172,38 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create Performance table:', error.message);
         }
 
-        // create grab settings table
+        // create saved searches
         try {
             await connection.query(`
-                CREATE TABLE IF NOT EXISTS \`GrabSettings\` (
+                CREATE TABLE IF NOT EXISTS \`SavedSearches\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
                     \`userId\` INTEGER UNSIGNED NOT NULL,
-                    \`bellsPercent\` TINYINT NOT NULL DEFAULT 100,
-                    PRIMARY KEY (\`userId\`),
+                    \`name\` VARCHAR(255) NOT NULL,
+                    \`exShort\` BOOL,
+                    \`exEighth\` BOOL,
+                    PRIMARY KEY (\`id\`),
                     FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
                 )
             `);
-            console.log('[ INFO ] GrabSettings table created successfully or already exists');
+            console.log(`[ INFO ] SavedSearches table created successfully or already exists`);
         } catch (error) {
-            console.error('[ ERROR ] Failed to create GrabSettings table:', error.message);
+            console.error(`[ ERROR ] Failed to create SavedSearches table: ${error.message}`);
+        }
+
+        // create log table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`Log\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`type\` TINYINT NOT NULL,
+                    \`timestamp\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    \`text\` TEXT NOT NULL,
+                    PRIMARY KEY (\`id\`)
+                )
+            `);
+            console.log(`[ INFO ] Log table created successfully or already exists`);
+        } catch (error) {
+            console.error(`[ ERROR ] Failed to create Log table: ${error.message}`);
         }
         
         console.log('[ SUCCESS ] Database and tables initialisation completed');

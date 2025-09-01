@@ -15,8 +15,8 @@ export async function initializeAdmin() {
             const hashedPassword = await hash('AdminSetup455');
             
             await db.execute(
-                'INSERT INTO User (username, email, password, permission, created_at) VALUES (?, ?, ?, ?, ?)',
-                ['admin', 'admin@towertrack.local', hashedPassword, 0, new Date().toISOString()]
+                'INSERT INTO User (username, email, password, permission) VALUES (?, ?, ?, ?)',
+                ['admin', 'admin@towertrack.local', hashedPassword, 0]
             );
             
             console.log('Admin user created successfully!');
