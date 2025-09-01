@@ -35,7 +35,6 @@ export const actions = {
             maxAge: 60 * 60 * 24 * 7 // 7 days
         });
 
-        //debug print session information
         log.info(`User logged in: ${result.user.username}, Permission Level: ${result.user.permission}`);
 
         throw redirect(303, '/home');

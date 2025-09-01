@@ -12,6 +12,7 @@
 	<ul>
 		<li><a href="/admin/import-dove-data">Import Dove Data >></a></li>
 		<li><a href="/admin/user-data">See User Data >></a></li>
+		<li><a href="/admin/logs">View Logs >></a></li>
 	</ul>
 </main>
 

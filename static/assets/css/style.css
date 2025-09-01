@@ -1369,3 +1369,69 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* Logs page styles */
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+}
+
+.logs-table th,
+.logs-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+}
+
+.logs-table th {
+    background: #f3f4f6;
+    font-weight: bold;
+    color: #374151;
+}
+
+.logs-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.logs-table td {
+    vertical-align: top;
+    word-break: break-word;
+}
+
+.logs-table .log-type-INFO {
+    color: #2563eb;
+    font-weight: bold;
+}
+.logs-table .log-type-ERROR {
+    color: #dc2626;
+    font-weight: bold;
+}
+.logs-table .log-type-SUCCESS {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.logs-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    color: #991b1b;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .logs-table th,
+    .logs-table td {
+        padding: 7px;
+        font-size: 0.85rem;
+    }
+}
+
