@@ -1,12 +1,5 @@
 <script>
-	import log from '$lib/log.js';
 	export let user = null;
-	
-	// Debug: log user data to see what we're getting
-	$: if (user) {
-		log.info(`Header user data: ${JSON.stringify(user)}`);
-		log.info(`Permission type: ${typeof user.permission}, Value: ${user.permission}`);
-	}
 </script>
 
 <div class="banner">
