@@ -46,9 +46,10 @@ export const actions = {
         try {
             await db.execute('INSERT INTO User (username, password, email, permission) VALUES (?, ?, ?, ?)', [username, hashedPassword, email, 3]);
             await db.execute('INSERT INTO PrivacyControl (userId) VALUES (?)', [username]);
+            log.success(`User "${username}" registered successfully`);
             // redirect to login page
         } catch (error) {
-            console.error('Database error:', error);
+            log.error(`User "${username}" failed to register: ${error.message}`);
             return fail(500, { error: true, message: 'Internal server error' });
         }
         

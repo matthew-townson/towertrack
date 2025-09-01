@@ -195,7 +195,7 @@ async function initialiseDatabase() {
             await connection.query(`
                 CREATE TABLE IF NOT EXISTS \`Log\` (
                     \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-                    \`type\` TINYINT NOT NULL,
+                    \`type\` VARCHAR(10) NOT NULL,
                     \`timestamp\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     \`text\` TEXT NOT NULL,
                     PRIMARY KEY (\`id\`)

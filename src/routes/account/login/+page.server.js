@@ -36,7 +36,7 @@ export const actions = {
         });
 
         //debug print session information
-        log.info(`User logged in: ${result.user.username}, Session ID: ${sessionId}, Permission Level: ${result.user.permission}`);
+        log.info(`User logged in: ${result.user.username}, Permission Level: ${result.user.permission}`);
 
         throw redirect(303, '/home');
     }
