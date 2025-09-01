@@ -750,11 +750,6 @@ h1, h2, h3, h4, h5, h6 {
         transform: scale(0.95);
     }
 }
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(195,60,84,0.08);
-    transition: background 0.2s, box-shadow 0.2s;
-}
 
 .search-btn:hover,
 .search-btn:focus {
