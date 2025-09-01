@@ -152,11 +152,23 @@ export const actions = {
 
         if (removeAlias) {
             try {
+                // Get alias name before deleting
+                const [aliasRows] = await db.execute('SELECT Name FROM OtherNames WHERE id = ? AND userId = ?', [removeAlias, locals.user.id]);
+                if (aliasRows.length === 0) {
+                    return fail(400, { error: true, message: 'Alias not found or already removed', action: 'updateAlias' });
+                }
+                const aliasName = aliasRows[0].Name;
+
+                // Delete the alias
                 const result = await db.execute('DELETE FROM OtherNames WHERE id = ? AND userId = ?', [removeAlias, locals.user.id]);
                 if (result[0].affectedRows === 0) {
                     return fail(400, { error: true, message: 'Alias not found or already removed', action: 'updateAlias' });
                 }
-                return { success: true, message: 'Alias removed successfully', action: 'updateAlias' };
+
+                // Delete any saved searches with this alias name
+                await db.execute('DELETE FROM SavedSearches WHERE userId = ? AND name = ?', [locals.user.id, aliasName]);
+
+                return { success: true, message: 'Alias and associated saved searches removed successfully', action: 'updateAlias' };
             } catch (error) {
                 console.error('Database error removing alias:', error);
                 return fail(500, { error: true, message: 'Failed to remove alias', action: 'updateAlias' });
