@@ -18,10 +18,10 @@ export async function load({ locals }) {
     const [aliases] = await db.execute('SELECT id, Name FROM OtherNames WHERE userId = ?', [locals.user.id]);
 
     // Get user privacy settings
-    const [privacy] = await db.execute('SELECT profileVisibility, dataVisibility FROM PrivacyControl WHERE userId = ?', [locals.user.id]);
+    const [privacy] = await db.execute('SELECT profileVisibility, dataVisibility FROM UserSettings WHERE userId = ?', [locals.user.id]);
 
     // Get user grab settings (create default if doesn't exist)
-    const [grabSettings] = await db.execute('SELECT bellsPercent FROM GrabSettings WHERE userId = ?', [locals.user.id]);
+    const [grabSettings] = await db.execute('SELECT bellsPercent FROM UserSettings WHERE userId = ?', [locals.user.id]);
     
     return {
         user: rows[0],
@@ -101,7 +101,14 @@ export const actions = {
         }
 
         try {
-            await db.execute('UPDATE PrivacyControl SET profileVisibility = ?, dataVisibility = ? WHERE userId = ?', [profileVisibility, dataVisibility, locals.user.id]);
+            await db.execute('UPDATE UserSettings SET profileVisibility = ?, dataVisibility = ? WHERE userId = ?', [profileVisibility, dataVisibility, locals.user.id]);
+            await db.execute(`
+                INSERT INTO UserSettings (userId, profileVisibility, dataVisibility)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                profileVisibility = VALUES(profileVisibility),
+                dataVisibility = VALUES(dataVisibility)
+            `, [locals.user.id, profileVisibility, dataVisibility]);
             return { success: true, message: 'Privacy settings updated successfully', action: 'updatePrivacy' };
         } catch (error) {
             console.error('Database error:', error);
@@ -225,7 +232,7 @@ export const actions = {
         try {
             // Insert or update grab settings
             await db.execute(`
-                INSERT INTO GrabSettings (userId, bellsPercent)
+                INSERT INTO UserSettings (userId, bellsPercent)
                 VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE
                 bellsPercent = VALUES(bellsPercent)

@@ -1,6 +1,5 @@
 import { initialiseDatabase } from '$lib/db.js';
 import { getSession } from '$lib/session.js';
-import log from '$lib/log.js';
 import { startDailyImport } from '$lib/scheduler.js';
 import { initializeAdmin } from '$lib/server/setup.js';
 

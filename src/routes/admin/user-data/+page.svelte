@@ -30,6 +30,14 @@
             default: return 'unknown';
         }
     }
+    
+    function getPrivacyLabel(visibility) {
+        return visibility ? 'Public' : 'Private';
+    }
+    
+    function getPrivacyClass(visibility) {
+        return visibility ? 'verified' : 'unverified';
+    }
 </script>
 
 <svelte:head>
@@ -64,6 +72,7 @@
                         <th>Username</th>
                         <th>Email</th>
                         <th>Permission Level</th>
+                        <th>Privacy Settings</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -79,8 +88,18 @@
                                 </span>
                             </td>
                             <td>
+                                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                    <span class="permission-badge {getPrivacyClass(user.profileVisibility)}">
+                                        Profile: {getPrivacyLabel(user.profileVisibility)}
+                                    </span>
+                                    <span class="permission-badge {getPrivacyClass(user.dataVisibility)}">
+                                        Data: {getPrivacyLabel(user.dataVisibility)}
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
                                 {#if user.id === data.user.id}
-                                    <span class="self-user">Cannot modify own permissions</span>
+                                    <span class="self-user">Cannot modify own settings</span>
                                     <div class="action-buttons">
                                         <button type="button" class="expand-btn" on:click={() => toggleUserDetails(user.id)}>
                                             {expandedUser === user.id ? 'Hide Details' : 'Edit Details'}
@@ -99,6 +118,18 @@
                                             </select>
                                             <button type="submit" class="update-btn">Update</button>
                                         </form>
+                                        <form method="POST" action="?/updatePrivacySettings" use:enhance class="permission-form">
+                                            <input type="hidden" name="userId" value={user.id} />
+                                            <select name="profileVisibility" class="permission-select">
+                                                <option value="1" selected={user.profileVisibility}>Profile: Public</option>
+                                                <option value="0" selected={!user.profileVisibility}>Profile: Private</option>
+                                            </select>
+                                            <select name="dataVisibility" class="permission-select">
+                                                <option value="1" selected={user.dataVisibility}>Data: Visible</option>
+                                                <option value="0" selected={!user.dataVisibility}>Data: Hidden</option>
+                                            </select>
+                                            <button type="submit" class="update-btn">Update Privacy</button>
+                                        </form>
                                         <button type="button" class="expand-btn" on:click={() => toggleUserDetails(user.id)}>
                                             {expandedUser === user.id ? 'Hide Details' : 'Edit Details'}
                                         </button>
@@ -108,7 +139,7 @@
                         </tr>
                         {#if expandedUser === user.id}
                             <tr class="expanded-row">
-                                <td colspan="5">
+                                <td colspan="6">
                                     <div class="user-details">
                                         <h4>Edit User Details</h4>
                                         <div class="detail-forms">

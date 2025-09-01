@@ -180,8 +180,8 @@ h1, h2, h3, h4, h5, h6 {
 .map-wrapper {
     position: relative;
     width: 100%;
-    height: calc(100vh - 200px);
-    min-height: 500px;
+    height: calc(100vh - 240px); /* Account for header and footer */
+    min-height: 400px;
     overflow: hidden;
 }
 
@@ -877,8 +877,9 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .map-wrapper {
-        height: calc(100vh - 180px);
-        min-height: calc(100vh - 180px);
+        height: calc(100vh - 200px);
+        min-height: calc(100vh - 200px);
+        margin-bottom: 80px;
     }
     
     .tower-count-display {
@@ -1026,8 +1027,9 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .map-wrapper {
-        height: calc(100vh - 160px);
-        min-height: calc(100vh - 160px);
+        height: calc(100vh - 180px);
+        min-height: calc(100vh - 180px);
+        margin-bottom: 70px;
     }
     
     .floating-location-btn,
