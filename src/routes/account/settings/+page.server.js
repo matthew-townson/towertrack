@@ -1,6 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import argon2 from 'argon2';
+import log from '$lib/server/log.js';
 
 export async function load({ locals }) {
     if (!locals.user) {
@@ -70,8 +71,15 @@ export const actions = {
         }
 
         try {
+            log.info(`User ${locals.user.id} updated their email to ${email}`);
             await db.execute('UPDATE User SET email = ? WHERE id = ?', [email, locals.user.id]);
-            return { success: true, message: 'Email updated successfully', action: 'updateEmail' };
+            // Redirect to email section with feedback
+            return {
+                success: true,
+                message: 'Email updated successfully',
+                action: 'updateEmail',
+                redirect: '/account/settings?section=profile'
+            };
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: true, message: 'Internal server error', action: 'updateEmail' });
@@ -109,7 +117,13 @@ export const actions = {
                 profileVisibility = VALUES(profileVisibility),
                 dataVisibility = VALUES(dataVisibility)
             `, [locals.user.id, profileVisibility, dataVisibility]);
-            return { success: true, message: 'Privacy settings updated successfully', action: 'updatePrivacy' };
+            log.info(`User ${locals.user.id} updated their privacy settings`);
+            return {
+                success: true,
+                message: 'Privacy settings updated successfully',
+                action: 'updatePrivacy',
+                redirect: '/account/settings?section=privacy'
+            };
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: true, message: 'Internal server error', action: 'updatePrivacy' });
@@ -140,8 +154,13 @@ export const actions = {
             }
             try {
                 await db.execute('INSERT INTO OtherNames (userId, Name) VALUES (?, ?)', [locals.user.id, aliasName]);
-                console.log(`[Alias] User ${locals.user.id} (${locals.user.username}) added alias: "${aliasName}"`);
-                return { success: true, message: 'Alias added successfully', action: 'updateAlias' };
+                log.info(`User ${locals.user.id} (${locals.user.username}) added alias: "${aliasName}"`);
+                return {
+                    success: true,
+                    message: 'Alias added successfully',
+                    action: 'updateAlias',
+                    redirect: '/account/settings?section=aliases'
+                };
             } catch (error) {
                 console.error('Database error adding alias:', error);
                 return fail(500, { error: true, message: 'Failed to add alias', action: 'updateAlias' });
@@ -165,8 +184,13 @@ export const actions = {
 
                 // Delete any saved searches with this alias name
                 await db.execute('DELETE FROM SavedSearches WHERE userId = ? AND name = ?', [locals.user.id, aliasName]);
-                console.log(`[Alias] User ${locals.user.id} (${locals.user.username}) removed alias: "${aliasName}"`);
-                return { success: true, message: 'Alias and associated saved searches removed successfully', action: 'updateAlias' };
+                log.info(`User ${locals.user.id} (${locals.user.username}) removed alias: "${aliasName}"`);
+                return {
+                    success: true,
+                    message: 'Alias and associated saved searches removed successfully',
+                    action: 'updateAlias',
+                    redirect: '/account/settings?section=aliases'
+                };
             } catch (error) {
                 console.error('Database error removing alias:', error);
                 return fail(500, { error: true, message: 'Failed to remove alias', action: 'updateAlias' });
@@ -220,7 +244,13 @@ export const actions = {
         try {
             const hashedPassword = await argon2.hash(newPassword);
             await db.execute('UPDATE User SET password = ? WHERE id = ?', [hashedPassword, locals.user.id]);
-            return { success: true, message: 'Password changed successfully', action: 'changePassword' };
+            log.info(`User ${locals.user.id} (${locals.user.username}) changed their password`);
+            return {
+                success: true,
+                message: 'Password changed successfully',
+                action: 'changePassword',
+                redirect: '/account/settings?section=password'
+            };
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: true, message: 'Internal server error', action: 'changePassword' });
@@ -247,8 +277,13 @@ export const actions = {
                 ON DUPLICATE KEY UPDATE
                 bellsPercent = VALUES(bellsPercent)
             `, [locals.user.id, bellsPercent]);
-            
-            return { success: true, message: 'Grab settings updated successfully', action: 'updateGrabSettings' };
+            log.info(`User ${locals.user.id} (${locals.user.username}) updated their grab settings`);
+            return {
+                success: true,
+                message: 'Grab settings updated successfully',
+                action: 'updateGrabSettings',
+                redirect: '/account/settings?section=grabs'
+            };
         } catch (error) {
             console.error('Database error:', error);
             return fail(500, { error: true, message: 'Internal server error', action: 'updateGrabSettings' });
