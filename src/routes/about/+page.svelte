@@ -18,3 +18,5 @@
         Keep track of your ringing history and view statistics.
     </p>
 </main>
+
+<Footer />
