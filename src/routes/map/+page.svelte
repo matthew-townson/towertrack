@@ -442,8 +442,8 @@
         </div>
     {:else}
         <div class="box p-0 map-wrapper" style="height:100%; min-height:0; margin:0;">
-            <div class="map-container" style="width:100%; height:100%; position:relative;">
-                <div bind:this={mapContainer} class="map" style="width:100%; height:100%; min-height:0;"></div>
+            <div class="map-container" style="width:100%; position:relative;">
+                <div bind:this={mapContainer} class="map" style="width:100%; min-height:0;"></div>
                 
                 <div class="notification is-info tower-count-display py-2 px-3 mb-0">
                     <p>

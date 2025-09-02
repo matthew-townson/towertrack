@@ -108,48 +108,57 @@
         {/if}
 
         {#if activeSection === 'aliases'}
-            <form id="alias-form" class="settings-section" method="post" action="?/updateAlias">
-                <h2>Additional Names</h2>
-                    <div class="info">
-                        <p>Add other variations of your name as they may appear on BellBoard or other ringing records</p>
-                    </div>
-                <div class="alias-edit">
-                    <div class="alias-list">
+            <form id="alias-form" class="box" method="post" action="?/updateAlias">
+                <h2 class="title is-5 mb-4">Additional Names</h2>
+                <div class="notification is-info mb-4">
+                    Add other variations of your name as they may appear on BellBoard or other ringing records.
+                </div>
+                <div>
+                    <div>
                         <!-- Show username as non-removable item -->
-                        <div class="alias-item username-item" title="Your username is included by default in all searches">
-                            <span>{data.user?.username ?? ''} - <a href="https://bb.ringingworld.co.uk/search.php?ringer={data.user?.username ?? ''}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank">Link</a></span>
-                            <span>Username</span>
+                        <div class="box has-background-light mb-2 is-flex is-align-items-center is-justify-content-space-between">
+                            <span>
+                                <span class="has-text-weight-semibold">{data.user?.username ?? ''}</span>
+                                &nbsp;-&nbsp;
+                                <a href="https://bb.ringingworld.co.uk/search.php?ringer={data.user?.username ?? ''}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank" class="has-text-link">Link</a>
+                            </span>
+                            <span class="tag is-info is-light">Username</span>
                         </div>
-                        
                         {#if data.aliases && data.aliases.length > 0}
                             {#each data.aliases as alias}
-                                <div class="alias-item">
-                                    <span>{alias.Name} - <a href="https://bb.ringingworld.co.uk/search.php?ringer={alias.Name}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank">Link</a></span>
-                                    <button type="button" on:click={() => removeAlias(alias.id)} class="remove-btn">Remove</button>
+                                <div class="box mb-2 is-flex is-align-items-center is-justify-content-space-between">
+                                    <span>
+                                        <span class="has-text-weight-semibold">{alias.Name}</span>
+                                        &nbsp;-&nbsp;
+                                        <a href="https://bb.ringingworld.co.uk/search.php?ringer={alias.Name}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank" class="has-text-link">Link</a>
+                                    </span>
+                                    <button type="button" on:click={() => removeAlias(alias.id)} class="button is-danger is-light is-small">Remove</button>
                                 </div>
                             {/each}
                         {/if}
                     </div>
-                    
-                    <div class="add-alias">
-                        <input 
-                            type="text" 
-                            bind:value={newAlias} 
-                            placeholder="Enter name/alias" 
-                            on:keydown={(e) => e.key === 'Enter' && (e.preventDefault(), addAlias())}
-                        />
-                        <button type="button" on:click={addAlias} disabled={!newAlias.trim()}>Add</button>
+                    <div class="field is-grouped mt-4">
+                        <div class="control is-expanded">
+                            <input 
+                                type="text" 
+                                bind:value={newAlias} 
+                                placeholder="Enter name/alias" 
+                                class="input"
+                                on:keydown={(e) => e.key === 'Enter' && (e.preventDefault(), addAlias())}
+                            />
+                        </div>
+                        <div class="control">
+                            <button type="button" class="button is-primary" on:click={addAlias} disabled={!newAlias.trim()}>Add</button>
+                        </div>
                     </div>
                 </div>
                 {#if form?.action === 'updateAlias' && form?.error}
-                    <div class="error">
-                        <h3>❗Error</h3>
-                        <p>{form.message}</p>
+                    <div class="notification is-danger mt-3">
+                        <strong>Error:</strong> {form.message}
                     </div>
                 {:else if form?.action === 'updateAlias' && form?.success}
-                    <div class="success">
-                        <h3>❕Success</h3>
-                        <p>{form.message}</p>
+                    <div class="notification is-success mt-3">
+                        <strong>Success:</strong> {form.message}
                     </div>
                 {/if}
             </form>

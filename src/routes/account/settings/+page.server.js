@@ -130,19 +130,17 @@ export const actions = {
             if (!aliasName) {
                 return fail(400, { error: true, message: 'Alias name cannot be empty', action: 'updateAlias' });
             }
-            
             if (aliasName.length > 255) {
                 return fail(400, { error: true, message: 'Alias name is too long', action: 'updateAlias' });
             }
-            
             // Check if alias already exists for this user
             const [existingAlias] = await db.execute('SELECT id FROM OtherNames WHERE userId = ? AND Name = ?', [locals.user.id, aliasName]);
             if (existingAlias.length > 0) {
                 return fail(400, { error: true, message: 'This alias already exists', action: 'updateAlias' });
             }
-            
             try {
                 await db.execute('INSERT INTO OtherNames (userId, Name) VALUES (?, ?)', [locals.user.id, aliasName]);
+                console.log(`[Alias] User ${locals.user.id} (${locals.user.username}) added alias: "${aliasName}"`);
                 return { success: true, message: 'Alias added successfully', action: 'updateAlias' };
             } catch (error) {
                 console.error('Database error adding alias:', error);
@@ -167,7 +165,7 @@ export const actions = {
 
                 // Delete any saved searches with this alias name
                 await db.execute('DELETE FROM SavedSearches WHERE userId = ? AND name = ?', [locals.user.id, aliasName]);
-
+                console.log(`[Alias] User ${locals.user.id} (${locals.user.username}) removed alias: "${aliasName}"`);
                 return { success: true, message: 'Alias and associated saved searches removed successfully', action: 'updateAlias' };
             } catch (error) {
                 console.error('Database error removing alias:', error);
