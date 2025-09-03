@@ -47,7 +47,7 @@
                 <div class="form-group">
                 <div class="info">
                     <h3>ℹ️ Info</h3>
-                    <p>Add searchable names <a href="/settings">here</a></p>
+                    <p>Add searchable names <a href="/account/settings">here</a></p>
                 </div>
                     <label for="username">BellBoard name</label>
                     <select

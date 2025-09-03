@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
+import log from '$lib/server/log.js';
 import argon2 from 'argon2';
 
 export const actions = {
@@ -44,8 +45,8 @@ export const actions = {
         const hashedPassword = await argon2.hash(password);
         // insert user into database
         try {
-            await db.execute('INSERT INTO User (username, password, email, permission) VALUES (?, ?, ?, ?)', [username, hashedPassword, email, 3]);
-            await db.execute('INSERT INTO PrivacyControl (userId) VALUES (?)', [username]);
+            const [result] = await db.execute('INSERT INTO User (username, password, email, permission) VALUES (?, ?, ?, ?)', [username, hashedPassword, email, 3]);
+            await db.execute('INSERT INTO UserSettings (userId) VALUES (?)', [result.insertId]);
             log.success(`User "${username}" registered successfully`);
             // redirect to login page
         } catch (error) {

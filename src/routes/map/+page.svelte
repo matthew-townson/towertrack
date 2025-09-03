@@ -24,6 +24,26 @@
     let closestTower = null;
     let userLocation = null;
     
+    let practiceNightFilter = ''; // '' means no filter
+
+    // Extract unique practice nights (Mon-Sun) from tower.Practice, allow multiple per tower
+    const nightPattern = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/gi;
+    $: practiceNights = Array.from(
+        new Set(
+            data.towers
+                .flatMap(tower => {
+                    if (!tower.Practice || typeof tower.Practice !== 'string') return [];
+                    return [...tower.Practice.matchAll(nightPattern)].map(m => m[1]);
+                })
+        )
+    )
+    .map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())
+    .filter(Boolean)
+    .sort((a, b) => {
+        const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        return order.indexOf(a) - order.indexOf(b);
+    });
+
     function toggleSidebar() {
         sidebarOpen = !sidebarOpen;
     }
@@ -254,23 +274,30 @@
         );
     }
     
+    function matchesPracticeNight(tower) {
+        if (!practiceNightFilter) return true;
+        if (!tower.Practice || typeof tower.Practice !== 'string') return false;
+        // Match if any night in the tower.Practice matches the filter
+        return tower.Practice.match(nightPattern)?.some(n => n.toLowerCase() === practiceNightFilter.toLowerCase());
+    }
+
     function updateDisplayedTowers() {
         if (!map) return;
-        
+
         allMarkers.forEach(marker => {
             map.removeLayer(marker);
         });
         allMarkers = [];
-        
+
         const centre = map.getCenter();
-        
+
         const towersWithDistance = data.towers
             .filter(tower => tower.Lat && tower.Long)
             .filter(tower => {
                 if (!tower.Bells) return false;
                 const bellCount = parseInt(tower.Bells);
                 if (isNaN(bellCount)) return false;
-                
+
                 if (isMinimumBells) {
                     return bellCount >= bellsFilter;
                 } else {
@@ -282,6 +309,7 @@
                 if (isUnringable && !showUnringable) return false;
                 return true;
             })
+            .filter(matchesPracticeNight)
             .map(tower => {
                 const distance = centre.distanceTo([tower.Lat, tower.Long]);
                 return { ...tower, distance };
@@ -295,7 +323,7 @@
                     if (!tower.Bells) return false;
                     const bellCount = parseInt(tower.Bells);
                     if (isNaN(bellCount)) return false;
-                    
+
                     if (isMinimumBells) {
                         return bellCount >= bellsFilter;
                     } else {
@@ -307,6 +335,7 @@
                     if (isUnringable && !showUnringable) return false;
                     return true;
                 })
+                .filter(matchesPracticeNight)
                 .map(tower => {
                     const userLatLng = window.L.latLng(userLocation.lat, userLocation.lng);
                     const towerLatLng = window.L.latLng(tower.Lat, tower.Long);
@@ -348,9 +377,17 @@
 
             const popupContent = `
                 <div class="tower-popup">
-                    <h4><strong><a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" style="${isUnringable ? 'color: red;' : ''}">${isUnringable ? 'U/R' : ''} ${tower.Place}, ${tower.Dedicn || 'Unknown Dedication'}</a></strong></h4>
+                    <h4><strong>
+                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" style="${isUnringable ? 'color: red;' : ''}">
+                            ${isUnringable ? 'U/R' : ''} ${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}
+                        </a>
+                    </strong></h4>
                     <p style="${isUnringable ? 'color: red;' : ''}">${tower.County || tower.Country}</br>
-                    <strong>${tower.Bells || ''}</strong>, ${tower.Wt || ''} in ${tower.Note || ''}</p>
+                        <strong style="color:${isUnringable ? 'red' : pinSVG.match(/fill="([^"]+)"/)?.[1] || '#888'}">
+                            ${tower.Bells || ''}
+                        </strong>, ${tower.Wt || ''} in ${tower.Note || ''}
+                        ${tower.Practice ? `<br>${tower.Practice}` : ''}
+                    </p>
                 </div>
             `;
             
@@ -367,7 +404,7 @@
             if (!tower.Bells) return false;
             const bellCount = parseInt(tower.Bells);
             if (isNaN(bellCount)) return false;
-            
+
             if (isMinimumBells) {
                 return bellCount >= bellsFilter;
             } else {
@@ -378,8 +415,10 @@
             const isUnringable = tower.UR === 1 || tower.UR === '1';
             if (isUnringable && !showUnringable) return false;
             return true;
-        }).length;
-    
+        })
+        .filter(matchesPracticeNight)
+        .length;
+
     onMount(async () => {
         const L = await import('leaflet');
         window.L = L;
@@ -407,7 +446,7 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable)) {
+    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter)) {
         updateDisplayedTowers();
     }
 </script>
@@ -426,99 +465,102 @@
 
 <Header user={data.user} />
 
-<main class="map-page">
-    <h1>Tower Map</h1>
-    
+<main class="section map-page" style="padding:0; margin:0; flex:1 1 auto;">
     {#if data.error}
-        <div class="error">
-            <h3>❗Error</h3>
+        <div class="notification is-danger">
+            <h3 class="title is-5">❗Error</h3>
             <p>{data.error}</p>
         </div>
     {:else}
-        <div class="map-wrapper">
-            <div class="map-container">
-                <div bind:this={mapContainer} class="map"></div>
+        <div class="box p-0 map-wrapper" style="height:100%; min-height:0; margin:0;">
+            <div class="map-container" style="width:100%; position:relative;">
+                <div bind:this={mapContainer} class="map" style="width:100%; min-height:0;"></div>
                 
-                <div class="tower-count-display">
-                    <p><strong>Showing {currentlyDisplayed} of {filteredTowerCount} towers</strong> that match the filter (from a total of {data.towers.length} towers)</p>
+                <div class="notification is-info tower-count-display py-2 px-3 mb-0">
+                    <p>
+                        <strong>Showing {currentlyDisplayed} of {filteredTowerCount} towers</strong> that match the filter (from a total of {data.towers.length} towers)
+                    </p>
                 </div>
                 
                 {#if userLocation && closestTower}
-                    <div class="closest-tower-display">
-                        <h4>Closest Tower:</h4>
-                        <p>
-                            <strong>
-                                <a href="https://dove.cccbr.org.uk/tower/{closestTower.TowerID}" target="_blank">
-                                    {closestTower.Place}, {closestTower.Dedicn || 'Unknown Dedication'}
-                                </a>
-                            </strong>
-                        </p>
-                        <p>{closestTower.County || 'Unknown'} • <strong>{closestTower.Bells || 'Unknown'}</strong> bells</p>
-                        <p>{(closestTower.distance / 1000).toFixed(1)}km away</p>
+                    <div class="card closest-tower-display has-background-light">
+                        <div class="card-content py-2 px-3">
+                            <h4 class="title is-6 mb-2">Closest Tower:</h4>
+                            <p>
+                                <strong>
+                                    <a href="https://dove.cccbr.org.uk/tower/{closestTower.TowerID}" target="_blank" class="has-text-link">
+                                        {closestTower.Place}, {closestTower.Dedicn || 'Unknown Dedication'}
+                                    </a>
+                                </strong>
+                            </p>
+                            <p>{closestTower.County || 'Unknown'} • <strong>{closestTower.Bells || 'Unknown'}</strong> bells</p>
+                            <p>{(closestTower.distance / 1000).toFixed(1)}km away</p>
+                        </div>
                     </div>
                 {/if}
                 
                 <button 
-                    class="floating-location-btn {isTrackingLocation ? 'tracking' : ''}" 
+                    class="button is-rounded is-small floating-location-btn {isTrackingLocation ? 'tracking has-background-link has-text-white' : 'has-background-white has-text-link'}"
                     on:click={toggleLocationTracking} 
                     title={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'} 
                     aria-label={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'}
                 >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-                    </svg>
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                        </svg>
+                    </span>
                 </button>
                 
                 <button 
-                    class="floating-sidebar-btn" 
+                    class="button is-rounded is-small floating-sidebar-btn has-background-white has-text-grey"
                     on:click={toggleSidebar}
                     title="Toggle Controls"
                     aria-label="Toggle Controls"
                 >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
-                    </svg>
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+                        </svg>
+                    </span>
                 </button>
             </div>
             
-            <div class="sidebar {sidebarOpen ? 'open' : ''}">
-                <div class="sidebar-header">
-                    <h3>Tower Filter</h3>
-                    <button class="close-btn" on:click={toggleSidebar} aria-label="Close sidebar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18.3 5.71c-.39-.39-1.02-.39-1.41 0L12 10.59 7.11 5.7c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.88c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
-                        </svg>
-                    </button>
+            <aside class="sidebar {sidebarOpen ? 'open' : ''} box p-0" style="max-width: 350px;">
+                <div class="sidebar-header has-background-light py-3 px-4 is-flex is-align-items-center is-justify-content-space-between">
+                    <h3 class="title is-6 mb-0">Tower Filter</h3>
+                    <button class="delete close-btn" on:click={toggleSidebar} aria-label="Close sidebar"></button>
                 </div>
                 
-                <div class="sidebar-content">
-                    <div class="control-section">
-                        <h4>Number of Bells</h4>
-                        <label for="bellsFilter">Bells: {bellsFilter}</label>
-                        <input 
-                            type="range" 
-                            id="bellsFilter" 
-                            bind:value={bellsFilter}
-                            min="1"
-                            max="16"
-                            step="1"
-                            class="bell-slider"
-                        />
-                        <div class="slider-labels">
+                <div class="sidebar-content py-4 px-4">
+                    <div class="field mb-5">
+                        <label class="label" for="bellsFilter">Number of Bells: {bellsFilter}</label>
+                        <div class="control">
+                            <input 
+                                type="range" 
+                                id="bellsFilter" 
+                                bind:value={bellsFilter}
+                                min="1"
+                                max="16"
+                                step="1"
+                                class="slider is-fullwidth"
+                            />
+                        </div>
+                        <div class="is-flex is-justify-content-space-between is-size-7 mt-1">
                             <span>1</span>
                             <span>16</span>
                         </div>
-                        <label class="checkbox-label">
+                        <label class="checkbox mt-2">
                             <input 
                                 type="checkbox" 
                                 bind:checked={isMinimumBells}
                             />
-                            Show ≥ {bellsFilter}<br>(Otherwise exactly {bellsFilter})
+                            Show ≥ {bellsFilter}
                         </label>
                     </div>
                     
-                    <div class="control-section">
-                        <label class="checkbox-label">
+                    <div class="field mb-5">
+                        <label class="checkbox">
                             <input 
                                 type="checkbox" 
                                 bind:checked={showUnringable}
@@ -527,35 +569,53 @@
                         </label>
                     </div>
                     
-                    <div class="control-section">
-                        <h4>Display Limit</h4>
-                        <div class="inline-input-group">
-                            <label for="displayLimitInput">Number of towers to display at once:</label>
-                            <input 
-                                type="number" 
-                                id="displayLimitInput"
-                                bind:value={displayLimit}
-                                min="1"
-                                max={data.towers.length}
-                                class="inline-number-input"
-                            />
+                    <div class="field mb-5">
+                        <label class="label" for="displayLimitInput">Display Limit: {displayLimit}</label>
+                        <div class="field has-addons">
+                            <div class="control">
+                                <input 
+                                    type="number" 
+                                    id="displayLimitInput"
+                                    bind:value={displayLimit}
+                                    min="1"
+                                    max={data.towers.length}
+                                    class="input is-small"
+                                    style="width: 90px;"
+                                />
+                            </div>
+                            <div class="control is-expanded">
+                                <input 
+                                    type="range" 
+                                    id="displayLimit" 
+                                    bind:value={displayLimit}
+                                    min="10"
+                                    max={Math.min(data.towers.length)}
+                                    step="10"
+                                    class="slider is-fullwidth"
+                                />
+                            </div>
                         </div>
-                        <input 
-                            type="range" 
-                            id="displayLimit" 
-                            bind:value={displayLimit}
-                            min="10"
-                            max={Math.min(data.towers.length)}
-                            step="10"
-                            class="bell-slider"
-                        />
-                        <div class="slider-labels">
+                        <div class="is-flex is-justify-content-space-between is-size-7 mt-1">
                             <span>10</span>
                             <span>{Math.min(data.towers.length)}</span>
                         </div>
                     </div>
+                    
+                    <div class="field mb-5">
+                        <label class="label" for="practiceNightFilter">Practice Night</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="practiceNightFilter" bind:value={practiceNightFilter}>
+                                    <option value="">(Any)</option>
+                                    {#each practiceNights as night}
+                                        <option value={night}>{night}</option>
+                                    {/each}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </aside>
             
             {#if sidebarOpen}
                 <div class="sidebar-overlay" on:click={toggleSidebar} on:keydown={(e) => e.key === 'Escape' && toggleSidebar()} role="button" tabindex="0"></div>
