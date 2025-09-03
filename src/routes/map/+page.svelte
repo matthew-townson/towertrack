@@ -24,6 +24,26 @@
     let closestTower = null;
     let userLocation = null;
     
+    let practiceNightFilter = ''; // '' means no filter
+
+    // Extract unique practice nights (Mon-Sun) from tower.Practice, allow multiple per tower
+    const nightPattern = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/gi;
+    $: practiceNights = Array.from(
+        new Set(
+            data.towers
+                .flatMap(tower => {
+                    if (!tower.Practice || typeof tower.Practice !== 'string') return [];
+                    return [...tower.Practice.matchAll(nightPattern)].map(m => m[1]);
+                })
+        )
+    )
+    .map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())
+    .filter(Boolean)
+    .sort((a, b) => {
+        const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        return order.indexOf(a) - order.indexOf(b);
+    });
+
     function toggleSidebar() {
         sidebarOpen = !sidebarOpen;
     }
@@ -254,23 +274,30 @@
         );
     }
     
+    function matchesPracticeNight(tower) {
+        if (!practiceNightFilter) return true;
+        if (!tower.Practice || typeof tower.Practice !== 'string') return false;
+        // Match if any night in the tower.Practice matches the filter
+        return tower.Practice.match(nightPattern)?.some(n => n.toLowerCase() === practiceNightFilter.toLowerCase());
+    }
+
     function updateDisplayedTowers() {
         if (!map) return;
-        
+
         allMarkers.forEach(marker => {
             map.removeLayer(marker);
         });
         allMarkers = [];
-        
+
         const centre = map.getCenter();
-        
+
         const towersWithDistance = data.towers
             .filter(tower => tower.Lat && tower.Long)
             .filter(tower => {
                 if (!tower.Bells) return false;
                 const bellCount = parseInt(tower.Bells);
                 if (isNaN(bellCount)) return false;
-                
+
                 if (isMinimumBells) {
                     return bellCount >= bellsFilter;
                 } else {
@@ -282,6 +309,7 @@
                 if (isUnringable && !showUnringable) return false;
                 return true;
             })
+            .filter(matchesPracticeNight)
             .map(tower => {
                 const distance = centre.distanceTo([tower.Lat, tower.Long]);
                 return { ...tower, distance };
@@ -295,7 +323,7 @@
                     if (!tower.Bells) return false;
                     const bellCount = parseInt(tower.Bells);
                     if (isNaN(bellCount)) return false;
-                    
+
                     if (isMinimumBells) {
                         return bellCount >= bellsFilter;
                     } else {
@@ -307,6 +335,7 @@
                     if (isUnringable && !showUnringable) return false;
                     return true;
                 })
+                .filter(matchesPracticeNight)
                 .map(tower => {
                     const userLatLng = window.L.latLng(userLocation.lat, userLocation.lng);
                     const towerLatLng = window.L.latLng(tower.Lat, tower.Long);
@@ -375,7 +404,7 @@
             if (!tower.Bells) return false;
             const bellCount = parseInt(tower.Bells);
             if (isNaN(bellCount)) return false;
-            
+
             if (isMinimumBells) {
                 return bellCount >= bellsFilter;
             } else {
@@ -386,8 +415,10 @@
             const isUnringable = tower.UR === 1 || tower.UR === '1';
             if (isUnringable && !showUnringable) return false;
             return true;
-        }).length;
-    
+        })
+        .filter(matchesPracticeNight)
+        .length;
+
     onMount(async () => {
         const L = await import('leaflet');
         window.L = L;
@@ -415,7 +446,7 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable)) {
+    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter)) {
         updateDisplayedTowers();
     }
 </script>
@@ -567,6 +598,20 @@
                         <div class="is-flex is-justify-content-space-between is-size-7 mt-1">
                             <span>10</span>
                             <span>{Math.min(data.towers.length)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="field mb-5">
+                        <label class="label" for="practiceNightFilter">Practice Night</label>
+                        <div class="control">
+                            <div class="select is-fullwidth">
+                                <select id="practiceNightFilter" bind:value={practiceNightFilter}>
+                                    <option value="">(Any)</option>
+                                    {#each practiceNights as night}
+                                        <option value={night}>{night}</option>
+                                    {/each}
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
