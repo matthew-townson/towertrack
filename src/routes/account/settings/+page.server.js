@@ -22,14 +22,15 @@ export async function load({ locals }) {
     const [privacy] = await db.execute('SELECT profileVisibility, dataVisibility FROM UserSettings WHERE userId = ?', [locals.user.id]);
 
     // Get user grab settings (create default if doesn't exist)
-    const [grabSettings] = await db.execute('SELECT bellsPercent FROM UserSettings WHERE userId = ?', [locals.user.id]);
+    const [grabSettings] = await db.execute('SELECT bellsPercent, exShort FROM UserSettings WHERE userId = ?', [locals.user.id]);
     
     return {
         user: rows[0],
         aliases: aliases,
         privacy: privacy[0],
         grabSettings: grabSettings[0] || {
-            bellsPercent: 100
+            bellsPercent: 100,
+            exShort: 1
         }
     };
 }
@@ -264,6 +265,8 @@ export const actions = {
 
         const data = await request.formData();
         const bellsPercent = data.get('bellsPercent');
+        // Checkbox returns 'on' if checked, otherwise null
+        const excludeShortTouches = data.get('excludeShortTouches') === 'on' ? 1 : 0;
 
         if (isNaN(bellsPercent) || bellsPercent < 1 || bellsPercent > 100) {
             return fail(400, { error: true, message: 'Percentage must be between 1 and 100', action: 'updateGrabSettings' });
@@ -272,11 +275,12 @@ export const actions = {
         try {
             // Insert or update grab settings
             await db.execute(`
-                INSERT INTO UserSettings (userId, bellsPercent)
-                VALUES (?, ?)
+                INSERT INTO UserSettings (userId, bellsPercent, exShort)
+                VALUES (?, ?, ?)
                 ON DUPLICATE KEY UPDATE
-                bellsPercent = VALUES(bellsPercent)
-            `, [locals.user.id, bellsPercent]);
+                bellsPercent = VALUES(bellsPercent),
+                exShort = VALUES(exShort)
+            `, [locals.user.id, bellsPercent, excludeShortTouches]);
             log.info(`User ${locals.user.id} (${locals.user.username}) updated their grab settings`);
             return {
                 success: true,

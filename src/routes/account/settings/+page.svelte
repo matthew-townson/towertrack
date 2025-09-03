@@ -256,6 +256,17 @@
                                min="1" max="100" required />
                     </div>
                 </div>
+                <div class="field">
+                    <label class="checkbox has-text-light" for="excludeShortTouches">
+                        <input 
+                            type="checkbox" 
+                            id="excludeShortTouches" 
+                            name="excludeShortTouches"
+                            checked={!!data.grabSettings?.exShort}
+                        />
+                        Exclude short touches
+                    </label>
+                </div>
                 <button type="submit" class="button is-danger is-fullwidth mt-3">Update Grab Settings</button>
                 {#if form?.action === 'updateGrabSettings' && form?.error}
                     <div class="notification is-danger mt-3">

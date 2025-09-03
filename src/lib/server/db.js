@@ -58,6 +58,7 @@ async function initialiseDatabase() {
                     \`profileVisibility\` BOOLEAN NOT NULL DEFAULT 1,
                     \`dataVisibility\` BOOLEAN NOT NULL DEFAULT 1,
                     \`bellsPercent\` TINYINT NOT NULL DEFAULT 100,
+                    \`exShort\` BOOL DEFAULT 1,
                     PRIMARY KEY (\`userId\`),
                     FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
                 )
@@ -170,24 +171,6 @@ async function initialiseDatabase() {
             console.log('[ INFO ] Performance table created successfully or already exists');
         } catch (error) {
             console.error('[ ERROR ] Failed to create Performance table:', error.message);
-        }
-
-        // create saved searches
-        try {
-            await connection.query(`
-                CREATE TABLE IF NOT EXISTS \`SavedSearches\` (
-                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-                    \`userId\` INTEGER UNSIGNED NOT NULL,
-                    \`name\` VARCHAR(255) NOT NULL,
-                    \`exShort\` BOOL,
-                    \`exEighth\` BOOL,
-                    PRIMARY KEY (\`id\`),
-                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
-                )
-            `);
-            console.log(`[ INFO ] SavedSearches table created successfully or already exists`);
-        } catch (error) {
-            console.error(`[ ERROR ] Failed to create SavedSearches table: ${error.message}`);
         }
 
         // create log table
