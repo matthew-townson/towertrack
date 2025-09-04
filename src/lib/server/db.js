@@ -156,15 +156,18 @@ async function initialiseDatabase() {
                 CREATE TABLE IF NOT EXISTS \`Performance\` (
                     \`PerformanceID\` INTEGER UNSIGNED NOT NULL,
                     \`Association\` VARCHAR(255),
+                    \`TowerID\` INTEGER UNSIGNED,
                     \`Place\` VARCHAR(255),
                     \`Dedication\` VARCHAR(255),
                     \`County\` VARCHAR(255),
+                    \`TenorWeightLbs\` INTEGER UNSIGNED,
                     \`Date\` DATE,
                     \`Duration\` VARCHAR(32),
                     \`Changes\` INTEGER,
                     \`Method\` VARCHAR(255),
                     \`Ringers\` JSON,
                     \`Timestamp\` TIMESTAMP,
+                    \`Footnotes\` JSON,
                     PRIMARY KEY (\`PerformanceID\`)
                 )
             `);
