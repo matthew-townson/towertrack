@@ -1,7 +1,7 @@
 import db from '$lib/server/db.js';
 
-// ANSI color codes
-const colors = {
+// ANSI colour codes
+const colours = {
     INFO: '\x1b[36m',    // Cyan
     ERROR: '\x1b[31m',   // Red
     SUCCESS: '\x1b[32m', // Green
@@ -11,9 +11,9 @@ const colors = {
 
 async function log(type, message) {
     const timestamp = new Date().toISOString();
-    const color = colors[type] || '';
-    console.log(`${timestamp} ${color}[ ${type} ]${colors.RESET} ${message}`);
-    
+    const colour = colours[type] || '';
+    console.log(`${timestamp} ${colour}[ ${type} ]${colours.RESET} ${message}`);
+
     // Save non-debug logs to database
     if (type !== 'DEBUG') {
         try {

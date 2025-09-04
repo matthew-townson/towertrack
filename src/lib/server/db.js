@@ -192,6 +192,26 @@ async function initialiseDatabase() {
             console.error(`[ ERROR ] Failed to create Log table: ${error.message}`);
         }
         
+        // optimise all tables
+        try {
+            console.log('[ INFO ] Attempt to optimise db tables')
+            console.log('       ├ Optimising User table');
+            await connection.query(`OPTIMIZE TABLE \`User\``);
+            console.log('       ├ Optimising UserSettings table');
+            await connection.query(`OPTIMIZE TABLE \`UserSettings\``);
+            console.log('       ├ Optimising Tower table');
+            await connection.query(`OPTIMIZE TABLE \`Tower\``);
+            console.log('       ├ Optimising Bell table');
+            await connection.query(`OPTIMIZE TABLE \`Bell\``);
+            console.log('       ├ Optimising Performance table');
+            await connection.query(`OPTIMIZE TABLE \`Performance\``);
+            console.log('       └ Optimising Log table');
+            await connection.query(`OPTIMIZE TABLE \`Log\``);
+            console.log('[ SUCCESS ] Tables optimized successfully');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to optimize tables:', error.message);
+        }
+
         console.log('[ SUCCESS ] Database and tables initialisation completed');
     } catch (error) {
         console.error('[ ERROR ] Database initialisation error:', error);

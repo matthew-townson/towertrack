@@ -1,6 +1,7 @@
 import log from '$lib/server/log.js';
 import pool from '$lib/server/db.js';
 import fs from 'fs';
+import { json } from 'stream/consumers';
 
 export async function importDoveData() {
     log.info('Starting import of Dove data');
@@ -21,6 +22,10 @@ export async function importDoveData() {
 
     const towersCsv = await towers.text();
     const bellsCsv = await bells.text();
+    
+    // DEBUG: Output bells and towers
+    log.debug(towersCsv);
+    log.debug(bellsCsv);
 
     // Save csv data to files in "temp" directory
     const tempDir = 'dovedata/temp';
@@ -128,8 +133,10 @@ export async function importDoveData() {
         // Insert towers data, only import if RingType is full-circle ring
         const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
         log.info('Inserting towers data');
-        for (const tower of filteredTowersData) {
-            await pool.query('INSERT INTO Tower (`TowerID`, `RingID`, `Place`, `Place2`, `PlaceCL`, `Dedicn`, `BareDedicn`, `AltName`, `RingName`, `Region`, `County`, `Country`, `HistRegion`, `ISO3166code`, `Diocese`, `Lat`, `Long`, `Bells`, `UR`, `Semitones`, `Wt`, `Note`, `GF`, `ExtraInfo`, `WebPage`, `Affiliations`, `Postcode`, `Practice`, `LGrade`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+        const batchSize = 500;
+        for (let i = 0; i < filteredTowersData.length; i += batchSize) {
+            const batch = filteredTowersData.slice(i, i + batchSize);
+            const values = batch.map(tower => [
                 tower.TowerID ? parseInt(tower.TowerID) : null,
                 tower.RingID ? parseInt(tower.RingID) : null,
                 tower.Place || null,
@@ -160,35 +167,42 @@ export async function importDoveData() {
                 tower.Practice || null,
                 tower.LGrade || null,
             ]);
+            await pool.query('INSERT INTO Tower (`TowerID`, `RingID`, `Place`, `Place2`, `PlaceCL`, `Dedicn`, `BareDedicn`, `AltName`, `RingName`, `Region`, `County`, `Country`, `HistRegion`, `ISO3166code`, `Diocese`, `Lat`, `Long`, `Bells`, `UR`, `Semitones`, `Wt`, `Note`, `GF`, `ExtraInfo`, `WebPage`, `Affiliations`, `Postcode`, `Practice`, `LGrade`) VALUES ?', [values]);
         }
         log.success(`Inserted ${filteredTowersData.length} towers into the database`);
 
         // Insert bells data
         log.info('Inserting bells data');
-        for (const bell of bellsData) {
-            await pool.query('INSERT INTO Bell (`BellID`, `TowerID`, `RingID`, `BellRole`, `BellName`, `WeightLbs`, `WeightApprox`, `Note`, `CastDate`, `Listed`, `Founder`, `FounderUncertain`, `Canons`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-                bell['Bell ID'] ? parseInt(bell['Bell ID']) : null,
-                bell['Tower ID'] ? parseInt(bell['Tower ID']) : null,
-                bell['Ring ID'] ? parseInt(bell['Ring ID']) : null,
-                bell['Bell Role'] || null,
-                bell['Bell Name'] || null,
-                bell['Weight (lbs)'] ? parseInt(bell['Weight (lbs)']) : null,
-                bell['Weight (approx)'] === 'Y' ? true : null,
-                bell['Note'] || null,
-                bell['Cast Date'] || null,
-                bell['Listed'] === 'Y' ? true : null,
-                bell['Founder'] || null,
-                bell['Founder Uncertain'] === 'Y' ? true : null,
-                bell['Canons'] || null
+        for (let i = 0; i < bellsData.length; i += batchSize) {
+            const batch = bellsData.slice(i, i + batchSize);
+            const values = batch.map(bell => [
+            bell['Bell ID'] ? parseInt(bell['Bell ID']) : null,
+            bell['Tower ID'] ? parseInt(bell['Tower ID']) : null,
+            bell['Ring ID'] ? parseInt(bell['Ring ID']) : null,
+            bell['Bell Role'] || null,
+            bell['Bell Name'] || null,
+            bell['Weight (lbs)'] ? parseInt(bell['Weight (lbs)']) : null,
+            bell['Weight (approx)'] === 'Y' ? true : null,
+            bell['Note'] || null,
+            bell['Cast Date'] || null,
+            bell['Listed'] === 'Y' ? true : null,
+            bell['Founder'] || null,
+            bell['Founder Uncertain'] === 'Y' ? true : null,
+            bell['Canons'] || null
             ]);
+            await pool.query('INSERT INTO Bell (`BellID`, `TowerID`, `RingID`, `BellRole`, `BellName`, `WeightLbs`, `WeightApprox`, `Note`, `CastDate`, `Listed`, `Founder`, `FounderUncertain`, `Canons`) VALUES ?', [values]);
         }
         log.success(`Inserted ${bellsData.length} bells into the database`);
+
+        // Commit transaction
+        await pool.query('COMMIT');
+        log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
         
         // Copy current CSV files to archive
         fs.copyFileSync(`${tempDir}/towers.csv`, archiveTowersFile);
         fs.copyFileSync(`${tempDir}/bells.csv`, archiveBellsFile);
         log.info('Archived current CSV files');
-
+        
         // Delete temporary CSV files
         fs.unlinkSync(`${tempDir}/towers.csv`);
         fs.unlinkSync(`${tempDir}/bells.csv`);
@@ -198,11 +212,7 @@ export async function importDoveData() {
         // Save current timestamp to indicate last import time to a txt file
         const lastImportTime = new Date().toISOString();
         fs.writeFileSync(`${archiveDir}/prevImport.txt`, lastImportTime);
-
-        // Commit transaction
-        await pool.query('COMMIT');
-        log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
-        log.info(`Last import time saved: ${lastImportTime}`);
+        log.info(`Last import time saved: ${lastImportTime || ''}`);
 
     } catch (error) {
         // Rollback transaction on error
