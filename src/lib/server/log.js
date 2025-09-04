@@ -5,7 +5,8 @@ const colors = {
     INFO: '\x1b[36m',    // Cyan
     ERROR: '\x1b[31m',   // Red
     SUCCESS: '\x1b[32m', // Green
-    RESET: '\x1b[0m'     // Reset to default
+    DEBUG: '\x1b[35m',   // Magenta
+    RESET: '\x1b[0m'
 };
 
 async function log(type, message) {
@@ -13,11 +14,13 @@ async function log(type, message) {
     const color = colors[type] || '';
     console.log(`${timestamp} ${color}[ ${type} ]${colors.RESET} ${message}`);
     
-    // save to database
-    try {
-        await db.execute('INSERT INTO Log (type, text) VALUES (?, ?)', [type, message]);
-    } catch (error) {
-        console.error('Error saving log to database:', error);
+    // Save non-debug logs to database
+    if (type !== 'DEBUG') {
+        try {
+            await db.execute('INSERT INTO Log (type, text) VALUES (?, ?)', [type, message]);
+        } catch (error) {
+            console.error('Error saving log to database:', error);
+        }
     }
 }
 
@@ -33,9 +36,14 @@ function success(message) {
     log('SUCCESS', message);
 }
 
+function debug(message) {
+    log('DEBUG', message);
+}
+
 export default {
     log,
     info,
     error,
-    success
+    success,
+    debug
 };
