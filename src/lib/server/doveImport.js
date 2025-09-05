@@ -169,7 +169,7 @@ export async function importDoveData() {
             ]);
             await pool.query('INSERT INTO Tower (`TowerID`, `RingID`, `Place`, `Place2`, `PlaceCL`, `Dedicn`, `BareDedicn`, `AltName`, `RingName`, `Region`, `County`, `Country`, `HistRegion`, `ISO3166code`, `Diocese`, `Lat`, `Long`, `Bells`, `UR`, `Semitones`, `Wt`, `Note`, `GF`, `ExtraInfo`, `WebPage`, `Affiliations`, `Postcode`, `Practice`, `LGrade`) VALUES ?', [values]);
         }
-        log.success(`Inserted ${filteredTowersData.length} towers into the database`);
+        log.info(`Inserted ${filteredTowersData.length} towers into the database`);
 
         // Insert bells data
         log.info('Inserting bells data');
@@ -192,12 +192,17 @@ export async function importDoveData() {
             ]);
             await pool.query('INSERT INTO Bell (`BellID`, `TowerID`, `RingID`, `BellRole`, `BellName`, `WeightLbs`, `WeightApprox`, `Note`, `CastDate`, `Listed`, `Founder`, `FounderUncertain`, `Canons`) VALUES ?', [values]);
         }
-        log.success(`Inserted ${bellsData.length} bells into the database`);
+        log.info(`Inserted ${bellsData.length} bells into the database`);
 
         // Commit transaction
         await pool.query('COMMIT');
-        log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
-        
+        log.info(`Committing ${towersData.length} towers and ${bellsData.length} bells`);
+
+        // Optimise tables
+        log.info('Optimising Tower and Bell tables');
+        await pool.query('OPTIMIZE TABLE Tower, Bell');
+        log.info('Finished optimising tables');
+
         // Copy current CSV files to archive
         fs.copyFileSync(`${tempDir}/towers.csv`, archiveTowersFile);
         fs.copyFileSync(`${tempDir}/bells.csv`, archiveBellsFile);
@@ -213,6 +218,9 @@ export async function importDoveData() {
         const lastImportTime = new Date().toISOString();
         fs.writeFileSync(`${archiveDir}/prevImport.txt`, lastImportTime);
         log.info(`Last import time saved: ${lastImportTime || ''}`);
+
+        // Success message
+        log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
 
     } catch (error) {
         // Rollback transaction on error
