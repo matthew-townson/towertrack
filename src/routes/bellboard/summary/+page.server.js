@@ -5,10 +5,10 @@ export async function load({ locals }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
-    // ...existing code to load summary data...
+
+    // load all performances that 
     return {
         user: locals.user,
-        // ...other summary data...
     };
 }
 
