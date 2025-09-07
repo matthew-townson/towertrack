@@ -40,15 +40,6 @@ export async function importDoveData() {
         };
     }
 
-    // Save csv data to files in "temp" directory
-    const tempDir = 'dovedata/temp';
-    if (!fs.existsSync(tempDir)) {
-        fs.mkdirSync(tempDir, { recursive: true });
-    }
-    fs.writeFileSync(`${tempDir}/towers.csv`, towersCsv);
-    fs.writeFileSync(`${tempDir}/bells.csv`, bellsCsv);
-    log.info(`Saved towers.csv and bells.csv to ${tempDir}/`);
-
     // Parse CSV data with proper handling of quoted fields and commas
     const parseCSV = (csv) => {
         const lines = csv.split('\n').filter(line => line.trim());
@@ -105,34 +96,6 @@ export async function importDoveData() {
     log.info(`Parsing CSV data`);
     const towersData = parseCSV(towersCsv);
     const bellsData = parseCSV(bellsCsv);
-
-    // Compare csv data to files in archive directory, if same as fresh csvs, skip import
-    /*
-    log.info(`Comparing CSV data with archived data`);
-    const archiveDir = 'dovedata/archive';
-    if (!fs.existsSync(archiveDir)) {
-        fs.mkdirSync(archiveDir, { recursive: true });
-    }
-    const archiveTowersFile = `${archiveDir}/towers.csv`;
-    const archiveBellsFile = `${archiveDir}/bells.csv`;
-
-    if (fs.existsSync(archiveTowersFile)) {
-        const archiveTowersCsv = fs.readFileSync(archiveTowersFile, 'utf-8');
-        const archiveTowersData = parseCSV(archiveTowersCsv);
-        if (JSON.stringify(towersData) === JSON.stringify(archiveTowersData)) {
-            log.info('No changes in towers data, skipping import.');
-            // Delete temporary CSV files
-            fs.unlinkSync(`${tempDir}/towers.csv`);
-            fs.unlinkSync(`${tempDir}/bells.csv`);
-            fs.rmSync(tempDir, { recursive: true });
-            log.info('Deleted temporary CSV files');
-            return {
-                success: false,
-                message: 'No changes in towers data, skipping import.'
-            };
-        }
-    }
-    */
 
     // If different, overwrite database with new data
     log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
@@ -217,19 +180,6 @@ export async function importDoveData() {
         log.info('Optimising Tower and Bell tables');
         await pool.query('OPTIMIZE TABLE Tower, Bell');
         log.info('Finished optimising tables');
-
-        /*
-        // Copy current CSV files to archive
-        fs.copyFileSync(`${tempDir}/towers.csv`, archiveTowersFile);
-        fs.copyFileSync(`${tempDir}/bells.csv`, archiveBellsFile);
-        log.info('Archived current CSV files');
-
-        // Delete temporary CSV files
-        fs.unlinkSync(`${tempDir}/towers.csv`);
-        fs.unlinkSync(`${tempDir}/bells.csv`);
-        fs.rmSync(tempDir, { recursive: true });
-        log.info('Deleted temporary CSV files');
-        */
 
         // Save new hashes to CSVImportLog
         await pool.query('INSERT INTO CSVImportLog (filename, hash) VALUES (?, ?)', ['towers.csv', towersHash]);
