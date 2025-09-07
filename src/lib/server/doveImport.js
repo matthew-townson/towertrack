@@ -171,19 +171,19 @@ export async function importDoveData() {
             await pool.query('INSERT INTO Bell (`BellID`, `TowerID`, `RingID`, `BellRole`, `BellName`, `WeightLbs`, `WeightApprox`, `Note`, `CastDate`, `Listed`, `Founder`, `FounderUncertain`, `Canons`) VALUES ?', [values]);
         }
         log.info(`Inserted ${bellsData.length} bells into the database`);
-
-        // Commit transaction
-        await pool.query('COMMIT');
-        log.info(`Committing ${towersData.length} towers and ${bellsData.length} bells`);
-
+        
         // Optimise tables
         log.info('Optimising Tower and Bell tables');
-        await pool.query('OPTIMIZE TABLE Tower, Bell');
+        await pool.query('ANALYZE TABLE Tower, Bell');
         log.info('Finished optimising tables');
 
         // Save new hashes to CSVImportLog
         await pool.query('INSERT INTO CSVImportLog (filename, hash) VALUES (?, ?)', ['towers.csv', towersHash]);
         await pool.query('INSERT INTO CSVImportLog (filename, hash) VALUES (?, ?)', ['bells.csv', bellsHash]);
+        
+        // Commit transaction
+        await pool.query('COMMIT');
+        log.info(`Committing ${towersData.length} towers and ${bellsData.length} bells`);
 
         log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
 
