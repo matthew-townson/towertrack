@@ -7,7 +7,7 @@ import crypto from 'crypto';
 export async function importDoveData() {
     log.info('Starting import of Dove data');
 
-    // Save csv data
+    // Fetch CSVs
     log.info('Fetching towers.csv and bells.csv from Dove website');
     const towers = await fetch('https://dove.cccbr.org.uk/towers.csv');
     const bells = await fetch('https://dove.cccbr.org.uk/bells.csv');
@@ -23,6 +23,22 @@ export async function importDoveData() {
 
     const towersCsv = await towers.text();
     const bellsCsv = await bells.text();
+
+    // Hash CSV contents
+    const towersHash = crypto.createHash('sha256').update(towersCsv).digest('hex');
+    const bellsHash = crypto.createHash('sha256').update(bellsCsv).digest('hex');
+
+    // Check latest hashes in CSVImportLog
+    const [towersLog] = await pool.query('SELECT hash FROM CSVImportLog WHERE filename = ? ORDER BY timestamp DESC LIMIT 1', ['towers.csv']);
+    const [bellsLog] = await pool.query('SELECT hash FROM CSVImportLog WHERE filename = ? ORDER BY timestamp DESC LIMIT 1', ['bells.csv']);
+
+    if (towersLog.length && towersLog[0].hash === towersHash && bellsLog.length && bellsLog[0].hash === bellsHash) {
+        log.info('No changes in towers.csv or bells.csv, skipping import.');
+        return {
+            success: false,
+            message: 'No changes in towers.csv or bells.csv, skipping import.'
+        };
+    }
 
     // Save csv data to files in "temp" directory
     const tempDir = 'dovedata/temp';
@@ -91,6 +107,7 @@ export async function importDoveData() {
     const bellsData = parseCSV(bellsCsv);
 
     // Compare csv data to files in archive directory, if same as fresh csvs, skip import
+    /*
     log.info(`Comparing CSV data with archived data`);
     const archiveDir = 'dovedata/archive';
     if (!fs.existsSync(archiveDir)) {
@@ -115,18 +132,19 @@ export async function importDoveData() {
             };
         }
     }
+    */
 
     // If different, overwrite database with new data
     log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
     try {
         // Start transaction
         await pool.query('BEGIN');
-        
+
         // Clear existing data
         log.info('Clearing existing bells and towers data');
         await pool.query('DELETE FROM Bell');
         await pool.query('DELETE FROM Tower');
-        
+
         // Insert towers data, only import if RingType is full-circle ring
         const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
         log.info('Inserting towers data');
@@ -200,23 +218,23 @@ export async function importDoveData() {
         await pool.query('OPTIMIZE TABLE Tower, Bell');
         log.info('Finished optimising tables');
 
+        /*
         // Copy current CSV files to archive
         fs.copyFileSync(`${tempDir}/towers.csv`, archiveTowersFile);
         fs.copyFileSync(`${tempDir}/bells.csv`, archiveBellsFile);
         log.info('Archived current CSV files');
-        
+
         // Delete temporary CSV files
         fs.unlinkSync(`${tempDir}/towers.csv`);
         fs.unlinkSync(`${tempDir}/bells.csv`);
         fs.rmSync(tempDir, { recursive: true });
         log.info('Deleted temporary CSV files');
-        
-        // Save current timestamp to indicate last import time to a txt file
-        const lastImportTime = new Date().toISOString();
-        fs.writeFileSync(`${archiveDir}/prevImport.txt`, lastImportTime);
-        log.info(`Last import time saved: ${lastImportTime || ''}`);
+        */
 
-        // Success message
+        // Save new hashes to CSVImportLog
+        await pool.query('INSERT INTO CSVImportLog (filename, hash) VALUES (?, ?)', ['towers.csv', towersHash]);
+        await pool.query('INSERT INTO CSVImportLog (filename, hash) VALUES (?, ?)', ['bells.csv', bellsHash]);
+
         log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
 
     } catch (error) {

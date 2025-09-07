@@ -1,6 +1,7 @@
 import { importDoveData } from '$lib/server/doveImport.js';
 import log from '$lib/server/log.js';
 import fs from 'fs';
+import pool from '$lib/server/db.js';
 
 let importInterval = null;
 let isSchedulerEnabled = true; // Default enabled
@@ -42,14 +43,12 @@ export function stopDailyImport() {
 
 async function checkAndRunStartupImport() {
     try {
-        const archiveDir = 'dovedata/archive';
-        const lastImportFile = `${archiveDir}/prevImport.txt`;
-        
-        if (fs.existsSync(lastImportFile)) {
-            const lastImportTime = new Date(fs.readFileSync(lastImportFile, 'utf-8'));
+        // Get latest import time from database
+        const [rows] = await pool.query('SELECT timestamp FROM CSVImportLog ORDER BY timestamp DESC LIMIT 1');
+        if (rows.length > 0) {
+            const lastImportTime = new Date(rows[0].timestamp);
             const now = new Date();
             const hoursSinceLastImport = (now - lastImportTime) / (1000 * 60 * 60);
-            
             // If more than 24 hours since last import, run it now
             if (hoursSinceLastImport >= 24) {
                 log.info('More than 24 hours since last import, running startup import');
@@ -57,7 +56,7 @@ async function checkAndRunStartupImport() {
             }
         } else {
             // No previous import record, run first import
-            log.info('No previous import found, running initial import');
+            log.info('No previous import found in database, running initial import');
             await importDoveData();
         }
     } catch (error) {
@@ -66,17 +65,18 @@ async function checkAndRunStartupImport() {
 }
 
 export function getLastImportTime() {
-    try {
-        const archiveDir = 'dovedata/archive';
-        const lastImportFile = `${archiveDir}/prevImport.txt`;
-        
-        if (fs.existsSync(lastImportFile)) {
-            return new Date(fs.readFileSync(lastImportFile, 'utf-8'));
+    // Async version to get last import time from database
+    return (async () => {
+        try {
+            const [rows] = await pool.query('SELECT timestamp FROM CSVImportLog ORDER BY timestamp DESC LIMIT 1');
+            if (rows.length > 0) {
+                return new Date(rows[0].timestamp);
+            }
+        } catch (error) {
+            log.error(`Failed to get last import time from database: ${error.message}`);
         }
-    } catch (error) {
-        log.error(`Failed to get last import time: ${error.message}`);
-    }
-    return null;
+        return null;
+    })();
 }
 
 export function enableScheduler() {

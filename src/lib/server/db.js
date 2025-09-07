@@ -189,7 +189,23 @@ async function initialiseDatabase() {
         } catch (error) {
             console.error(`[ ERROR ] Failed to create Log table: ${error.message}`);
         }
-        
+
+        // csv import log table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`CSVImportLog\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`filename\` VARCHAR(255) NOT NULL,
+                    \`hash\` VARCHAR(64) NOT NULL,
+                    \`timestamp\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`)
+                )
+            `);
+            console.log('[ INFO ] CSVImportLog table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create CSVImportLog table:', error.message);
+        }
+
         // optimise all tables
         try {
             console.log('[ INFO ] Attempt to optimise db tables')
