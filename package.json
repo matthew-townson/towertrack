@@ -6,7 +6,10 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^2.0.0",
@@ -20,6 +23,7 @@
 		"leaflet": "^1.9.4",
 		"mysql2": "^3.14.1",
 		"node-fetch": "^3.3.2",
+		"svelte-adapter-bun": "^0.5.2",
 		"xml2js": "^0.6.2"
 	}
 }
