@@ -71,7 +71,7 @@ services:
       DB_USER: towertrack
       DB_PASSWORD: ${MYSQL_PASSWORD:-towertrackpass}
       DB_NAME: towertracker
-    command: bun --bun run dev
+    command: bun --bun run dev --host
     profiles:
       - dev
 
