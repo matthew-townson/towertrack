@@ -31,11 +31,12 @@ export async function initializeAdmin() {
 
             const hashedPassword = await hash(randomPassword);
 
-            await db.execute(
+            const [result] = await db.execute(
                 'INSERT INTO User (username, email, password, permission) VALUES (?, ?, ?, ?)',
                 [adminUsername, adminEmail, hashedPassword, 0]
             );
-            
+            await db.execute('INSERT INTO UserSettings (userId) VALUES (?)', [result.insertId]);
+
             log.success('Admin user created successfully!');
             log.info(`Username: ${adminUsername}`);
             log.info(`Password: ${randomPassword}`);
