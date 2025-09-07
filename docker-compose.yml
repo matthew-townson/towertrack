@@ -1,15 +1,45 @@
 version: '3.8'
 
 services:
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: towertracker
+      MYSQL_USER: towertrack
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-towertrackpass}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@towertrack.local}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   towertrack:
     build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - HOST=0.0.0.0
-      - PORT=3000
-      - INIT_ADMIN=true
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      INIT_ADMIN: "true"
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: towertrack
+      DB_PASSWORD: ${MYSQL_PASSWORD:-towertrackpass}
+      DB_NAME: towertracker
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"]
@@ -23,14 +53,25 @@ services:
     build:
       context: .
       target: builder
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "5173:5173"
     volumes:
       - .:/app
       - /app/node_modules
     environment:
-      - NODE_ENV=development
-      - INIT_ADMIN=true
-    command: npm run dev -- --host 0.0.0.0
+      NODE_ENV: development
+      INIT_ADMIN: "true"
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: towertrack
+      DB_PASSWORD: ${MYSQL_PASSWORD:-towertrackpass}
+      DB_NAME: towertracker
+    command: bun --bun run dev
     profiles:
       - dev
+
+volumes:
+  mysql_data:

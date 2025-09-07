@@ -1,7 +1,8 @@
+//import { json } from 'stream/consumers';
 import log from '$lib/server/log.js';
 import pool from '$lib/server/db.js';
 import fs from 'fs';
-import { json } from 'stream/consumers';
+import crypto from 'crypto';
 
 export async function importDoveData() {
     log.info('Starting import of Dove data');
@@ -22,10 +23,6 @@ export async function importDoveData() {
 
     const towersCsv = await towers.text();
     const bellsCsv = await bells.text();
-    
-    // DEBUG: Output bells and towers
-    log.debug(towersCsv);
-    log.debug(bellsCsv);
 
     // Save csv data to files in "temp" directory
     const tempDir = 'dovedata/temp';
