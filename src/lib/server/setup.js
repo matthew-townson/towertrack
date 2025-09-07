@@ -1,5 +1,6 @@
 import { hash } from 'argon2';
 import db from '$lib/server/db.js';
+import log from '$lib/server/log.js';
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 
@@ -11,14 +12,16 @@ export async function initializeAdmin() {
         );
 
         if (existingAdmin.length === 0) {
-            console.log('No admin user found. Creating admin...');
+            log.info('No admin user found. Creating admin...');
 
             // Check if user has entered their own username/email
             let adminUsername, adminEmail;
             if (!ADMIN_USERNAME || !ADMIN_EMAIL) {
+                log.info('No custom username/email, using default');
                 adminUsername = 'admin';
                 adminEmail = 'admin@towertrack.local';
             } else {
+                log.info('Custom username and email provided');
                 adminUsername = ADMIN_USERNAME;
                 adminEmail = ADMIN_EMAIL;
             }
@@ -33,10 +36,10 @@ export async function initializeAdmin() {
                 [adminUsername, adminEmail, hashedPassword, 0]
             );
             
-            console.log('Admin user created successfully!');
-            console.log(`Username: ${adminUsername}`);
-            console.log(`Password: ${randomPassword}`);
-            console.log('⚠️  Please change the default password after first login!');
+            log.success('Admin user created successfully!');
+            log.info(`Username: ${adminUsername}`);
+            log.info(`Password: ${randomPassword}`);
+            log.warn('⚠️  Please change the default password after first login!');
         }
     } catch (error) {
         console.error('Error initializing admin user:', error);

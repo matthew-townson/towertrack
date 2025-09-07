@@ -6,6 +6,7 @@ const colours = {
     ERROR: '\x1b[31m',   // Red
     SUCCESS: '\x1b[32m', // Green
     DEBUG: '\x1b[35m',   // Magenta
+    WARN: '\x1b[33m',    // Yellow
     RESET: '\x1b[0m'
 };
 
@@ -40,10 +41,15 @@ function debug(message) {
     log('DEBUG', message);
 }
 
+function warn(message) {
+    log('WARN', message);
+}
+
 export default {
     log,
     info,
     error,
     success,
-    debug
+    debug,
+    warn
 };

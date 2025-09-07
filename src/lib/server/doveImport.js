@@ -9,8 +9,8 @@ export async function importDoveData() {
 
     // Fetch CSVs
     log.info('Fetching towers.csv and bells.csv from Dove website');
-    const towers = await fetch('https://dove.cccbr.org.uk/towers.csv');
-    const bells = await fetch('https://dove.cccbr.org.uk/bells.csv');
+    const towers = await fetch('https://mtownson.com/dovedata/towers.csv');
+    const bells = await fetch('https://mtownson.com/dovedata/bells.csv');
 
     if (!towers.ok) {
         log.error(`HTTP error fetching towers.csv! status: ${towers.status}`);
