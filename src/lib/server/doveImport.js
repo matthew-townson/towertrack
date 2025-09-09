@@ -99,6 +99,8 @@ export async function importDoveData() {
 
     // If different, overwrite database with new data
     log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
+    const batchSize = 500;
+    
     try {
         // Start transaction
         await pool.query('BEGIN');
@@ -111,7 +113,6 @@ export async function importDoveData() {
         // Insert towers data, only import if RingType is full-circle ring
         const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
         log.info('Inserting towers data');
-        const batchSize = 500;
         for (let i = 0; i < filteredTowersData.length; i += batchSize) {
             const batch = filteredTowersData.slice(i, i + batchSize);
             const values = batch.map(tower => [
@@ -148,6 +149,19 @@ export async function importDoveData() {
             await pool.query('INSERT INTO Tower (`TowerID`, `RingID`, `Place`, `Place2`, `PlaceCL`, `Dedicn`, `BareDedicn`, `AltName`, `RingName`, `Region`, `County`, `Country`, `HistRegion`, `ISO3166code`, `Diocese`, `Lat`, `Long`, `Bells`, `UR`, `Semitones`, `Wt`, `Note`, `GF`, `ExtraInfo`, `WebPage`, `Affiliations`, `Postcode`, `Practice`, `LGrade`) VALUES ?', [values]);
         }
         log.info(`Inserted ${filteredTowersData.length} towers into the database`);
+
+        // commit
+        await pool.query('COMMIT');
+    } catch (error) {
+        // Rollback transaction on error
+        await pool.query('ROLLBACK');
+        log.error(`Database import failed: ${error.message}`);
+        throw error;
+    }
+
+    try {
+        // start new transaction for bells
+        await pool.query('BEGIN');
 
         // Insert bells data
         log.info('Inserting bells data');

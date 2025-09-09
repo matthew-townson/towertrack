@@ -31,7 +31,7 @@ async function initialiseDatabase() {
         // create user if does not exist
         try {
             await connection.query(`
-                CREATE TABLE IF NOT EXISTS \`User\` (
+                CREATE OR ALTER TABLE IF NOT EXISTS \`User\` (
                     \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
                     \`username\` VARCHAR(255) NOT NULL,
                     \`password\` VARCHAR(255) NOT NULL,
@@ -40,7 +40,8 @@ async function initialiseDatabase() {
                     \`otherNames\` TINYINT NOT NULL DEFAULT 0,
                     PRIMARY KEY (\`id\`),
                     UNIQUE KEY \`username\` (\`username\`),
-                    UNIQUE KEY \`email\` (\`email\`)
+                    UNIQUE KEY \`email\` (\`email\`),
+                    INDEX \`idx_username\` (\`username\`)
                 )
             `);
             console.log('[ INFO ] User table created successfully or already exists');
@@ -74,7 +75,8 @@ async function initialiseDatabase() {
                     \`userId\` INTEGER UNSIGNED NOT NULL,
                     \`Name\` VARCHAR(255) NOT NULL,
                     PRIMARY KEY (\`id\`),
-                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    INDEX \`idx_userId\` (\`userId\`)
                 )
             `);
             console.log('[ INFO ] OtherNames table created successfully or already exists');
@@ -166,12 +168,26 @@ async function initialiseDatabase() {
                     \`Ringers\` JSON,
                     \`Timestamp\` TIMESTAMP,
                     \`Footnotes\` JSON,
-                    PRIMARY KEY (\`PerformanceID\`)
+                    PRIMARY KEY (\`PerformanceID\`),
+                    FOREIGN KEY (\`TowerID\`) REFERENCES \`Tower\`(\`TowerID\`)
                 )
             `);
             console.log('[ INFO ] Performance table created successfully or already exists');
         } catch (error) {
             console.error('[ ERROR ] Failed to create Performance table:', error.message);
+        }
+
+        // create grabs table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`Grab\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                PRIMARY KEY (\`id\`)
+            )
+        `);
+            console.log('[ INFO ] Grab table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create Grab table:', error.message);
         }
 
         // create log table
@@ -219,8 +235,12 @@ async function initialiseDatabase() {
             await connection.query(`ANALYZE TABLE \`Bell\``);
             console.log('         ├ Optimising Performance table');
             await connection.query(`ANALYZE TABLE \`Performance\``);
+            console.log('         ├ Optimising Grab table');
+            await connection.query(`ANALYZE TABLE \`Grab\``);
             console.log('         └ Optimising Log table');
             await connection.query(`ANALYZE TABLE \`Log\``);
+            console.log('         └ Optimising CSVImportLog table');
+            await connection.query(`ANALYZE TABLE \`CSVImportLog\``);
             console.log('[ SUCCESS ] Tables optimized successfully');
         } catch (error) {
             console.error('[ ERROR ] Failed to optimize tables:', error.message);
