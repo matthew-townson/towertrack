@@ -378,7 +378,7 @@
             const popupContent = `
                 <div class="tower-popup">
                     <h4><strong>
-                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" style="${isUnringable ? 'color: red;' : ''}">
+                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" rel="noopener noreferrer" style="${isUnringable ? 'color: red;' : ''}">
                             ${isUnringable ? 'U/R' : ''} ${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}
                         </a>
                     </strong></h4>
