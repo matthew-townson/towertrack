@@ -97,21 +97,21 @@ export async function importDoveData() {
     const towersData = parseCSV(towersCsv);
     const bellsData = parseCSV(bellsCsv);
 
+    // Filter towers data first - only import if RingType is full-circle ring
+    const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
+
     // If different, overwrite database with new data
     log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
     const batchSize = 500;
     
     try {
         // Start transaction
-        await pool.query('BEGIN');
+        await pool.query('START TRANSACTION');
 
         // Clear existing data
         log.info('Clearing existing bells and towers data');
         await pool.query('DELETE FROM Bell');
         await pool.query('DELETE FROM Tower');
-
-        // Insert towers data, only import if RingType is full-circle ring
-        const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
         log.info('Inserting towers data');
         for (let i = 0; i < filteredTowersData.length; i += batchSize) {
             const batch = filteredTowersData.slice(i, i + batchSize);
@@ -147,23 +147,22 @@ export async function importDoveData() {
                 tower.LGrade || null,
             ]);
             await pool.query('INSERT INTO Tower (`TowerID`, `RingID`, `Place`, `Place2`, `PlaceCL`, `Dedicn`, `BareDedicn`, `AltName`, `RingName`, `Region`, `County`, `Country`, `HistRegion`, `ISO3166code`, `Diocese`, `Lat`, `Long`, `Bells`, `UR`, `Semitones`, `Wt`, `Note`, `GF`, `ExtraInfo`, `WebPage`, `Affiliations`, `Postcode`, `Practice`, `LGrade`) VALUES ?', [values]);
-        }
-        log.info(`Inserted ${filteredTowersData.length} towers into the database`);
-
+        }        
         // commit
         await pool.query('COMMIT');
+        
+        log.info(`Inserted ${filteredTowersData.length} towers into the database`);
+
     } catch (error) {
-        // Rollback transaction on error
+        // Rollback on error
         await pool.query('ROLLBACK');
         log.error(`Database import failed: ${error.message}`);
         throw error;
     }
 
     try {
-        // start new transaction for bells
-        await pool.query('BEGIN');
-
-        // Insert bells data
+        // insert bells data
+        await pool.query('START TRANSACTION');
         log.info('Inserting bells data');
         for (let i = 0; i < bellsData.length; i += batchSize) {
             const batch = bellsData.slice(i, i + batchSize);
@@ -184,8 +183,18 @@ export async function importDoveData() {
             ]);
             await pool.query('INSERT INTO Bell (`BellID`, `TowerID`, `RingID`, `BellRole`, `BellName`, `WeightLbs`, `WeightApprox`, `Note`, `CastDate`, `Listed`, `Founder`, `FounderUncertain`, `Canons`) VALUES ?', [values]);
         }
+        await pool.query('COMMIT');
         log.info(`Inserted ${bellsData.length} bells into the database`);
-        
+    } catch (error) {
+        // Rollback on error
+        await pool.query('ROLLBACK');
+        log.error(`Database import failed: ${error.message}`);
+        throw error;
+    }
+
+    try {
+        await pool.query('START TRANSACTION');
+
         // Optimise tables
         log.info('Optimising Tower and Bell tables');
         await pool.query('ANALYZE TABLE Tower, Bell');
@@ -197,9 +206,9 @@ export async function importDoveData() {
         
         // Commit transaction
         await pool.query('COMMIT');
-        log.info(`Committing ${towersData.length} towers and ${bellsData.length} bells`);
+        log.info(`Committing ${filteredTowersData.length} towers and ${bellsData.length} bells`);
 
-        log.success(`Successfully imported ${towersData.length} towers and ${bellsData.length} bells`);
+        log.success(`Successfully imported ${filteredTowersData.length} towers and ${bellsData.length} bells`);
 
     } catch (error) {
         // Rollback transaction on error
@@ -210,6 +219,6 @@ export async function importDoveData() {
     
     return {
         success: true,
-        message: `Successfully imported ${towersData.length} towers and ${bellsData.length} bells`
+        message: `Successfully imported ${filteredTowersData.length} towers and ${bellsData.length} bells`
     };
 }

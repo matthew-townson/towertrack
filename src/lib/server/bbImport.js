@@ -11,7 +11,7 @@ export async function importBBData(userId) {
     const names = [user.username, ...aliases.map(a => a.Name)];
     const exShort = !!settings?.exShort;
 
-    log.info(`Importing BellBoard data for username=${user.username}`);
+    log.info(`Importing BellBoard data for ${user.username}`);
 
     // Helper to build BellBoard search URL
     function buildUrl(name, length) {
@@ -85,7 +85,7 @@ export async function importBBData(userId) {
 
     // Helper to extract place, dedication, county, towerid, tenor from place XML
     function extractPlaceFields(placeObj) {
-        let Place = null, Dedication = null, County = null, towerID = null, tenorWeightLbs = null, tenorKey = null;
+        let Place = null, Dedication = null, County = null, towerID = null, tenorWeightLbs = null, tenorKey = null, ringID = null;
         if (placeObj) {
             towerID = placeObj.$?.['dove-tower-id'] ? parseInt(placeObj.$['dove-tower-id']) : null;
             if (placeObj['place-name']) {
@@ -108,15 +108,20 @@ export async function importBBData(userId) {
                     tenorKey = keyMatch[1];
                 }
             }
+
+            // extract RingID from ring attributes
+            if (ringObj && ringObj.$?.['dove-ring-id']) {
+                ringID = parseInt(ringObj.$['dove-ring-id']);
+            }
         }
-        return { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey };
+        return { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey, ringID };
     }
 
     // Helper to build the performance object for insertion
     function buildPerformanceObject(perf, perfId) {
         // Clean XML for place
         const placeObj = perf.place?.[0];
-        const { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey } = extractPlaceFields(placeObj);
+        const { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey, ringID } = extractPlaceFields(placeObj);
         // Extract changes and method from <title>
         const changes = perf.title?.[0]?.changes?.[0] ? parseInt(perf.title[0].changes[0]) : null;
         const method = perf.title?.[0]?.method?.[0] || null;
@@ -124,10 +129,12 @@ export async function importBBData(userId) {
         const ringers = parseRingersTag(perf.ringers?.[0]?.ringer || []);
         // Footnotes
         const footnotes = parseFootnotesTag(perf.footnote || []);
+
         return {
             performanceID: perfId ? parseInt(perfId) : null,
             association: perf.association?.[0] || null,
             towerID: towerID,
+            ringID: ringID,
             place: Place,
             dedication: Dedication,
             county: County,
@@ -159,31 +166,87 @@ export async function importBBData(userId) {
             if (perfId && perfId.startsWith('P')) perfId = perfId.slice(1);
             const perfObj = buildPerformanceObject(perf, perfId);
 
-            // Use INSERT IGNORE to skip if performance already exists
+            // If ringID missing, try to lookup a RingID for the Tower
             try {
-            await pool.query(
-                `INSERT IGNORE INTO Performance (PerformanceID, Association, TowerID, Place, Dedication, County, TenorWeightLbs, TenorKey, Date, Duration, Changes, Method, Ringers, Timestamp, Footnotes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                perfObj.performanceID,
-                perfObj.association,
-                perfObj.towerID,
-                perfObj.place,
-                perfObj.dedication,
-                perfObj.county,
-                perfObj.tenorWeightLbs,
-                perfObj.tenorKey,
-                perfObj.date,
-                perfObj.duration,
-                perfObj.changes,
-                perfObj.method,
-                JSON.stringify(perfObj.ringers),
-                perfObj.timestamp,
-                JSON.stringify(perfObj.footnotes)
-                ]
-            );
+                if (!perfObj.ringID && perfObj.towerID) {
+                    const [rows] = await pool.query('SELECT RingID FROM Tower WHERE TowerID = ? LIMIT 1', [perfObj.towerID]);
+                    if (rows.length > 0 && rows[0].RingID != null) {
+                        perfObj.ringID = rows[0].RingID;
+                        log.debug(`Filled missing ringID for performance ${perfObj.performanceID} using Tower ${perfObj.towerID} -> RingID ${perfObj.ringID}`);
+                    }
+                }
+            } catch (lookupErr) {
+                log.error(`Error looking up RingID for tower ${perfObj.towerID}: ${lookupErr.message}`);
+            }
+
+            // Verify that the Tower (TowerID, RingID) exists to satisfy foreign key
+            try {
+                if (perfObj.towerID) {
+                    let towerExists = false;
+                    if (perfObj.ringID) {
+                        const [trows] = await pool.query('SELECT 1 FROM Tower WHERE TowerID = ? AND RingID = ? LIMIT 1', [perfObj.towerID, perfObj.ringID]);
+                        towerExists = trows.length > 0;
+                    } else {
+                        const [trows] = await pool.query('SELECT 1 FROM Tower WHERE TowerID = ? LIMIT 1', [perfObj.towerID]);
+                        towerExists = trows.length > 0;
+                    }
+
+                    if (!towerExists) {
+                        log.warn(`No matching Tower record for Performance ${perfObj.performanceID}: TowerID=${perfObj.towerID} RingID=${perfObj.ringID} — clearing to avoid FK error`);
+                        perfObj.towerID = null;
+                        perfObj.ringID = null;
+                    }
+                }
+            } catch (verifyErr) {
+                log.error(`Error verifying Tower for performance ${perfObj.performanceID}: ${verifyErr.message}`);
+            }
+
+            try {
+                const [result] = await pool.query(
+                    `INSERT INTO Performance (PerformanceID, Association, TowerID, RingID, Place, Dedication, County, TenorWeightLbs, TenorKey, Date, Duration, Changes, Method, Ringers, Timestamp, Footnotes)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     ON DUPLICATE KEY UPDATE
+                        Association = VALUES(Association),
+                        TowerID = VALUES(TowerID),
+                        RingID = VALUES(RingID),
+                        Place = VALUES(Place),
+                        Dedication = VALUES(Dedication),
+                        County = VALUES(County),
+                        TenorWeightLbs = VALUES(TenorWeightLbs),
+                        TenorKey = VALUES(TenorKey),
+                        Date = VALUES(Date),
+                        Duration = VALUES(Duration),
+                        Changes = VALUES(Changes),
+                        Method = VALUES(Method),
+                        Ringers = VALUES(Ringers),
+                        Timestamp = VALUES(Timestamp),
+                        Footnotes = VALUES(Footnotes)
+                    `,
+                    [
+                        perfObj.performanceID,
+                        perfObj.association,
+                        perfObj.towerID,
+                        perfObj.ringID,
+                        perfObj.place,
+                        perfObj.dedication,
+                        perfObj.county,
+                        perfObj.tenorWeightLbs,
+                        perfObj.tenorKey,
+                        perfObj.date,
+                        perfObj.duration,
+                        perfObj.changes,
+                        perfObj.method,
+                        JSON.stringify(perfObj.ringers),
+                        perfObj.timestamp,
+                        JSON.stringify(perfObj.footnotes)
+                    ]
+                );
+
+                if (result && typeof result.affectedRows !== 'undefined') {
+                    //log.debug(`Upsert perfID ${perfObj.performanceID}: affectedRows=${result.affectedRows}, warnings=${result.warningStatus || 0}`);
+                }
             } catch (err) {
-            log.error(`DB error inserting performance ID: ${perfObj.performanceID} - ${err.message}`);
+                log.error(`DB error inserting/updating performance ID: ${perfObj.performanceID} - ${err.message}`);
             }
         }
     }

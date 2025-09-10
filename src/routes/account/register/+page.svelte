@@ -1,8 +1,37 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
+    import { onMount, onDestroy } from 'svelte';
     export let form;
     export let data;
+
+    // 1-in-10 chance surprise
+    let showSurprise = false;
+    let surpriseTimer = null;
+    function closeSurprise() {
+        showSurprise = false;
+        if (surpriseTimer) {
+            clearTimeout(surpriseTimer);
+            surpriseTimer = null;
+        }
+    }
+
+    onMount(() => {
+        if (Math.random() < 0.1) {
+            showSurprise = true;
+            surpriseTimer = setTimeout(() => {
+                showSurprise = false;
+                surpriseTimer = null;
+            }, 3000);
+        }
+    });
+
+    onDestroy(() => {
+        if (surpriseTimer) {
+            clearTimeout(surpriseTimer);
+            surpriseTimer = null;
+        }
+    });
 </script>
 
 <svelte:head>
@@ -31,6 +60,10 @@
         <button type="submit">Register</button>
         {#if form?.error}
             <p class="error">{form.message}</p>
+        {/if}
+        {#if showSurprise}
+            <br><br>
+            <a href="/pages/surprise.html"><img src="/assets/image/funny/noaccount.jpg" style="border-radius: 5px;" alt="surprise!" /></a>
         {/if}
     </form>
 </main>

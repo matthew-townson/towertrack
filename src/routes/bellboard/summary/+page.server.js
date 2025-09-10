@@ -18,26 +18,57 @@ export async function load({ locals }) {
 
     const sql = `
     WITH matched_perfs AS (
-      SELECT DISTINCT p.PerformanceID, p.Changes,
-        COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count
+      SELECT DISTINCT p.PerformanceID
       FROM Performance p
-      JOIN JSON_TABLE(
-        p.Ringers,
-        '$.ringers[*]' COLUMNS ( name VARCHAR(255) PATH '$.name' )
-      ) AS jt
-      LEFT JOIN \`User\` u ON LOWER(TRIM(u.username)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(jt.name)) COLLATE utf8mb4_unicode_ci
-      LEFT JOIN OtherNames onm ON LOWER(TRIM(onm.Name)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(jt.name)) COLLATE utf8mb4_unicode_ci
+      LEFT JOIN (
+        -- Use JSON_TABLE to extract names from JSON structure
+        SELECT p2.PerformanceID, jt.name
+        FROM Performance p2
+        JOIN JSON_TABLE(
+          p2.Ringers,
+          '$.ringers[*]' COLUMNS ( name VARCHAR(255) PATH '$.name' )
+        ) AS jt
+      ) AS extracted ON p.PerformanceID = extracted.PerformanceID
+      LEFT JOIN \`User\` u ON 
+        LOWER(TRIM(u.username)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci
+        OR LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci LIKE CONCAT(LOWER(TRIM(u.username)), ' (%') COLLATE utf8mb4_unicode_ci
+      LEFT JOIN OtherNames onm ON 
+        LOWER(TRIM(onm.Name)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci
+        OR LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci LIKE CONCAT(LOWER(TRIM(onm.Name)), ' (%') COLLATE utf8mb4_unicode_ci
       WHERE COALESCE(u.id, onm.userId) = ?
+      
+      UNION
+      
+      -- Also include performances where name is found in the Ringers JSON as a substring (fallback)
+      SELECT DISTINCT p.PerformanceID
+      FROM Performance p
+      JOIN \`User\` u ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(u.username)), '%')
+      WHERE u.id = ?
+      
+      UNION
+      
+      SELECT DISTINCT p.PerformanceID
+      FROM Performance p
+      JOIN OtherNames onm ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(onm.Name)), '%')
+      WHERE onm.userId = ?
     )
     SELECT
-      COALESCE(SUM(CASE WHEN Changes >= 5000 THEN 1 ELSE 0 END), 0) AS peal_count,
-      COALESCE(SUM(CASE WHEN Changes >= 2500 AND Changes < 5000 THEN 1 ELSE 0 END), 0) AS half_peal_count,
-      COALESCE(SUM(CASE WHEN Changes >= 1250 AND Changes < 2500 THEN 1 ELSE 0 END), 0) AS quarter_count,
-      COUNT(*) AS performance_count
-    FROM matched_perfs;
+      (SELECT COUNT(*) FROM matched_perfs mp
+       JOIN Performance p ON p.PerformanceID = mp.PerformanceID
+       WHERE p.Changes >= 5000) AS peal_count,
+       
+      (SELECT COUNT(*) FROM matched_perfs mp
+       JOIN Performance p ON p.PerformanceID = mp.PerformanceID
+       WHERE p.Changes >= 2500 AND p.Changes < 5000) AS half_peal_count,
+       
+      (SELECT COUNT(*) FROM matched_perfs mp
+       JOIN Performance p ON p.PerformanceID = mp.PerformanceID
+       WHERE p.Changes >= 1250 AND p.Changes < 2500) AS quarter_count,
+       
+      (SELECT COUNT(*) FROM matched_perfs) AS performance_count
     `;
 
-    const [rows] = await db.query(sql, [locals.user.id]);
+    const [rows] = await db.query(sql, [locals.user.id, locals.user.id, locals.user.id]);
     const stats = rows?.[0] || { peal_count: 0, half_peal_count: 0, quarter_count: 0, performance_count: 0 };
 
     // fetch the actual matched performances to print/classify
@@ -47,20 +78,48 @@ export async function load({ locals }) {
         COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
         p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
       FROM Performance p
-      JOIN JSON_TABLE(
-        p.Ringers,
-        '$.ringers[*]' COLUMNS ( name VARCHAR(255) PATH '$.name' )
-      ) AS jt
-      LEFT JOIN \`User\` u ON LOWER(TRIM(u.username)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(jt.name)) COLLATE utf8mb4_unicode_ci
-      LEFT JOIN OtherNames onm ON LOWER(TRIM(onm.Name)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(jt.name)) COLLATE utf8mb4_unicode_ci
+      LEFT JOIN (
+        -- Use JSON_TABLE to extract names from JSON structure
+        SELECT p2.PerformanceID, jt.name
+        FROM Performance p2
+        JOIN JSON_TABLE(
+          p2.Ringers,
+          '$.ringers[*]' COLUMNS ( name VARCHAR(255) PATH '$.name' )
+        ) AS jt
+      ) AS extracted ON p.PerformanceID = extracted.PerformanceID
+      LEFT JOIN \`User\` u ON 
+        LOWER(TRIM(u.username)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci
+        OR LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci LIKE CONCAT(LOWER(TRIM(u.username)), ' (%') COLLATE utf8mb4_unicode_ci
+      LEFT JOIN OtherNames onm ON 
+        LOWER(TRIM(onm.Name)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci
+        OR LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci LIKE CONCAT(LOWER(TRIM(onm.Name)), ' (%') COLLATE utf8mb4_unicode_ci
       WHERE COALESCE(u.id, onm.userId) = ?
+      
+      UNION
+      
+      -- Also include performances where name is found in the Ringers JSON as a substring (fallback)
+      SELECT DISTINCT p.PerformanceID, p.Changes,
+        COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
+        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
+      FROM Performance p
+      JOIN \`User\` u ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(u.username)), '%')
+      WHERE u.id = ?
+      
+      UNION
+      
+      SELECT DISTINCT p.PerformanceID, p.Changes,
+        COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
+        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
+      FROM Performance p
+      JOIN OtherNames onm ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(onm.Name)), '%')
+      WHERE onm.userId = ?
     )
     SELECT PerformanceID, Changes, bell_count, Date, Method, Place, Dedication, County, Ringers, Duration, Association, TenorWeightLbs, TenorKey, Footnotes
     FROM matched_perfs
     ORDER BY Date DESC, PerformanceID DESC;
     `;
 
-    const [perfRows] = await db.query(perfSql, [locals.user.id]);
+    const [perfRows] = await db.query(perfSql, [locals.user.id, locals.user.id, locals.user.id]);
     const performances = (perfRows || []).map(r => {
         let ringers = [];
         let footnotes = [];
