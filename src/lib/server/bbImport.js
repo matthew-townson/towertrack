@@ -85,7 +85,7 @@ export async function importBBData(userId) {
 
     // Helper to extract place, dedication, county, towerid, tenor from place XML
     function extractPlaceFields(placeObj) {
-        let Place = null, Dedication = null, County = null, towerID = null, tenorWeightLbs = null;
+        let Place = null, Dedication = null, County = null, towerID = null, tenorWeightLbs = null, tenorKey = null;
         if (placeObj) {
             towerID = placeObj.$?.['dove-tower-id'] ? parseInt(placeObj.$['dove-tower-id']) : null;
             if (placeObj['place-name']) {
@@ -102,16 +102,21 @@ export async function importBBData(userId) {
             if (ringObj && (ringObj.$?.tenor || ringObj.tenor)) {
                 const tenorStr = ringObj.$?.tenor || ringObj.tenor;
                 tenorWeightLbs = cwtToLbs(tenorStr);
+                
+                const keyMatch = tenorStr.match(/in\s+([A-G][b#]?)/i);
+                if (keyMatch) {
+                    tenorKey = keyMatch[1];
+                }
             }
         }
-        return { Place, Dedication, County, towerID, tenorWeightLbs };
+        return { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey };
     }
 
     // Helper to build the performance object for insertion
     function buildPerformanceObject(perf, perfId) {
         // Clean XML for place
         const placeObj = perf.place?.[0];
-        const { Place, Dedication, County, towerID, tenorWeightLbs } = extractPlaceFields(placeObj);
+        const { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey } = extractPlaceFields(placeObj);
         // Extract changes and method from <title>
         const changes = perf.title?.[0]?.changes?.[0] ? parseInt(perf.title[0].changes[0]) : null;
         const method = perf.title?.[0]?.method?.[0] || null;
@@ -127,6 +132,7 @@ export async function importBBData(userId) {
             dedication: Dedication,
             county: County,
             tenorWeightLbs: tenorWeightLbs,
+            tenorKey: tenorKey,
             date: perf.date?.[0] || null,
             duration: perf.duration?.[0] || null,
             changes: changes,
@@ -156,8 +162,8 @@ export async function importBBData(userId) {
             // Use INSERT IGNORE to skip if performance already exists
             try {
             await pool.query(
-                `INSERT IGNORE INTO Performance (PerformanceID, Association, TowerID, Place, Dedication, County, TenorWeightLbs, Date, Duration, Changes, Method, Ringers, Timestamp, Footnotes)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                `INSERT IGNORE INTO Performance (PerformanceID, Association, TowerID, Place, Dedication, County, TenorWeightLbs, TenorKey, Date, Duration, Changes, Method, Ringers, Timestamp, Footnotes)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                 perfObj.performanceID,
                 perfObj.association,
@@ -166,6 +172,7 @@ export async function importBBData(userId) {
                 perfObj.dedication,
                 perfObj.county,
                 perfObj.tenorWeightLbs,
+                perfObj.tenorKey,
                 perfObj.date,
                 perfObj.duration,
                 perfObj.changes,

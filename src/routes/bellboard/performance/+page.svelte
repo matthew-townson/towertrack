@@ -68,10 +68,9 @@
             
             <p class="date-details">
                 {formatDate(data.performance.Date)}
-                {#if data.performance.Duration} in {data.performance.Duration}{/if}
-                {#if data.performance.TenorWeightLbs || data.performance.TenorKey}
-                    ({#if data.performance.TenorWeightLbs}{lbsToHundredweight(data.performance.TenorWeightLbs)}{/if}{#if data.performance.TenorKey && data.performance.TenorWeightLbs} in {data.performance.TenorKey}{/if})
-                {/if}
+                {data.performance.Duration ? `in ${data.performance.Duration}` : ''}
+                {data.performance.TenorWeightLbs ? `(${lbsToHundredweight(data.performance.TenorWeightLbs)}` : ''}
+                {data.performance.TenorKey ? ` in ${data.performance.TenorKey})` : ''}
             </p>
             
             <p class="method-changes">
@@ -83,7 +82,7 @@
                     <div class="ringers-list">
                         {#each data.performance.ringers as ringer, index}
                             <div class="ringer-item">
-                                <span class="bell-number">{index + 1}.</span>
+                                <span class="bell-number">{index + 1}</span>
                                 <span class="ringer-name">
                                     {ringer.name}
                                     {#if ringer.conductor}
@@ -108,19 +107,22 @@
 
             <div class="external-links">
                 <h4 class="external-heading">External Sites</h4>
-                <a href="https://bb.ringingworld.co.uk/view.php?id=P{data.performance.PerformanceID}" 
-                   target="_blank" rel="noopener noreferrer" class="bellboard-link">
-                    View on BellBoard
-                </a>
-            </div>
-
-            {#if data.performance.TowerID}
-                <div class="dove-link">
-                    <a href="https://dove.cccbr.org.uk/tower/{data.performance.TowerID}" target="_blank" rel="noopener noreferrer">
-                        View on Dove (Tower {data.performance.TowerID})
+                <div class="external-link">
+                    <a href="https://bb.ringingworld.co.uk/view.php?id=P{data.performance.PerformanceID}" 
+                       target="_blank" rel="noopener noreferrer">
+                        View on BellBoard
                     </a>
                 </div>
-            {/if}
+
+                {#if data.performance.TowerID}
+                    <div class="external-link">
+                        <a href="https://dove.cccbr.org.uk/tower/{data.performance.TowerID}" target="_blank" rel="noopener noreferrer">
+                            View on Dove ({data.performance.Place ? `${data.performance.Place}, ` : ''}{data.performance.Dedication ? `${data.performance.Dedication}` : ''})
+                        </a>
+                    </div>
+                {/if}
+            </div>
+
         </div>
     </div>
 </main>
@@ -247,12 +249,6 @@
         font-weight: normal;
     }
 
-    .conductor-badge {
-        color: #c33c54;
-        font-weight: 500;
-        font-size: 0.85rem;
-    }
-
     .footnotes-section {
         margin: 0.25rem 0;
     }
@@ -281,33 +277,18 @@
         font-weight: 600;
         margin: 0 0 0.5rem 0;
     }
-    
-    .bellboard-link {
-        background: #c33c54;
-        color: white;
-        padding: 0.5rem 1rem;
-        text-decoration: none;
-        border-radius: 4px;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        display: inline-block;
-    }
-    
-    .bellboard-link:hover {
-        background: #a02f44;
-        }
-    
-    .dove-link {
+
+    .external-link {
         margin-top: 0.5rem;
     }
     
-    .dove-link a {
+    .external-link a {
         color: #8ee3ef;
         text-decoration: none;
         font-size: 0.9rem;
     }
     
-    .dove-link a:hover {    
+    .external-link a:hover {    
         text-decoration: underline;
     }
     
