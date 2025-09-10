@@ -32,51 +32,32 @@ jobs:
           docker compose --profile main up --build -d
           echo "Towertrack container started"
 
-      - name: Wait for Database and Listener initialisation
-        run: |
-          echo "Waiting for database and listener to be healthy..."
-          timeout 60s bash -c '
-            until [ "$(docker inspect -f {{.State.Health.Status}} $(docker-compose ps -q mysql))" = "healthy" ]; do
-              sleep 5
-              echo "Still waiting for MySQL to be healthy..."
-            done
-          ' || exit 1
-          echo "MySQL is healthy"
-          echo "Waiting for Towertrack to be healthy..."
-          timeout 60s bash -c '
-            until [ "$(docker inspect -f {{.State.Health.Status}} $(docker-compose ps -q towertrack))" = "healthy" ]; do
-              sleep 5
-              echo "Still waiting for Towertrack to be healthy..."
-            done
-          ' || exit 1
-          echo "Towertrack is healthy"
-
       - name: Wait and check for successful initialisation
         run: |
           echo "Waiting for initialisation to complete..."
           timeout 90s bash -c '
-            until docker-compose logs towertrack | grep -q "\[ SUCCESS \] Database and tables initialisation completed"; do
+            until docker compose logs towertrack | grep -q "\[ SUCCESS \] Database and tables initialisation completed"; do
               sleep 5
               echo "Still waiting for initialisation..."
-              if ! docker-compose ps | grep -q "towertrack.*Up"; then
+              if ! docker compose ps | grep -q "towertrack.*Up"; then
                 echo "❌ Container exited before initialisation completed"
-                docker-compose logs towertrack
+                docker compose logs towertrack
                 exit 1
               fi
             done
           ' || exit 1
           
           echo "✅ Success! Found database initialisation completion message"
-          docker-compose logs towertrack | grep "\[ SUCCESS \] Database and tables initialisation completed" -A 3 -B 3
+          docker compose logs towertrack | grep "\[ SUCCESS \] Database and tables initialisation completed" -A 3 -B 3
 
       - name: Show logs on failure
         if: failure()
         run: |
           echo "==== Docker Compose Status ===="
-          docker-compose ps
+          docker compose ps
           echo "==== Container Logs ===="
-          docker-compose logs
+          docker compose logs
 
       - name: Clean up
         if: always()
-        run: docker-compose down -v
+        run: docker compose down -v
