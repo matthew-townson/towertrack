@@ -17,9 +17,19 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
+      - name: Build and start services
+        run: |
+          docker compose up -d mysql
+          echo "MySQL service started, waiting for it to be ready..."
+
+      - name: Wait for MySQL to be ready
+        run: |
+          timeout 60s bash -c 'until docker exec $(docker compose ps -q mysql) mysqladmin ping -h localhost -ptowertrackpass --silent; do echo "Waiting for MySQL..."; sleep 3; done'
+          echo "MySQL is ready"
+
       - name: Start towertrack container
         run: |
-          docker-compose --profile main up --build -d
+          docker compose --profile main up --build -d
           echo "Towertrack container started"
 
       - name: Wait for Database and Listener initialisation
