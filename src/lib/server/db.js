@@ -40,7 +40,8 @@ async function initialiseDatabase() {
                     \`otherNames\` TINYINT NOT NULL DEFAULT 0,
                     PRIMARY KEY (\`id\`),
                     UNIQUE KEY \`username\` (\`username\`),
-                    UNIQUE KEY \`email\` (\`email\`)
+                    UNIQUE KEY \`email\` (\`email\`),
+                    INDEX \`idx_username\` (\`username\`)
                 )
             `);
             console.log('[ INFO ] User table created successfully or already exists');
@@ -74,7 +75,8 @@ async function initialiseDatabase() {
                     \`userId\` INTEGER UNSIGNED NOT NULL,
                     \`Name\` VARCHAR(255) NOT NULL,
                     PRIMARY KEY (\`id\`),
-                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    INDEX \`idx_userId\` (\`userId\`)
                 )
             `);
             console.log('[ INFO ] OtherNames table created successfully or already exists');
@@ -115,7 +117,9 @@ async function initialiseDatabase() {
                     \`Postcode\` VARCHAR(20),
                     \`Practice\` VARCHAR(255),
                     \`LGrade\` VARCHAR(10),
-                    PRIMARY KEY (\`TowerID\`, \`RingID\`)
+                    PRIMARY KEY (\`TowerID\`),
+                    INDEX \`idx_ring\` (\`RingID\`),
+                    INDEX \`idx_tower_ring\` (\`TowerID\`, \`RingID\`)
                 )
             `);
             console.log('[ INFO ] Tower table created successfully or already exists');
@@ -140,7 +144,8 @@ async function initialiseDatabase() {
                     \`Founder\` VARCHAR(255),
                     \`FounderUncertain\` BOOLEAN,
                     \`Canons\` VARCHAR(50),
-                    PRIMARY KEY (\`BellID\`)
+                    PRIMARY KEY (\`BellID\`),
+                    INDEX \`idx_tower_ring\` (\`TowerID\`, \`RingID\`)
                 )
             `);
             console.log('[ INFO ] Bell table created successfully or already exists');
@@ -155,6 +160,7 @@ async function initialiseDatabase() {
                     \`PerformanceID\` INTEGER UNSIGNED NOT NULL,
                     \`Association\` VARCHAR(255),
                     \`TowerID\` INTEGER UNSIGNED,
+                    \`RingID\` INTEGER UNSIGNED,
                     \`Place\` VARCHAR(255),
                     \`Dedication\` VARCHAR(255),
                     \`County\` VARCHAR(255),
@@ -167,12 +173,60 @@ async function initialiseDatabase() {
                     \`Ringers\` JSON,
                     \`Timestamp\` TIMESTAMP,
                     \`Footnotes\` JSON,
-                    PRIMARY KEY (\`PerformanceID\`)
+                    PRIMARY KEY (\`PerformanceID\`),
+                    FOREIGN KEY (\`TowerID\`) REFERENCES \`Tower\`(\`TowerID\`),
+                    INDEX \`idx_tower_ring\` (\`TowerID\`, \`RingID\`)
                 )
             `);
             console.log('[ INFO ] Performance table created successfully or already exists');
         } catch (error) {
             console.error('[ ERROR ] Failed to create Performance table:', error.message);
+        }
+
+        // create grabs table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`Grab\` (
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`towerID\` INTEGER UNSIGNED NOT NULL,
+                    \`ringID\` INTEGER UNSIGNED NOT NULL,
+                    \`dateGrabbed\` DATE NOT NULL,
+                    \`lastUpdated\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`userId\`, \`towerID\`, \`ringID\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`towerID\`) REFERENCES \`Tower\`(\`TowerID\`) ON DELETE NO ACTION,
+                    INDEX \`idx_user_grabs\` (\`userId\`),
+                    INDEX \`idx_tower_grabs\` (\`towerID\`, \`ringID\`),
+                    INDEX \`idx_date_grabbed\` (\`dateGrabbed\`)
+                )
+            `);
+            console.log('[ INFO ] Grab table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create Grab table:', error.message);
+        }
+
+        // create grab bells table for tracking which bells were rung
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`GrabBell\` (
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`bellID\` INTEGER UNSIGNED NOT NULL,
+                    \`bellRole\` VARCHAR(50) NOT NULL,
+                    \`towerID\` INTEGER UNSIGNED NOT NULL,
+                    \`ringID\` INTEGER UNSIGNED NOT NULL,
+                    PRIMARY KEY (\`userId\`, \`bellID\`, \`towerID\`, \`ringID\`),
+                    FOREIGN KEY (\`userId\`, \`towerID\`, \`ringID\`) 
+                        REFERENCES \`Grab\`(\`userId\`, \`towerID\`, \`ringID\`) 
+                        ON DELETE NO ACTION,
+                    FOREIGN KEY (\`bellID\`)
+                        REFERENCES \`Bell\`(\`BellID\`)
+                        ON DELETE NO ACTION,
+                    INDEX \`idx_bell_role\` (\`bellRole\`)
+                )
+            `);
+            console.log('[ INFO ] GrabBell table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create GrabBell table:', error.message);
         }
 
         // create log table
@@ -220,8 +274,14 @@ async function initialiseDatabase() {
             await connection.query(`ANALYZE TABLE \`Bell\``);
             console.log('         ├ Optimising Performance table');
             await connection.query(`ANALYZE TABLE \`Performance\``);
-            console.log('         └ Optimising Log table');
+            console.log('         ├ Optimising Grab table');
+            await connection.query(`ANALYZE TABLE \`Grab\``);
+            console.log('         ├ Optimising GrabBell table');
+            await connection.query(`ANALYZE TABLE \`GrabBell\``);
+            console.log('         ├ Optimising Log table');
             await connection.query(`ANALYZE TABLE \`Log\``);
+            console.log('         └ Optimising CSVImportLog table');
+            await connection.query(`ANALYZE TABLE \`CSVImportLog\``);
             console.log('[ SUCCESS ] Tables optimized successfully');
         } catch (error) {
             console.error('[ ERROR ] Failed to optimize tables:', error.message);
