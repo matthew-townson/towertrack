@@ -183,17 +183,6 @@ export async function importDoveData() {
             ]);
             await pool.query('INSERT INTO Bell (`BellID`, `TowerID`, `RingID`, `BellRole`, `BellName`, `WeightLbs`, `WeightApprox`, `Note`, `CastDate`, `Listed`, `Founder`, `FounderUncertain`, `Canons`) VALUES ?', [values]);
         }
-        await pool.query('COMMIT');
-        log.info(`Inserted ${bellsData.length} bells into the database`);
-    } catch (error) {
-        // Rollback on error
-        await pool.query('ROLLBACK');
-        log.error(`Database import failed: ${error.message}`);
-        throw error;
-    }
-
-    try {
-        await pool.query('START TRANSACTION');
 
         // Optimise tables
         log.info('Optimising Tower and Bell tables');

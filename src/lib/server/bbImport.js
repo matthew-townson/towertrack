@@ -109,7 +109,6 @@ export async function importBBData(userId) {
                 }
             }
 
-            // extract RingID from ring attributes
             if (ringObj && ringObj.$?.['dove-ring-id']) {
                 ringID = parseInt(ringObj.$['dove-ring-id']);
             }
@@ -117,17 +116,12 @@ export async function importBBData(userId) {
         return { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey, ringID };
     }
 
-    // Helper to build the performance object for insertion
     function buildPerformanceObject(perf, perfId) {
-        // Clean XML for place
         const placeObj = perf.place?.[0];
         const { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey, ringID } = extractPlaceFields(placeObj);
-        // Extract changes and method from <title>
         const changes = perf.title?.[0]?.changes?.[0] ? parseInt(perf.title[0].changes[0]) : null;
         const method = perf.title?.[0]?.method?.[0] || null;
-        // Ringers
         const ringers = parseRingersTag(perf.ringers?.[0]?.ringer || []);
-        // Footnotes
         const footnotes = parseFootnotesTag(perf.footnote || []);
 
         return {
@@ -150,7 +144,6 @@ export async function importBBData(userId) {
         };
     }
 
-    // Fetch and process performances for each name and length
     async function fetchAndInsert(name, length, filterChanges = false) {
         const url = buildUrl(name, length);
         const res = await fetch(url);
@@ -166,7 +159,6 @@ export async function importBBData(userId) {
             if (perfId && perfId.startsWith('P')) perfId = perfId.slice(1);
             const perfObj = buildPerformanceObject(perf, perfId);
 
-            // If ringID missing, try to lookup a RingID for the Tower
             try {
                 if (!perfObj.ringID && perfObj.towerID) {
                     const [rows] = await pool.query('SELECT RingID FROM Tower WHERE TowerID = ? LIMIT 1', [perfObj.towerID]);
@@ -179,7 +171,6 @@ export async function importBBData(userId) {
                 log.error(`Error looking up RingID for tower ${perfObj.towerID}: ${lookupErr.message}`);
             }
 
-            // Verify that the Tower (TowerID, RingID) exists to satisfy foreign key
             try {
                 if (perfObj.towerID) {
                     let towerExists = false;

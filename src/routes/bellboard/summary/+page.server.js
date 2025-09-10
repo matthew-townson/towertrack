@@ -31,10 +31,10 @@ export async function load({ locals }) {
       ) AS extracted ON p.PerformanceID = extracted.PerformanceID
       LEFT JOIN \`User\` u ON 
         LOWER(TRIM(u.username)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci
-        OR LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci LIKE CONCAT(LOWER(TRIM(u.username)), ' (%') COLLATE utf8mb4_unicode_ci
+        OR LOWER(TRIM(u.username)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(SUBSTRING_INDEX(extracted.name, ' (', 1))) COLLATE utf8mb4_unicode_ci
       LEFT JOIN OtherNames onm ON 
         LOWER(TRIM(onm.Name)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci
-        OR LOWER(TRIM(extracted.name)) COLLATE utf8mb4_unicode_ci LIKE CONCAT(LOWER(TRIM(onm.Name)), ' (%') COLLATE utf8mb4_unicode_ci
+        OR LOWER(TRIM(onm.Name)) COLLATE utf8mb4_unicode_ci = LOWER(TRIM(SUBSTRING_INDEX(extracted.name, ' (', 1))) COLLATE utf8mb4_unicode_ci
       WHERE COALESCE(u.id, onm.userId) = ?
       
       UNION
