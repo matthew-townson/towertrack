@@ -488,7 +488,7 @@
                             <h4 class="title is-6 mb-2">Closest Tower:</h4>
                             <p>
                                 <strong>
-                                    <a href="https://dove.cccbr.org.uk/tower/{closestTower.TowerID}" target="_blank" class="has-text-link">
+                                    <a href="https://dove.cccbr.org.uk/tower/{closestTower.TowerID}" target="_blank" rel="noopener noreferrer" class="has-text-link">
                                         {closestTower.Place}, {closestTower.Dedicn || 'Unknown Dedication'}
                                     </a>
                                 </strong>
