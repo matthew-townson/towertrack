@@ -24,7 +24,7 @@
 	<br><br>
 	<h2>BellBoard functions</h2>
 	<ul>
-		<li>TODO See summary of performances - <a href="/bellboard/summary" class="button">BellBoard Summary</a></li>
+		<li>See summary of performances - <a href="/bellboard/summary" class="button">BellBoard Summary</a></li>
 		<li>Import performances from BellBoard - <a href="/bellboard/searches" class="button">Add a BellBoard search</a><br><i>(Where applicable, auto-adds to grabbed towers)</i></li>
 	</ul>
 </main>

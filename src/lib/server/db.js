@@ -159,6 +159,7 @@ async function initialiseDatabase() {
                     \`Dedication\` VARCHAR(255),
                     \`County\` VARCHAR(255),
                     \`TenorWeightLbs\` INTEGER UNSIGNED,
+                    \`TenorKey\` VARCHAR(5),
                     \`Date\` DATE,
                     \`Duration\` VARCHAR(32),
                     \`Changes\` INTEGER,

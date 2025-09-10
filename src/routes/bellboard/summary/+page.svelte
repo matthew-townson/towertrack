@@ -5,6 +5,28 @@
     export let data;
     export let form;
     let loading = false;
+    let showNotification = false;
+
+    // show notification when form result arrives
+    $: if (form?.success || form?.error) showNotification = true;
+
+    // Client-side classification function to match server logic
+    function classifyChanges(changes, bell_count) {
+        if (changes >= 5000) return 'peal';
+        if (changes >= 2500 && changes < 5000) return 'half-peal';
+        if (changes >= 1250 && changes < 2500) return 'quarter';
+        return 'performance';
+    }
+
+    // Convert lbs to hundredweight format
+    function lbsToHundredweight(lbs) {
+        if (!lbs) return '';
+        const cwt = Math.floor(lbs / 112);
+        const remaining = lbs % 112;
+        const qtr = Math.floor(remaining / 28);
+        const finalLbs = remaining % 28;
+        return `${cwt}-${qtr}-${finalLbs}`;
+    }
 </script>
 
 <svelte:head>
@@ -16,21 +38,197 @@
 <main>
     <h1>BellBoard Summary for {data.user.username}</h1>
 
-    <form method="POST" action="?/importBBData" use:enhance={() => {
-        loading = true;
-        return async ({ result }) => {
-            loading = false;
-        };
-    }}>
-        <button type="submit" disabled={loading}>
-            {loading ? 'Updating...' : 'Update'}
-        </button>
-    </form>
-    <!-- ...existing summary display code... -->
-    {#if form?.success}
-        <div class="notification is-success">{form.message}</div>
+    <!-- Stats summary -->
+    {#if data?.stats}
+        <section class="box">
+            <p><strong>Peals:</strong> {data.stats.peal_count}</p>
+            <p><strong>Half peals:</strong> {data.stats.half_peal_count}</p>
+            <p><strong>Quarter peals:</strong> {data.stats.quarter_count}</p>
+            <p><strong>Total Performances:</strong> {data.stats.performance_count}</p>
+            <form method="POST" action="?/importBBData" use:enhance={() => {
+                loading = true;
+                return async ({ result, update }) => {
+                    loading = false;
+                    if (result.type === 'success') {
+                        await update();
+                    }
+                };
+            }}>
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Updating...' : 'Update performances'}
+                </button>
+            </form>
+            {#if form?.success && showNotification}
+                <div class="notification is-success">
+                    <button class="notification-close" aria-label="Close" on:click={() => showNotification = false}>×</button>
+                    {form.message}
+                </div>
+            {/if}
+            {#if form?.error && showNotification}
+                <div class="notification is-danger">
+                    <button class="notification-close" aria-label="Close" on:click={() => showNotification = false}>×</button>
+                    {form.message}
+                </div>
+            {/if}
+        </section>
     {/if}
-    {#if form?.error}
-        <div class="notification is-danger">{form.message}</div>
+
+    <!-- Print performances -->
+    <h2>Your Performances</h2>
+    {#if data?.performances?.length > 0}
+        <div class="performances-container">
+            {#each data.performances as perf}
+                <div class="performance-card">
+                    <div class="performance-content">
+                        <div class="performance-main">
+                            <p class="performance-title">
+                                {perf.Changes || 'N/A'} {perf.Method || ''}
+                            </p>
+                            <p class="performance-date">
+                                {perf.Date ? new Date(perf.Date).toLocaleDateString() : 'N/A'}{perf.Duration ? ` in ${perf.Duration}` : ''}
+                            </p>
+                            
+                            <div class="performance-details">
+                                <p>{perf.Association || ''}</p>
+
+                                <p>
+                                    {perf.Place ? `${perf.Place}` : ''}{perf.Dedication ? `, ${perf.Dedication}` : ''}{perf.County ? `, ${perf.County}` : ''}{perf.TenorWeightLbs ? ` (${lbsToHundredweight(perf.TenorWeightLbs)}` : ''}{perf.TenorKey && perf.TenorWeightLbs ? ` in ${perf.TenorKey})` : ''}
+                                </p>
+                                
+                                {#if perf.ringers && perf.ringers.length > 0}
+                                    <div class="footnotes-list">
+                                        {#each perf.ringers as ringer, index}
+                                            <span class="footnote-item">{ringer.name}{#if ringer.conductor} (C){/if}{#if index < perf.ringers.length - 1}, {/if}</span>
+                                        {/each}
+                                    </div>
+                                {/if}
+                                
+                                {#if perf.footnotes && perf.footnotes.length > 0}
+                                    <div class="footnotes-list">
+                                        {#each perf.footnotes as footnote}
+                                            <div class="footnote-item">{footnote}</div>
+                                        {/each}
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                        
+                        {#if perf.PerformanceID}
+                            <div class="performance-link">
+                                <a href="/bellboard/performance?id={perf.PerformanceID}">View Details</a>
+                                <br>
+                                <a href={`https://bb.ringingworld.co.uk/view.php?id=P${perf.PerformanceID}`} target="_blank" rel="noopener noreferrer">View on BellBoard</a>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            {/each}
+        </div>
+    {:else}
+        <p>No performances found.</p>
     {/if}
 </main>
+
+<Footer />
+
+<style>
+    .performances-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .performance-card {
+        background: #23262b;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: none;
+    }
+
+    .performance-content {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .performance-main {
+        flex: 1;
+        text-align: left;
+    }
+
+    .performance-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f3f4f6;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .performance-date {
+        font-size: 0.9rem;
+        color: #8ee3ef;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .performance-details {
+        color: #f3f4f6;
+    }
+
+    .performance-details p {
+        margin: 0.25rem 0;
+        line-height: 1.4;
+        font-weight: normal;
+    }
+
+    .footnotes-list {
+        margin-top: 0.25rem;
+    }
+
+    .footnote-item {
+        margin: 0.125rem 0;
+        padding-left: 0;
+        color: #f3f4f6;
+        font-weight: normal;
+        font-size: 0.85rem;
+        font-style: italic;
+    }
+
+    .performance-link {
+        flex-shrink: 0;
+        align-self: flex-start;
+    }
+
+    .performance-link a {
+        color: #8ee3ef;
+        text-decoration: none;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    .performance-link a:hover {
+        text-decoration: underline;
+    }
+
+    .notification-close {
+        float: right;
+        background: transparent;
+        border: none;
+        color: #ffffff;
+        font-size: 1.1rem;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+        .performance-content {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .performance-link {
+            align-self: flex-end;
+        }
+    }
+</style>
