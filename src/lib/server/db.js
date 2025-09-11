@@ -1,4 +1,5 @@
 import mysql from 'mysql2/promise';
+import { building } from '$app/environment';
 const DB_HOST = process.env.DB_HOST;
 const DB_PORT = process.env.DB_PORT;
 const DB_USER = process.env.DB_USER;
@@ -18,6 +19,12 @@ const connectionConfig = {
 
 // init db
 async function initialiseDatabase() {
+    // skip initialisation during build
+    if (building) {
+        console.log('[ INFO ] Skipping database initialisation during build');
+        return;
+    }
+
     // debug: print connection config
     console.log('[ INFO ] Initialising database');
     const connection = await mysql.createConnection(connectionConfig);
