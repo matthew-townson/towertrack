@@ -1,4 +1,6 @@
 name: Docker initialisation Test
+permissions:
+  contents: read
 
 on:
   push:
