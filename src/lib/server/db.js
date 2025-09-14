@@ -208,14 +208,16 @@ async function initialiseDatabase() {
                     \`userId\` INTEGER UNSIGNED NOT NULL,
                     \`towerID\` INTEGER UNSIGNED NOT NULL,
                     \`ringID\` INTEGER UNSIGNED NOT NULL,
-                    \`dateGrabbed\` DATE NOT NULL,
+                    \`dateGrabbed\` TINYINT,
+                    \`monthGrabbed\` TINYINT,
+                    \`yearGrabbed\` YEAR,
                     \`lastUpdated\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (\`userId\`, \`towerID\`, \`ringID\`),
                     FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
                     FOREIGN KEY (\`towerID\`, \`ringID\`) REFERENCES \`Tower\`(\`TowerID\`, \`RingID\`) ON DELETE NO ACTION,
                     INDEX \`idx_user_grabs\` (\`userId\`),
                     INDEX \`idx_tower_grabs\` (\`towerID\`, \`ringID\`),
-                    INDEX \`idx_date_grabbed\` (\`dateGrabbed\`)
+                    INDEX \`idx_date_grabbed\` (\`yearGrabbed\`, \`monthGrabbed\`, \`dateGrabbed\`)
                 )
             `);
             console.log('[ INFO ] Grab table created successfully or already exists');

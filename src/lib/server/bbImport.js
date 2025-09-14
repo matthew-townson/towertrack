@@ -171,6 +171,7 @@ export async function importBBData(userId) {
                 log.error(`Error looking up RingID for tower ${perfObj.towerID}: ${lookupErr.message}`);
             }
 
+            // TODO: for old rings, still match towerid, but ringID null?
             try {
                 if (perfObj.towerID) {
                     let towerExists = false;
