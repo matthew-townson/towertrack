@@ -50,12 +50,12 @@ export const actions = {
         const hashedPassword = await argon2.hash(password);
         // insert user into database
         try {
-            const [result] = await db.execute('INSERT INTO User (username, password, email, permission) VALUES (?, ?, ?, ?)', [trimmedUsername, hashedPassword, trimmedEmail, 3]);
+            const [result] = await db.execute('INSERT INTO User (username, password, email, permission) VALUES (?, ?, ?, ?)', [tUsername, hashedPassword, tEmail, 3]);
             await db.execute('INSERT INTO UserSettings (userId) VALUES (?)', [result.insertId]);
-            log.success(`User "${trimmedUsername}" registered successfully`);
+            log.success(`User "${tUsername}" registered successfully`);
             // redirect to login page
         } catch (error) {
-            log.error(`User "${trimmedUsername}" failed to register: ${error.message}`);
+            log.error(`User "${tUsername}" failed to register: ${error.message}`);
             return fail(500, { error: true, message: 'Internal server error' });
         }
         
