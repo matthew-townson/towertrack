@@ -12,21 +12,69 @@
 
 <main>
 	<h1>Welcome back {data.user.username}!</h1>
-	<br>
-	<h2>Tower grabbing</h2>
-	<ul>
-		<li>TODO Add new grabbed towers - <a href="/towers/new" class="button">Add Tower</a></li>
-		<li>TODO View your grabbed towers - <a href="/towers" class="button">View Towers</a></li>
-		<li>TODO View your grabbed towers on a map - <a href="/towers/map" class="button">View Map</a></li>
-		<li>TODO View your grabbed towers on a calendar - <a href="/towers/calendar" class="button">View Calendar</a></li>
-		<li>TODO View your grabbed towers on a timeline - <a href="/towers/timeline" class="button">View Timeline</a></li>
-	</ul>
-	<br><br>
-	<h2>BellBoard functions</h2>
-	<ul>
-		<li>See summary of performances - <a href="/bellboard/summary" class="button">BellBoard Summary</a></li>
-		<li>Import performances from BellBoard - <a href="/bellboard/searches" class="button">Add a BellBoard search</a><br><i>(Where applicable, auto-adds to grabbed towers)</i></li>
-	</ul>
+	
+	<div class="dashboard-container">
+	    <div class="dashboard-section">
+	        <h2>Tower grabbing</h2>
+            <p class="section-description">Track the towers you've rung at and the bells you've grabbed.</p>
+	        
+	        <div class="stat-summary">
+	            <div class="stat-card">
+	                <div class="stat-number">{data.grabCount}</div>
+	                <div class="stat-label">Total Grabs</div>
+	            </div>
+	        </div>
+	        
+	        <div class="feature-links">
+		        <a href="/grab/add" class="feature-card">
+		            <span class="feature-icon">+</span>
+		            <div class="feature-text">
+		                <h3>Add a New Grab</h3>
+		                <p>Record a new tower you've rung at</p>
+		            </div>
+		        </a>
+		        
+		        <a href="/grab" class="feature-card">
+		            <span class="feature-icon">📋</span>
+		            <div class="feature-text">
+		                <h3>See All Grabs</h3>
+		                <p>View and manage your tower grab collection</p>
+		            </div>
+		        </a>
+		        
+		        <a href="/map" class="feature-card">
+		            <span class="feature-icon">🗺️</span>
+		            <div class="feature-text">
+		                <h3>View on Map</h3>
+		                <p>See your grabbed towers on an interactive map</p>
+		            </div>
+		        </a>
+		    </div>
+	    </div>
+	    
+	    <div class="dashboard-section">
+	        <h2>BellBoard data</h2>
+            <p class="section-description">Connect with BellBoard to import your performances.</p>
+	        
+	        <div class="feature-links">
+		        <a href="/bellboard/summary" class="feature-card">
+		            <span class="feature-icon">📊</span>
+		            <div class="feature-text">
+		                <h3>BellBoard Summary</h3>
+		                <p>View a summary of your performances</p>
+		            </div>
+		        </a>
+		        
+		        <a href="/account/settings?/updateAlias" class="feature-card">
+		            <span class="feature-icon">🔄</span>
+		            <div class="feature-text">
+		                <h3>Import from BellBoard</h3>
+		                <p>Set up automatic imports from BellBoard</p>
+		            </div>
+		        </a>
+		    </div>
+	    </div>
+	</div>
 </main>
 
 <Footer />
