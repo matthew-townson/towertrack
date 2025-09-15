@@ -184,11 +184,11 @@ export const actions = {
                 }
 
                 // Delete any saved searches with this alias name
-                await db.execute('DELETE FROM SavedSearches WHERE userId = ? AND name = ?', [locals.user.id, aliasName]);
+                await db.execute('DELETE FROM OtherNames WHERE userId = ? AND Name = ?', [locals.user.id, aliasName]);
                 log.info(`User ${locals.user.id} (${locals.user.username}) removed alias: "${aliasName}"`);
                 return {
                     success: true,
-                    message: 'Alias and associated saved searches removed successfully',
+                    message: 'Alias removed successfully',
                     action: 'updateAlias',
                     redirect: '/account/settings?section=aliases'
                 };
