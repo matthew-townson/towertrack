@@ -28,6 +28,8 @@ This by default runs the app on port `3000` and the database on port `3306`
 docker-compose --profile dev up --build
 ```
 
+This runs the app on port `5173` and will reload whenever changes are made to files
+
 ## Setup
 
 When running for the first time, an admin user is created with a random 8 alphanumeric password.  

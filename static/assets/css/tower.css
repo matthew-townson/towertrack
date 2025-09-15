@@ -1,0 +1,268 @@
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.tower-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.tower-title h1 {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+    color: #8ee3ef;
+}
+
+.tower-location {
+    color: #a1a1aa;
+    font-size: 1.1rem;
+}
+
+.tower-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.action-button {
+    background-color: #c33c54;
+    color: white;
+}
+
+.dove-button {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.map-button {
+    background-color: #10b981;
+    color: white;
+}
+
+.button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s, transform 0.1s;
+    border: none;
+    cursor: pointer;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.tower-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.tower-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.details-card, .bells-card, .grab-card, .performances-card {
+    background: #2d3139;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: none;
+}
+
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #8ee3ef;
+    border-bottom: 1px solid #3b3f45;
+    padding-bottom: 0.5rem;
+}
+
+.detail-item {
+    display: flex;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.detail-label {
+    font-weight: 600;
+    min-width: 130px;
+    color: #f3f4f6;
+}
+
+.detail-value {
+    color: #d1d5db;
+}
+
+.detail-value a {
+    color: #8ee3ef;
+    text-decoration: none;
+}
+
+.detail-value a:hover {
+    text-decoration: underline;
+}
+
+.unringable {
+    color: #ef4444;
+}
+
+.bells-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bells-list th, .bells-list td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #3b3f45;
+}
+
+.bells-list th {
+    font-weight: 600;
+    color: #f3f4f6;
+}
+
+.bells-list td {
+    color: #d1d5db;
+}
+
+.bell-grabbed {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.bell-name {
+    font-style: italic;
+    margin-left: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.uncertain {
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.user-grab-details {
+    margin-bottom: 1rem;
+}
+
+.grab-actions {
+    margin-top: 1rem;
+}
+
+.edit-grab-button {
+    background-color: #8ee3ef;
+    color: #14161a;
+}
+
+.performances-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.performance-item {
+    background: #23262b;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.performance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.performance-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f3f4f6;
+    margin: 0;
+}
+
+.performance-date {
+    color: #a1a1aa;
+    font-size: 0.9rem;
+}
+
+.ringers-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.ringer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ringer-position {
+    color: #8ee3ef;
+    font-weight: 600;
+    min-width: 1.5rem;
+    text-align: right;
+}
+
+.ringer-name {
+    color: #d1d5db;
+}
+
+.conductor-badge {
+    background-color: #a02f44;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+}
+
+.performance-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.view-link {
+    color: #8ee3ef;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.view-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .tower-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .tower-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .ringers-list {
+        grid-template-columns: 1fr;
+    }
+}

@@ -46,7 +46,7 @@
             
             <p class="location">
                 {#if data.performance.TowerID}
-                    <a href="https://dove.cccbr.org.uk/tower/{data.performance.TowerID}" target="_blank" rel="noopener noreferrer" class="location-link">
+                    <a href="/tower/{data.performance.TowerID}">
                         {data.performance.Place || ''}{#if data.performance.County}, {data.performance.County}{/if}
                     </a>
                 {:else}
@@ -57,7 +57,7 @@
             {#if data.performance.Dedication}
                 <p class="dedication">
                     {#if data.performance.TowerID}
-                        <a href="https://dove.cccbr.org.uk/tower/{data.performance.TowerID}" target="_blank" rel="noopener noreferrer" class="dedication-link">
+                        <a href="/tower/{data.performance.TowerID}">
                             {data.performance.Dedication}
                         </a>
                     {:else}
@@ -120,6 +120,11 @@
                             View on Dove ({data.performance.Place ? `${data.performance.Place}, ` : ''}{data.performance.Dedication ? `${data.performance.Dedication}` : ''})
                         </a>
                     </div>
+                    <div class="external-link">
+                        <a href="/tower/{data.performance.TowerID}" target="_blank" rel="noopener noreferrer">
+                            View on TowerTracker
+                        </a>
+                    </div>
                 {/if}
             </div>
 
@@ -176,33 +181,11 @@
         margin: 0;
     }
 
-    .location-link {
-        color: #f3f4f6;
-        text-decoration: none;
-        font-weight: 600;
-    }
-
-    .location-link:hover {
-        color: #8ee3ef;
-        text-decoration: underline;
-    }
-
     .dedication {
         font-size: 1rem;
         color: #d1d5db;
         margin: 0;
         font-weight: normal;
-    }
-
-    .dedication-link {
-        color: #d1d5db;
-        text-decoration: none;
-        font-weight: normal;
-    }
-
-    .dedication-link:hover {
-        color: #8ee3ef;
-        text-decoration: underline;
     }
 
     .date-details {

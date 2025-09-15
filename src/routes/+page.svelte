@@ -6,12 +6,13 @@
 
 <svelte:head>
     <title>towertracker</title>
+    <link rel="stylesheet" href="/assets/css/home.css">
 </svelte:head>
 
 <Header user={data.user} />
 
 <main>
-    <p>Homepage</p>
+Tracking statistics of {data.userCount ? `${data.userCount} users` : 'no users'}
 </main>
 
 <Footer />

@@ -95,7 +95,8 @@
         }
         
         if (isGrabbed) {
-            svg += '<path d="M8 3 L12 7 L17 2" stroke="#00aa00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+            svg += '<path d="M8 3 L12 7 L17 2" stroke="black" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+            svg += '<path d="M8 3 L12 7 L17 2" stroke="#16e616ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
         }
         
         svg += `<path d="M12.5 ${pinOffset}C5.6 ${pinOffset} 0 ${5.6 + pinOffset} 0 ${12.5 + pinOffset}C0 ${19.6 + pinOffset} 12.5 ${41 + pinOffset} 12.5 ${41 + pinOffset}S25 ${19.6 + pinOffset} 25 ${12.5 + pinOffset}C25 ${5.6 + pinOffset} 19.4 ${pinOffset} 12.5 ${pinOffset}Z" fill="${color}"${strokeAttr}/>`;
@@ -126,20 +127,30 @@
         
         if (isNaN(weightValue)) return 'Unknown';
 
-        const totalPounds = Math.round(weightValue);
-        const hundredweight = Math.floor(totalPounds / 112);
-        const remainingAfterCwt = totalPounds % 112;
-        const quarters = Math.floor(remainingAfterCwt / 28);
-        const pounds = remainingAfterCwt % 28;
-
-        if (hundredweight > 0) {
-            return `${hundredweight}-${quarters}-${pounds}`;
-        } else {
-            let result = '';
-            if (quarters > 0) result += `${quarters}-`;
-            if (pounds > 0 || result === '') result += `${pounds}`;
-            return result.trim();
+        // Handle the possibility that the weight might already be in cwt-qtr-lb format
+        if (typeof weight === 'string' && weight.includes('-')) {
+            const parts = weight.split('-');
+            if (parts.length === 3) {
+                return weight; // Already in correct format
+            }
         }
+
+        const totalPounds = Math.round(weightValue);
+        
+        // 1 cwt = 112 pounds
+        const cwt = Math.floor(totalPounds / 112);
+        
+        // Remaining after cwt
+        const remainingAfterCwt = totalPounds % 112;
+        
+        // 1 qtr = 28 pounds (quarter of a hundredweight)
+        const qtr = Math.floor(remainingAfterCwt / 28);
+        
+        // Remaining pounds
+        const lb = remainingAfterCwt % 28;
+        
+        // Always use standard cwt-qtr-lb format
+        return `${cwt}-${qtr}-${lb}`;
     }
 
     function toggleLocationTracking() {
@@ -363,6 +374,13 @@
                 pealed: tower.pealed || false
             });
             
+            // Extract the pin color directly from the color array for consistency
+            const colors = [
+                '#999999', '#aa4488', '#fd99cc', '#ff8800', '#face27', '#039b16', '#44ffaa', '#fa1d1a',
+                '#aa4488', '#2f27ca', '#aaaa44', '#000000', '#aa8844', '#ff8888', '#88ff88', '#680098'
+            ];
+            const pinColor = isUnringable ? 'red' : colors[(bellCount - 1) % colors.length] || '#888888';
+            
             const customIcon = window.L.divIcon({
                 className: 'tower-pin',
                 html: pinSVG,
@@ -378,16 +396,20 @@
             const popupContent = `
                 <div class="tower-popup">
                     <h4><strong>
-                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" rel="noopener noreferrer" style="${isUnringable ? 'color: red;' : ''}">
+                        <a href="/tower/${tower.TowerID}" style="${isUnringable ? 'color: red;' : ''}">
                             ${isUnringable ? 'U/R' : ''} ${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}
                         </a>
-                    </strong></h4>
+                        </strong></h4>
                     <p style="${isUnringable ? 'color: red;' : ''}">${tower.County || tower.Country}</br>
-                        <strong style="color:${isUnringable ? 'red' : pinSVG.match(/fill="([^"]+)"/)?.[1] || '#888'}">
-                            ${tower.Bells || ''}
-                        </strong>, ${tower.Wt || ''} in ${tower.Note || ''}
+                        <strong style="color:${pinColor}">
+                            ${tower.Bells || ''}</strong>, ${tower.Wt ? convertToHundredweight(tower.Wt) : ''} in ${tower.Note || ''}
                         ${tower.Practice ? `<br>${tower.Practice}` : ''}
+                        ${tower.grabbed ? '<br><strong style="color: #00aa00;">✓ Grabbed</strong>' : ''}
                     </p>
+                    <div class="popup-actions">
+                        <a href="/tower/${tower.TowerID}" class="popup-link">View Details</a>
+                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" rel="noopener noreferrer" class="popup-link">Dove</a>
+                    </div>
                 </div>
             `;
             
@@ -625,3 +647,9 @@
 </main>
 
 <Footer />
+
+<style>
+    .tower-popup a {
+        text-decoration: none;
+    }
+</style>
