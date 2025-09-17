@@ -4,7 +4,6 @@ import fetch from 'node-fetch';
 import xml2js from 'xml2js';
 
 export async function importBBData(userId) {
-    // Get username, aliases, and exShort setting
     const [[user]] = await pool.query('SELECT username FROM User WHERE id = ?', [userId]);
     const [aliases] = await pool.query('SELECT Name FROM OtherNames WHERE userId = ?', [userId]);
     const [[settings]] = await pool.query('SELECT exShort FROM UserSettings WHERE userId = ?', [userId]);
@@ -13,7 +12,6 @@ export async function importBBData(userId) {
 
     log.info(`Importing BellBoard data for ${user.username}`);
 
-    // Helper to build BellBoard search URL
     function buildUrl(name, length) {
         const params = new URLSearchParams({
             ringer: name,
@@ -27,7 +25,6 @@ export async function importBBData(userId) {
         return `https://bb.ringingworld.co.uk/export.php?${params.toString()}`;
     }
 
-    // Helper to clean XML objects by removing $ keys and flattening _ keys
     function cleanXml(obj) {
         if (Array.isArray(obj)) {
             return obj.map(cleanXml);
@@ -45,11 +42,9 @@ export async function importBBData(userId) {
         return obj;
     }
 
-    // Helper to convert hundredweight format (e.g. "30-2-2 in Db") to lbs
     function cwtToLbs(str) {
         if (!str) return null;
         
-        // First try to match the full format (e.g. "30-2-2")
         let match = str.match(/(\d{1,2})-(\d{1,2})-(\d{1,2})/);
         if (match) {
             const [_, cwt, qtr, lbs] = match;
@@ -57,7 +52,6 @@ export async function importBBData(userId) {
             return total;
         }
         
-        // If no full format match, try to match just a single number (hundredweight only)
         match = str.match(/(\d{1,2})/);
         if (match) {
             const cwt = match[1];
@@ -68,22 +62,20 @@ export async function importBBData(userId) {
         return null;
     }
 
-    // Helper to extract ringers from <ringers> XML
     function parseRingersTag(ringersTag) {
         if (!Array.isArray(ringersTag)) return [];
         return ringersTag.map(r => ({
+            bell: r.$?.bell ? parseInt(r.$?.bell) : null,
             name: typeof r._ === 'string' ? r._ : r,
             conductor: r.$?.conductor === 'true' ? 1 : 0
         }));
     }
 
-    // Helper to extract footnotes from <footnote> XML
     function parseFootnotesTag(footnotesTag) {
         if (!Array.isArray(footnotesTag)) return [];
         return footnotesTag.map(f => typeof f === 'string' ? f : f._).filter(Boolean);
     }
 
-    // Helper to extract place, dedication, county, towerid, tenor from place XML
     function extractPlaceFields(placeObj) {
         let Place = null, Dedication = null, County = null, towerID = null, tenorWeightLbs = null, tenorKey = null, ringID = null;
         if (placeObj) {
@@ -142,6 +134,30 @@ export async function importBBData(userId) {
             timestamp: perf.timestamp?.[0] || null,
             footnotes: footnotes
         };
+    }
+
+    async function addGrab(perf) {
+        try {
+            const perfId = perf.$?.id || perf.id?.[0];
+            const cleanPerfId = perfId && perfId.startsWith('P') ? perfId.slice(1) : perfId;
+            
+            if (!cleanPerfId) {
+                log.warn('Cannot add grab: performance has no ID');
+                return;
+            }
+
+            // check if number of bells in the performance satisfies user's grab criteria
+            // get from number of ringers 
+            /*
+            await pool.query(
+                `INSERT IGNORE INTO Grab (UserID, PerformanceID) VALUES (?, ?)`,
+                [userId, parseInt(cleanPerfId)]
+            );
+            */
+            log.debug(`Added grab for user ${userId} on performance ${cleanPerfId}`);
+        } catch (err) {
+            log.error(`Error adding grab: ${err.message}`);
+        }
     }
 
     async function fetchAndInsert(name, length, filterChanges = false) {
