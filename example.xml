@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<performances xmlns="http://bb.ringingworld.co.uk/NS/performances#">
+    <performance xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1881631">
+        <association>Lancashire Association</association>
+        <place towerbase-id="2855" dove-tower-id="14459">
+            <place-name type="place">Lancaster</place-name>
+            <place-name type="dedication">Priory Church of St Mary</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="4460" tenor="30-2-2 in Db"/>
+        </place>
+        <date>2025-08-31</date>
+        <duration>84m 38s</duration>
+        <title>
+            <changes>2025</changes>
+            <method>Plain Doubles and Triples (2m)</method>
+        </title>
+        <details>2016 Plain Bob Triples, 9 Plain Bob Doubles, 1 c.o.m</details>
+        <composition ref="2306807"/>
+        <composer role="composed">David A Holmes</composer>
+        <ringers>
+            <ringer bell="1">Oliver J Skipper</ringer>
+            <ringer bell="2">Jim Currin</ringer>
+            <ringer bell="3">Frances M Ross</ringer>
+            <ringer bell="4">Nigel J Goodship</ringer>
+            <ringer bell="5">Morgan T Snape</ringer>
+            <ringer bell="6">Matthew J W Townson</ringer>
+            <ringer bell="7" conductor="true">Robin A Daw</ringer>
+            <ringer bell="8">Carolina M Goodship</ringer>
+        </ringers>
+        <footnote>Celebrating Rev Leah Vasey-Saunders' appointment to Bishop of Doncaster, and the return of ringing at Lancaster Priory after 6 months of maintenance work.</footnote>
+        <footnote>First date touch - 1, 2, 3, 5, 8</footnote>
+        <donation>£8.00</donation>
+        <timestamp>2025-08-31T18:56:55</timestamp>
+    </performance>
+</performances>
