@@ -1,0 +1,1270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<performances
+    xmlns="http://bb.ringingworld.co.uk/NS/performances#">
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1881631">
+        <association>Lancashire Association</association>
+        <place towerbase-id="2855" dove-tower-id="14459">
+            <place-name type="place">Lancaster</place-name>
+            <place-name type="dedication">Priory Church of St Mary</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="4460" tenor="30-2-2 in Db"/>
+        </place>
+        <date>2025-08-31</date>
+        <duration>84m 38s</duration>
+        <title>
+            <changes>2025</changes>
+            <method>Plain Doubles and Triples (2m)</method>
+        </title>
+        <details>2016 Plain Bob Triples, 9 Plain Bob Doubles, 1 c.o.m</details>
+        <composition ref="2306807"/>
+        <composer role="composed">David A Holmes</composer>
+        <ringers>
+            <ringer bell="1">Oliver J Skipper</ringer>
+            <ringer bell="2">Jim Currin</ringer>
+            <ringer bell="3">Frances M Ross</ringer>
+            <ringer bell="4">Nigel J Goodship</ringer>
+            <ringer bell="5">Morgan T Snape</ringer>
+            <ringer bell="6">Matthew J W Townson</ringer>
+            <ringer bell="7" conductor="true">Robin A Daw</ringer>
+            <ringer bell="8">Carolina M Goodship</ringer>
+        </ringers>
+        <footnote>Celebrating Rev Leah Vasey-Saunders' appointment to Bishop of Doncaster, and the return of ringing at Lancaster Priory after 6 months of maintenance work.</footnote>
+        <footnote>First date touch - 1, 2, 3, 5, 8</footnote>
+        <donation>£8.00</donation>
+        <timestamp>2025-08-31T18:56:55</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1880020">
+        <association>Lancashire Association</association>
+        <place towerbase-id="2435" dove-tower-id="11338">
+            <place-name type="place">Heversham</place-name>
+            <place-name type="dedication">St Peter</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="1339" tenor="13-1-15 in F"/>
+        </place>
+        <date>2025-08-25</date>
+        <duration>45m</duration>
+        <title>
+            <changes>1250</changes>
+            <method>Cambridge Surprise Minor</method>
+        </title>
+        <composition ref="2306689"/>
+        <composer role="composed">Ben White-Horne</composer>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Susan Johnson</ringer>
+            <ringer bell="3">Morgan T Snape</ringer>
+            <ringer bell="4">Kevin Mayfield</ringer>
+            <ringer bell="5">Simon A Percy</ringer>
+            <ringer bell="6" conductor="true">Nigel J Goodship</ringer>
+        </ringers>
+        <footnote>Rung to celebrate VJ Day</footnote>
+        <timestamp>2025-08-25T18:47:00</timestamp>
+        <rwref>5966.793</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1879964">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-08-25</date>
+        <duration>43m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Stedman Triples</method>
+        </title>
+        <composition ref="2306674"/>
+        <composer role="composed">Simon A Percy</composer>
+        <ringers>
+            <ringer bell="1" conductor="true">Simon A Percy</ringer>
+            <ringer bell="2">Morgan T Snape</ringer>
+            <ringer bell="3">Matthew J W Townson</ringer>
+            <ringer bell="4">Robin A Daw</ringer>
+            <ringer bell="5">Carolina M Goodship</ringer>
+            <ringer bell="6">Nigel J Goodship</ringer>
+            <ringer bell="7">Frances M Ross</ringer>
+            <ringer bell="8">Jessica P Morris</ringer>
+        </ringers>
+        <footnote>First of Stedman - 2</footnote>
+        <footnote>Circled the tower to quarters - 3</footnote>
+        <footnote>Circled the tower to quarters twice - 4</footnote>
+        <timestamp>2025-08-25T12:35:50</timestamp>
+        <rwref>5966.793</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1880027">
+        <association>Lancashire Association</association>
+        <place towerbase-id="4271" dove-tower-id="10999">
+            <place-name type="place">Sedbergh</place-name>
+            <place-name type="dedication">St Andrew</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="1000" tenor="15-1-25 in F"/>
+        </place>
+        <date>2025-08-25</date>
+        <duration>46m 7s</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Grandsire Triples</method>
+        </title>
+        <composition ref="2306687"/>
+        <composer role="composed">R W Willans</composer>
+        <ringers>
+            <ringer bell="1">Jessica P Morris</ringer>
+            <ringer bell="2">Nigel J Goodship</ringer>
+            <ringer bell="3">Susan Johnson</ringer>
+            <ringer bell="4">Morgan T Snape</ringer>
+            <ringer bell="5">Matthew J W Townson</ringer>
+            <ringer bell="6" conductor="true">Robin A Daw</ringer>
+            <ringer bell="7">Simon A Percy</ringer>
+            <ringer bell="8">Frances M Ross</ringer>
+        </ringers>
+        <footnote>Another farewell quarter for Simon Percy.</footnote>
+        <donation>£8.00</donation>
+        <timestamp>2025-08-25T19:19:03</timestamp>
+        <rwref>5966.793</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1879838">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-08-24</date>
+        <duration>42m 51s</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Minor</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Jessica P Morris</ringer>
+            <ringer bell="2">Hana Rigby</ringer>
+            <ringer bell="3">Simon A Percy</ringer>
+            <ringer bell="4">Morgan T Snape</ringer>
+            <ringer bell="5">Robin A Daw</ringer>
+            <ringer bell="6" conductor="true">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>First quarter inside to Plain Bob Minor - 2</footnote>
+        <timestamp>2025-08-24T19:41:44</timestamp>
+        <rwref>5966.793</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1877776">
+        <association>Lancashire Association</association>
+        <place towerbase-id="3965" dove-tower-id="13690">
+            <place-name type="place">Poulton le Fylde</place-name>
+            <place-name type="dedication">St Chad</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="3691" tenor="9 in Bb"/>
+        </place>
+        <date>2025-08-16</date>
+        <duration>45m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Minor</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Graham Wilkinson</ringer>
+            <ringer bell="2">Duncan Vyse</ringer>
+            <ringer bell="3">Victoria Boardman</ringer>
+            <ringer bell="4">Oliver Vyse</ringer>
+            <ringer bell="5">Matthew J W Townson</ringer>
+            <ringer bell="6" conductor="true">Morgan T Snape</ringer>
+        </ringers>
+        <footnote>Rung to commemorate the 80th anniversary of VJ Day (15th August)</footnote>
+        <footnote>First as conductor of minor - 6</footnote>
+        <footnote>First on treble and of minor - 1</footnote>
+        <timestamp>2025-08-17T17:52:17</timestamp>
+        <rwref>5967.811</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1876401">
+        <association>Lancashire Association</association>
+        <place towerbase-id="6709" dove-tower-id="16513">
+            <place-name type="place">Borwick Hall</place-name>
+            <place-name type="dedication">Lichfield Diocesan Mobile Belfry</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="6514" tenor="0-2-20 in D"/>
+        </place>
+        <date>2025-08-10</date>
+        <duration>33m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Minor</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Jessica P Morris</ringer>
+            <ringer bell="2">Nigel J Goodship</ringer>
+            <ringer bell="3">Sam N O Norman</ringer>
+            <ringer bell="4">Matthew W Goodship (the real Matthew)</ringer>
+            <ringer bell="5">Simon A Percy</ringer>
+            <ringer bell="6" conductor="true">Matthew J W Townson (the fake Matthew)</ringer>
+        </ringers>
+        <footnote>First Quarter as conductor of minor - 6</footnote>
+        <footnote>First Quarter in minor - 1</footnote>
+        <footnote>First Quarter in Plain Bob Minor - 6</footnote>
+        <footnote>With Birthday compliments to Ian Morris, Father of Jessica Morris</footnote>
+        <timestamp>2025-08-15T13:54:55</timestamp>
+        <rwref>5967.805</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1874832">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="6709" dove-tower-id="16513">
+            <place-name type="place">Borwick Hall</place-name>
+            <place-name type="dedication">Lichfield Diocesan Mobile Belfry</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="6514" tenor="0-2-20 in D"/>
+        </place>
+        <date>2025-08-08</date>
+        <duration>32m 42s</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Doubles</method>
+        </title>
+        <composer>trad</composer>
+        <ringers>
+            <ringer bell="1">Merlyn Gilldaley</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">Simon A Percy</ringer>
+            <ringer bell="4">Sam N O Norman</ringer>
+            <ringer bell="5" conductor="true">Matthew J W Townson</ringer>
+            <ringer bell="6">Jessica P Morris</ringer>
+        </ringers>
+        <footnote>First as conductor - 5</footnote>
+        <footnote>Followed by fish and chips (WITH CURRY)</footnote>
+        <timestamp>2025-08-08T20:36:06</timestamp>
+        <rwref>5967.805</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1877481">
+        <association>Lancashire Association</association>
+        <place towerbase-id="6709" dove-tower-id="16513">
+            <place-name type="place">Borwick Hall</place-name>
+            <place-name type="dedication">Lichfield Diocesan Mobile Belfry</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="6514" tenor="0-2-20 in D"/>
+        </place>
+        <date>2025-08-07</date>
+        <duration>34m</duration>
+        <title>
+            <changes>1320</changes>
+            <method>Grandsire Doubles</method>
+        </title>
+        <details>Contained all ten extents with treble as treble</details>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Alexander Fishburn</ringer>
+            <ringer bell="3">Robin A Daw</ringer>
+            <ringer bell="4">Simon A Percy</ringer>
+            <ringer bell="5" conductor="true">Christopher M J Stanley</ringer>
+            <ringer bell="6">Jessica P Morris</ringer>
+        </ringers>
+        <timestamp>2025-08-16T20:11:59</timestamp>
+        <rwref>5967.805</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1866828">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="281" dove-tower-id="12443">
+            <place-name type="place">Barbon</place-name>
+            <place-name type="dedication">St Bartholomew</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="2444" tenor="7-1-25 in A"/>
+        </place>
+        <date>2025-07-06</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1320</changes>
+            <method>Doubles and Minor (4m/p)</method>
+        </title>
+        <details>120 Simon Percy’s Rolling Pin Doubles; 240 Grandsire Doubles; 240 Plain Bob Doubles; 720 Norwich Surprise Minor</details>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Simon A Percy</ringer>
+            <ringer bell="3">Nigel J Goodship</ringer>
+            <ringer bell="4" conductor="true">Matthew W Goodship</ringer>
+            <ringer bell="5">Carolina M Goodship</ringer>
+            <ringer bell="6">Frances M Ross</ringer>
+        </ringers>
+        <footnote>750th quarter: 2</footnote>
+        <footnote>Circled the tower: 3</footnote>
+        <timestamp>2025-07-07T17:00:11</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1865697">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-07-02</date>
+        <duration>45m</duration>
+        <title>
+            <changes>1288</changes>
+            <method>Grandsire Triples</method>
+        </title>
+        <composition ref="2305558"/>
+        <composer role="composed">RWW</composer>
+        <ringers>
+            <ringer bell="1">Jessica P Morris</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">Frances M Ross</ringer>
+            <ringer bell="4">Matthew W Goodship</ringer>
+            <ringer bell="5">Matthew J W Townson</ringer>
+            <ringer bell="6" conductor="true">Simon A Percy</ringer>
+            <ringer bell="7">Morgan T Snape</ringer>
+            <ringer bell="8">Oliver J Skipper</ringer>
+        </ringers>
+        <footnote>First QP away from the tenor: 1.</footnote>
+        <footnote>First QP attempt on the treble without a broken rope: 1.</footnote>
+        <footnote>Rung to celebrate Matthew Townson and Jess Morris upcoming trip to Hong Kong.</footnote>
+        <footnote>RIP Scotby aka "Mr.Rats" 2010-2025, cat of David A Horne. (He preferred sleeping on Grandsire or Stedman blue lines).</footnote>
+        <timestamp>2025-07-02T22:03:35</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1864460">
+        <place towerbase-id="3949" dove-tower-id="10926">
+            <place-name type="place">Port Sunlight</place-name>
+            <place-name type="dedication">Christ Church</place-name>
+            <place-name type="county">Merseyside</place-name>
+            <ring type="tower" dove-ring-id="927" tenor="14-1-25 in F"/>
+        </place>
+        <date>2025-06-28</date>
+        <duration>50m</duration>
+        <title>
+            <changes>1280</changes>
+            <method>Plain Bob Major</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Merlyn Gilldaley</ringer>
+            <ringer bell="2">David P Lacy</ringer>
+            <ringer bell="3">Eliza I Lewis-Skeath</ringer>
+            <ringer bell="4">Philip E Chandler</ringer>
+            <ringer bell="5">Matthew J W Townson</ringer>
+            <ringer bell="6">Sacha R Jonas</ringer>
+            <ringer bell="7">Sam N O Norman</ringer>
+            <ringer bell="8" conductor="true">Matthew D Warburton</ringer>
+        </ringers>
+        <donation>£4.00</donation>
+        <timestamp>2025-06-28T12:44:33</timestamp>
+        <rwref>5963.724</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861569">
+        <association>Lancashire Association</association>
+        <place towerbase-id="2921" dove-tower-id="16898">
+            <place-name type="place">Leck</place-name>
+            <place-name type="dedication">St Peter</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="6899" tenor="12-1-15 in G"/>
+        </place>
+        <date>2025-06-15</date>
+        <duration>41m 11s</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Stedman Doubles</method>
+        </title>
+        <ringers>
+            <ringer bell="1" conductor="true">Matthew J W Townson</ringer>
+            <ringer bell="2" conductor="true">Morgan T Snape</ringer>
+            <ringer bell="3" conductor="true">Matthew W Goodship</ringer>
+            <ringer bell="4" conductor="true">Nigel J Goodship</ringer>
+            <ringer bell="5" conductor="true">Robin A Daw</ringer>
+        </ringers>
+        <footnote>First quarter of Stedman Doubles - 1, 2, 3</footnote>
+        <footnote>Jointly conducted (2 extents each + final plain course)</footnote>
+        <timestamp>2025-06-15T17:38:33</timestamp>
+        <rwref>5959.631</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861356">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-06-14</date>
+        <duration>43m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Doubles (2m)</method>
+        </title>
+        <details>660 Plain Bob, 600 Grandsire</details>
+        <ringers>
+            <ringer bell="1">Oliver J Skipper</ringer>
+            <ringer bell="2" conductor="true">Simon A Percy</ringer>
+            <ringer bell="3">Matthew J W Townson</ringer>
+            <ringer bell="4">Andrew W Kayll</ringer>
+            <ringer bell="5">Frances M Ross</ringer>
+            <ringer bell="6">Jessica P Morris</ringer>
+        </ringers>
+        <footnote>Rung to mark the 1st Birthday of the Eagles Head, Over Kellet.</footnote>
+        <footnote>First of Plain Bob and Grandsire Doubles - 3</footnote>
+        <timestamp>2025-06-14T18:36:02</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861366">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-06-13</date>
+        <duration>45m 15s</duration>
+        <title>
+            <changes>1325</changes>
+            <method>Plain Triples (2m)</method>
+        </title>
+        <details>1316 Grandsire; 9 Plain Bob</details>
+        <composition ref="2305106"/>
+        <composer role="composed">RWW</composer>
+        <ringers>
+            <ringer bell="1">Simon A Percy</ringer>
+            <ringer bell="2">Matthew J W Townson</ringer>
+            <ringer bell="3">Morgan T Snape</ringer>
+            <ringer bell="4">Jayden R Milby</ringer>
+            <ringer bell="5" conductor="true">Matthew W Goodship</ringer>
+            <ringer bell="6">Nigel J Goodship</ringer>
+            <ringer bell="7">Robin A Daw</ringer>
+            <ringer bell="8">Jessica P Morris</ringer>
+        </ringers>
+        <footnote>25th Quarter Peal, a year (to the day) since first touching a bell rope - 2</footnote>
+        <footnote>Also for Lancaster Day (12th June)</footnote>
+        <timestamp>2025-06-14T19:42:23</timestamp>
+        <rwref>5959.631</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861237">
+        <association>Lancashire Association of Change Ringers</association>
+        <place towerbase-id="2052" dove-tower-id="15649">
+            <place-name type="place">Goosnargh</place-name>
+            <place-name type="dedication">St Mary the Virgin</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="5650" tenor="7-2-13 in A"/>
+        </place>
+        <date>2025-06-10</date>
+        <duration>2h 36</duration>
+        <title>
+            <changes>5040</changes>
+            <method>Minor (3m)</method>
+        </title>
+        <details>Extents: 1,3 Kent TB; 4,5 Cambridge S; 2,6,7 Plain Bob</details>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">Matthew W Goodship</ringer>
+            <ringer bell="4">Morgan T Snape</ringer>
+            <ringer bell="5">Simon A Percy</ringer>
+            <ringer bell="6" conductor="true">Nigel J Goodship</ringer>
+        </ringers>
+        <footnote>First peal at first attempt: 4</footnote>
+        <footnote>First peal of minor as conductor</footnote>
+        <donation>£6.00</donation>
+        <flag type="first-peal" bell="4"/>
+        <timestamp>2025-06-14T06:17:13</timestamp>
+        <rwref>5957.584</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861089">
+        <association>Lancashire Association of Change Ringers</association>
+        <place towerbase-id="1485" dove-tower-id="16011">
+            <place-name type="place">Dent</place-name>
+            <place-name type="dedication">St Andrew</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="6012" tenor="8-0-23 in Bb"/>
+        </place>
+        <date>2025-06-07</date>
+        <duration>41m</duration>
+        <title>
+            <changes>1250</changes>
+            <method>Kent Treble Bob Minor</method>
+        </title>
+        <composition ref="2304989"/>
+        <composer role="composed">Donald F Morrison</composer>
+        <ringers>
+            <ringer bell="1">Oliver J Skipper</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">Carolina M Goodship</ringer>
+            <ringer bell="4">Matthew J W Townson</ringer>
+            <ringer bell="5">Frances M Ross</ringer>
+            <ringer bell="6" conductor="true">Nigel J Goodship</ringer>
+        </ringers>
+        <footnote>First of treble bob hunt: 1</footnote>
+        <footnote>First of minor inside: 4</footnote>
+        <footnote>Belated 90th birthday wishes to John Penney, father of 5, on 1st June.</footnote>
+        <donation>£6.00</donation>
+        <timestamp>2025-06-13T09:50:43</timestamp>
+        <rwref>5957.587</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1857300">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7647" dove-tower-id="11800">
+            <place-name type="place">Liverpool</place-name>
+            <place-name type="dedication">St Barnabas, Penny Lane</place-name>
+            <place-name type="county">Merseyside</place-name>
+            <ring type="tower" dove-ring-id="1801" tenor="11-3-27 in G"/>
+        </place>
+        <date>2025-05-29</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1344</changes>
+            <method>Treble Bob Major (2m)</method>
+        </title>
+        <details>192 Oxford, 1152 Kent, 14 c.o.m.
+No calls</details>
+        <composition ref="2304785"/>
+        <composer role="composed">Charles M S Botting</composer>
+        <ringers>
+            <ringer bell="1" conductor="true">Sam N O Norman</ringer>
+            <ringer bell="2">Matthew O Hall</ringer>
+            <ringer bell="3">Merlyn Gilldaley</ringer>
+            <ringer bell="4">Matthew J W Townson</ringer>
+            <ringer bell="5">Eliza I Lewis-Skeath</ringer>
+            <ringer bell="6">Sacha R Jonas</ringer>
+            <ringer bell="7">David P Lacy</ringer>
+            <ringer bell="8">Simon A Percy</ringer>
+        </ringers>
+        <footnote>Rung to celebrate the birth of Robert Oxbrough, son of friend of 5</footnote>
+        <footnote>Also rung for Ascension Day</footnote>
+        <footnote>First in Methods: 2, 3, 4, 5, 6, 7</footnote>
+        <footnote>First Spliced: 4</footnote>
+        <footnote>First Spliced as Conductor: 1</footnote>
+        <timestamp>2025-05-30T00:31:41</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1860973">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-05-16</date>
+        <duration>45m</duration>
+        <title>
+            <changes>1280</changes>
+            <method>Plain Bob Major</method>
+        </title>
+        <composition ref="2304529"/>
+        <composer role="composed">Simon A Percy</composer>
+        <ringers>
+            <ringer bell="1">Oliver J Skipper</ringer>
+            <ringer bell="2" conductor="true">Simon A Percy</ringer>
+            <ringer bell="3">Frances M Ross</ringer>
+            <ringer bell="4">Matthew J W Townson</ringer>
+            <ringer bell="5">Carolina M Goodship</ringer>
+            <ringer bell="6">Anne E Pettifor</ringer>
+            <ringer bell="7">Robin A Daw</ringer>
+            <ringer bell="8">Nigel J Goodship</ringer>
+        </ringers>
+        <footnote>First of Major - 1</footnote>
+        <footnote>Ring during the 80th anniversary of Seabrooks Crisps.</footnote>
+        <timestamp>2025-06-12T21:21:11</timestamp>
+        <rwref>5954.520</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1852013">
+        <association>Lancashire Association</association>
+        <place towerbase-id="4418" dove-tower-id="15438">
+            <place-name type="place">Silverdale</place-name>
+            <place-name type="dedication">St John</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="5439" tenor="12-0-16 in G"/>
+        </place>
+        <date>2025-05-11</date>
+        <duration>2h 45m 11s</duration>
+        <title>
+            <changes>5040</changes>
+            <method>Minor (4m)</method>
+        </title>
+        <details>1440 Norwich S, Cambridge S, Plain B, 720 Kent TB.</details>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Andrew J Holland</ringer>
+            <ringer bell="3" conductor="true">Robin A Daw</ringer>
+            <ringer bell="4">L Martin Daniels</ringer>
+            <ringer bell="5">Sam N O Norman</ringer>
+            <ringer bell="6">Simon A Percy</ringer>
+        </ringers>
+        <footnote>Rung for the Induction and Installation of Revd Eve Quillinan as Vicar of this Parish.</footnote>
+        <footnote>Also for the 80th Anniversary of VE Day.</footnote>
+        <footnote>100 years since the first peal on the bells, on 30th May 1925.</footnote>
+        <footnote>87th birthday compliment to Raymond Daw, father of 3.</footnote>
+        <donation>£6.00</donation>
+        <timestamp>2025-05-11T20:47:55</timestamp>
+        <rwref>5952.442</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1848435">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-05-08</date>
+        <duration>46m 45s</duration>
+        <title>
+            <changes>1280</changes>
+            <method>Plain Bob Major</method>
+        </title>
+        <composition ref="2304338"/>
+        <composer role="composed">Peter G Bellamy-Knights</composer>
+        <ringers>
+            <ringer bell="1">Susan Johnson</ringer>
+            <ringer bell="2">Frances M Ross</ringer>
+            <ringer bell="3">D Robert Pettifor</ringer>
+            <ringer bell="4">Carolina M Goodship</ringer>
+            <ringer bell="5">Nigel J Goodship</ringer>
+            <ringer bell="6">Anne E Pettifor</ringer>
+            <ringer bell="7">Matthew J W Townson</ringer>
+            <ringer bell="8" conductor="true">Robin A Daw</ringer>
+        </ringers>
+        <footnote>Rung on the 80th Anniversary of VE Day following the planting of a peace rose in the Churchyard.</footnote>
+        <donation>£8.00</donation>
+        <timestamp>2025-05-08T15:24:40</timestamp>
+        <rwref>5952.448</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1860972">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-05-07</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Triples</method>
+        </title>
+        <composition ref="2304325"/>
+        <composer role="composed">Simon A Percy</composer>
+        <ringers>
+            <ringer bell="1">Oliver J Skipper</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">Susan Johnson</ringer>
+            <ringer bell="4">Frances M Ross</ringer>
+            <ringer bell="5">Nigel J Goodship</ringer>
+            <ringer bell="6">Matthew J W Townson</ringer>
+            <ringer bell="7" conductor="true">Simon A Percy</ringer>
+            <ringer bell="8">Jessica P Morris</ringer>
+        </ringers>
+        <footnote>First Quarter Peal - 8</footnote>
+        <footnote>First Quarter Peal on 8 - 1</footnote>
+        <flag type="first-quarter" bell="8"/>
+        <timestamp>2025-06-12T21:20:00</timestamp>
+        <rwref>5953.497</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1845001">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-04-27</date>
+        <duration>2h 52</duration>
+        <title>
+            <changes>5152</changes>
+            <method>Yorkshire Surprise Major</method>
+        </title>
+        <composition ref="2304135"/>
+        <composer role="composed">C Middleton</composer>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">George H Campling</ringer>
+            <ringer bell="3">Pauline Campling</ringer>
+            <ringer bell="4">Sam N O Norman</ringer>
+            <ringer bell="5">Nigel J Goodship</ringer>
+            <ringer bell="6">Robin A Daw</ringer>
+            <ringer bell="7" conductor="true">Anne E Pettifor</ringer>
+            <ringer bell="8">Simon A Percy</ringer>
+        </ringers>
+        <footnote>First peal - 1 (first lesson in June 2024)</footnote>
+        <footnote>First peal as conductor - 7</footnote>
+        <footnote>In memory of Prof Allen E Goodship (brother of 5)</footnote>
+        <footnote>With congratulations to Pauline Campling on her election to the post of Hon Gen Sec of the LACR</footnote>
+        <flag type="first-peal" bell="1"/>
+        <timestamp>2025-04-27T20:47:11</timestamp>
+        <rwref>5953.494</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1844279">
+        <place towerbase-id="7756" dove-tower-id="16578">
+            <place-name type="place">City of London</place-name>
+            <place-name type="dedication">St James Garlickhythe</place-name>
+            <ring type="tower" dove-ring-id="6579" tenor="9-1-25 in G#"/>
+        </place>
+        <date>2025-04-25</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1344</changes>
+            <method>Plain Bob Triples</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Alison Lee</ringer>
+            <ringer bell="2">Jeanette Owen</ringer>
+            <ringer bell="3">Barbara Pettit</ringer>
+            <ringer bell="4">Ben Gooch</ringer>
+            <ringer bell="5">Matthew J W Townson</ringer>
+            <ringer bell="6" conductor="true">Neil Garner</ringer>
+            <ringer bell="7">Steve Bowley</ringer>
+            <ringer bell="8">George T Basford</ringer>
+        </ringers>
+        <footnote>First in method (5)</footnote>
+        <donation>£8.00</donation>
+        <timestamp>2025-04-25T15:25:54</timestamp>
+        <rwref>5950.406</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1843773">
+        <place towerbase-id="307" dove-tower-id="11169">
+            <place-name type="place">Barnes</place-name>
+            <place-name type="dedication">St Mary</place-name>
+            <place-name type="county">Greater London</place-name>
+            <ring type="tower" dove-ring-id="1170" tenor="10-2-20 in G#"/>
+        </place>
+        <date>2025-04-24</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1301</changes>
+            <method>Grandsire Triples</method>
+        </title>
+        <composer>Jadd Virji</composer>
+        <ringers>
+            <ringer bell="1">Isobel Murphy</ringer>
+            <ringer bell="2" conductor="true">Henry J Stephenson</ringer>
+            <ringer bell="3">Matthew J W Townson</ringer>
+            <ringer bell="4">Daniel J Austin</ringer>
+            <ringer bell="5">Ben Gooch</ringer>
+            <ringer bell="6">George T Basford</ringer>
+            <ringer bell="7">Neil Garner</ringer>
+            <ringer bell="8">Keith Murphy</ringer>
+        </ringers>
+        <footnote>For Thursday Service</footnote>
+        <footnote>First in method (3)</footnote>
+        <footnote>Wishing a Happy Birthday to Matthew (3)</footnote>
+        <donation>£8.00</donation>
+        <timestamp>2025-04-24T13:46:17</timestamp>
+        <rwref>5950.406</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1836693">
+        <association>Lancashire Association</association>
+        <place towerbase-id="6228" dove-tower-id="13810">
+            <place-name type="place">Arncliffe</place-name>
+            <place-name type="dedication">St Oswald</place-name>
+            <place-name type="county">North Yorkshire</place-name>
+            <ring type="tower" dove-ring-id="3811" tenor="15 in F#"/>
+        </place>
+        <date>2025-03-29</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1277</changes>
+            <method>Singles (7m)</method>
+        </title>
+        <details>180 Shipping Forecast; 180 Erin; 252 Stedman; 504 Grasmere Gingerbread; 36 Reverse Bob; 107 Plain Bob; 18 Original.</details>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3" conductor="true">Simon A Percy</ringer>
+        </ringers>
+        <footnote>Most methods - 1</footnote>
+        <footnote>Believed to be the first quarter peal on the bells. </footnote>
+        <timestamp>2025-03-30T08:48:10</timestamp>
+        <rwref>5951.425</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1836694">
+        <association>Lancashire Association</association>
+        <place towerbase-id="6229" dove-tower-id="11473">
+            <place-name type="place">Broughton</place-name>
+            <place-name type="dedication">All Saints</place-name>
+            <place-name type="county">North Yorkshire</place-name>
+            <ring type="tower" dove-ring-id="1474" tenor="5-3-11 in Bb"/>
+        </place>
+        <date>2025-03-29</date>
+        <duration>41m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Flying Flower-Stand Singles</method>
+        </title>
+        <ringers>
+            <ringer bell="1" conductor="true">Simon A Percy</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>Rung in recognition of the historic Broughton Flower-stand incident 13 years ago.No flower stands were harmed in the ringing of this quarter peal.</footnote>
+        <footnote>First quarter in the method: 1.3.3.1.3.1.1.3.1.3</footnote>
+        <timestamp>2025-03-30T08:50:50</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1836462">
+        <association>Lancashire Association</association>
+        <place towerbase-id="6232" dove-tower-id="10770">
+            <place-name type="place">Long Preston</place-name>
+            <place-name type="dedication">St Mary the Virgin</place-name>
+            <place-name type="county">North Yorkshire</place-name>
+            <ring type="tower" dove-ring-id="771" tenor="7-2-25 in A"/>
+        </place>
+        <date>2025-03-29</date>
+        <duration>43m 26s</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Stedman Singles</method>
+        </title>
+        <ringers>
+            <ringer bell="1" conductor="true">Matthew J W Townson</ringer>
+            <ringer bell="2">Simon A Percy</ringer>
+            <ringer bell="3">Robin A Daw</ringer>
+        </ringers>
+        <footnote>First quarter on three - 1</footnote>
+        <footnote>First as conductor - 1</footnote>
+        <footnote>First quarter in method - 1, 3</footnote>
+        <timestamp>2025-03-29T11:23:42</timestamp>
+        <rwref>5946.316</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1836707">
+        <association>Lancashire Association</association>
+        <place towerbase-id="6227" dove-tower-id="14918">
+            <place-name type="place">Rylstone</place-name>
+            <place-name type="dedication">St Peter</place-name>
+            <place-name type="county">North Yorkshire</place-name>
+            <ring type="tower" dove-ring-id="4919" tenor="7-2-20 in A"/>
+        </place>
+        <date>2025-03-29</date>
+        <duration>40m 20s</duration>
+        <title>
+            <changes>1281</changes>
+            <method>Grasmere Gingerbread Singles</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2" conductor="true">Robin A Daw</ringer>
+            <ringer bell="3">Simon A Percy</ringer>
+        </ringers>
+        <footnote>Believed to be the first quarter peal on the bells.</footnote>
+        <timestamp>2025-03-30T09:29:12</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1829183">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="3755" dove-tower-id="14519">
+            <place-name type="place">Orton</place-name>
+            <place-name type="dedication">All Saints</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="4520" tenor="12-3-13 in F#"/>
+        </place>
+        <date>2025-03-02</date>
+        <duration>53m</duration>
+        <title>
+            <changes>1344</changes>
+            <method>Plain Bob Major</method>
+        </title>
+        <composition ref="2303056"/>
+        <composer role="composed">Trad.</composer>
+        <ringers>
+            <ringer bell="1">Susan Johnson</ringer>
+            <ringer bell="2">Jamie Ross</ringer>
+            <ringer bell="3">Anne E Pettifor</ringer>
+            <ringer bell="4">Matthew J W Townson</ringer>
+            <ringer bell="5">Frances M Ross</ringer>
+            <ringer bell="6">Carolina M Goodship</ringer>
+            <ringer bell="7">Simon A Percy</ringer>
+            <ringer bell="8" conductor="true">Nigel J Goodship</ringer>
+        </ringers>
+        <footnote>First blows in method - 4</footnote>
+        <timestamp>2025-03-02T19:10:22</timestamp>
+        <rwref>5944.270</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1826097">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-02-20</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Triples</method>
+        </title>
+        <composition ref="2302841"/>
+        <composer role="composed">Simon A Percy</composer>
+        <ringers>
+            <ringer bell="1">Robin A Daw</ringer>
+            <ringer bell="2" conductor="true">Simon A Percy</ringer>
+            <ringer bell="3">Kevin Mayfield</ringer>
+            <ringer bell="4">Carolina M Goodship</ringer>
+            <ringer bell="5">Nigel J Goodship</ringer>
+            <ringer bell="6">Frances M Ross</ringer>
+            <ringer bell="7">L Martin Daniels</ringer>
+            <ringer bell="8">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>Ring half muffled following the memorial service of Neil Johnson.</footnote>
+        <footnote>Circled the tower, including both the old and the recast treble and second - 1 and 2</footnote>
+        <timestamp>2025-02-20T16:25:25</timestamp>
+        <rwref>5951.424</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861077">
+        <association>Lancashire Association of Change Ringers</association>
+        <place towerbase-id="281" dove-tower-id="12443">
+            <place-name type="place">Barbon</place-name>
+            <place-name type="dedication">St Bartholomew</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="2444" tenor="7-1-25 in A"/>
+        </place>
+        <date>2025-02-02</date>
+        <duration>44m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Doubles (4m,1p)</method>
+        </title>
+        <details>120 Stedman, 120 St Simon's, 120 St Martin's, 420 Grandsire, 480 Plain Bob</details>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Carolina M Goodship</ringer>
+            <ringer bell="3">Simon A Percy</ringer>
+            <ringer bell="4">Kevin Mayfield</ringer>
+            <ringer bell="5" conductor="true">Nigel J Goodship</ringer>
+            <ringer bell="6">Oliver J Skipper</ringer>
+        </ringers>
+        <footnote>First quarter peal at first attempt - 6</footnote>
+        <donation>£6.00</donation>
+        <flag type="first-quarter" bell="6"/>
+        <timestamp>2025-06-13T09:29:57</timestamp>
+        <rwref>5939.149</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1814343">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2025-01-24</date>
+        <duration>44m</duration>
+        <title>
+            <changes>1296</changes>
+            <method>Stedman Triples</method>
+        </title>
+        <composition ref="2302297"/>
+        <composer role="composed">Richard Weeks</composer>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">D Robert Pettifor</ringer>
+            <ringer bell="3">Robin A Daw</ringer>
+            <ringer bell="4">Carolina M Goodship</ringer>
+            <ringer bell="5">Anne E Pettifor</ringer>
+            <ringer bell="6">Nigel J Goodship</ringer>
+            <ringer bell="7" conductor="true">Simon A Percy</ringer>
+            <ringer bell="8">Sue Fellows</ringer>
+        </ringers>
+        <footnote>First inside to any method - 1</footnote>
+        <footnote>Circled the tower to quarters - 3</footnote>
+        <footnote>Rung in memory of Robert Phillip Christopher Austin, Uncle and Godfather of Matthew Townson.</footnote>
+        <timestamp>2025-01-24T22:32:37</timestamp>
+        <rwref>5951.424</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1811109">
+        <association>Lancashire Association</association>
+        <place towerbase-id="1394" dove-tower-id="13673">
+            <place-name type="place">Crosthwaite</place-name>
+            <place-name type="dedication">St Mary</place-name>
+            <place-name type="county">Cumbria</place-name>
+            <ring type="tower" dove-ring-id="3674" tenor="9-3-21 in G"/>
+        </place>
+        <date>2025-01-18</date>
+        <duration>48m</duration>
+        <title>
+            <changes>1440</changes>
+            <method>Norwich Surprise Minor</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Frances M Ross</ringer>
+            <ringer bell="3" conductor="true">Simon A Percy</ringer>
+            <ringer bell="4">Kevin Mayfield</ringer>
+            <ringer bell="5">Nigel J Goodship</ringer>
+            <ringer bell="6">Robin A Daw</ringer>
+        </ringers>
+        <timestamp>2025-01-18T12:05:34</timestamp>
+        <rwref>5937.107</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1804997">
+        <place towerbase-id="2555" dove-tower-id="14513">
+            <place-name type="place">Hornchurch</place-name>
+            <place-name type="dedication">St Andrew</place-name>
+            <place-name type="county">Essex</place-name>
+            <ring type="tower" dove-ring-id="4514" tenor="18-0-0 in Eb"/>
+        </place>
+        <date>2025-01-05</date>
+        <title>
+            <changes>1259</changes>
+            <method>Grandsire Caters</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Michelle A Stephenson</ringer>
+            <ringer bell="2">Matthew E Rayner</ringer>
+            <ringer bell="3">James Laken</ringer>
+            <ringer bell="4">Julie A Bloomfield</ringer>
+            <ringer bell="5">Marianne R Hayward</ringer>
+            <ringer bell="6">John M Church</ringer>
+            <ringer bell="7">Jonathan R Slack</ringer>
+            <ringer bell="8">Colin G Wright</ringer>
+            <ringer bell="9" conductor="true">Clive J Stephenson</ringer>
+            <ringer bell="10">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>For Evening Service and to welcome George Church, born 02/01/2025, a son for Dr Emma Kindell &amp; William Church and a first grandson for 6.</footnote>
+        <footnote>First on 10 - 10.</footnote>
+        <donation>£5.00</donation>
+        <timestamp>2025-01-05T20:57:23</timestamp>
+        <rwref>5935.62</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1804628">
+        <place towerbase-id="7647" dove-tower-id="11800">
+            <place-name type="place">Liverpool</place-name>
+            <place-name type="dedication">St Barnabas, Penny Lane</place-name>
+            <place-name type="county">Merseyside</place-name>
+            <ring type="tower" dove-ring-id="1801" tenor="11-3-27 in G"/>
+        </place>
+        <date>2025-01-04</date>
+        <duration>44m</duration>
+        <title>
+            <changes>1260</changes>
+            <method>Plain Bob Doubles</method>
+        </title>
+        <ringers>
+            <ringer bell="1">Chris Webster</ringer>
+            <ringer bell="2" conductor="true">Alexander M Fishburn</ringer>
+            <ringer bell="3">Elis Farrell</ringer>
+            <ringer bell="4">Melissa Villiers</ringer>
+            <ringer bell="5">Andrew Bradshaw</ringer>
+            <ringer bell="6">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>First on an inside bell (at first attempt) - 3.</footnote>
+        <timestamp>2025-01-05T10:45:45</timestamp>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1861156">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="1131" dove-tower-id="14921">
+            <place-name type="place">Chorley</place-name>
+            <place-name type="dedication">St Mary</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="4922" tenor="17-3-12 in E"/>
+        </place>
+        <date>2024-12-15</date>
+        <duration>46m</duration>
+        <title>
+            <changes>1320</changes>
+            <method>Spiced Surprise Minor (2m)</method>
+        </title>
+        <details>720 Onion Bhaji Surprise Minor and 600 Cambridge Surprise Minor</details>
+        <composer>trad</composer>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">Nigel J Goodship</ringer>
+            <ringer bell="3">Carolina M Goodship</ringer>
+            <ringer bell="4">Robin A Daw</ringer>
+            <ringer bell="5">Frances M Ross</ringer>
+            <ringer bell="6" conductor="true">Simon A Percy</ringer>
+        </ringers>
+        <footnote>First quarter on 6 - 1</footnote>
+        <timestamp>2025-06-13T19:20:26</timestamp>
+        <rwref>5934.37</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1829189">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="2855" dove-tower-id="14459">
+            <place-name type="place">Lancaster</place-name>
+            <place-name type="dedication">Priory Church of St Mary</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="4460" tenor="30-2-2 in Db"/>
+        </place>
+        <date>2024-12-15</date>
+        <duration>52m</duration>
+        <title>
+            <changes>1287</changes>
+            <method>Grandsire Triples</method>
+        </title>
+        <composition ref="2301422"/>
+        <composer role="composed">Simon A Bond</composer>
+        <ringers>
+            <ringer bell="1" conductor="true">Simon A Percy</ringer>
+            <ringer bell="2">Frances M Ross</ringer>
+            <ringer bell="3">Carolina M Goodship</ringer>
+            <ringer bell="4">D Robert Pettifor</ringer>
+            <ringer bell="5">Jim Currin</ringer>
+            <ringer bell="6">Nigel J Goodship</ringer>
+            <ringer bell="7">Robin A Daw</ringer>
+            <ringer bell="8">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>Rung for evensong.</footnote>
+        <footnote>Birthday compliments to Leonora Corden, sister of Carolina Goodship.</footnote>
+        <timestamp>2025-03-02T19:12:25</timestamp>
+        <rwref>5934.38</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1796020">
+        <place towerbase-id="4825" dove-tower-id="15122">
+            <place-name type="place">Stretton</place-name>
+            <place-name type="dedication">St Matthew</place-name>
+            <place-name type="county">Cheshire</place-name>
+            <ring type="tower" dove-ring-id="5123" tenor="8-3-18 in A"/>
+        </place>
+        <date>2024-12-12</date>
+        <duration>75m</duration>
+        <title>
+            <changes>2024</changes>
+            <method>Spliced Major (2m)</method>
+        </title>
+        <details>2016 Yorkshire Surprise Major and 8 Little Bob Major</details>
+        <composition ref="2301354"/>
+        <composer role="composed">Simon A Percy</composer>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2" conductor="true">Simon A Percy</ringer>
+            <ringer bell="3">Michael J Allen</ringer>
+            <ringer bell="4">Matthew O Hall</ringer>
+            <ringer bell="5">Iain D Scott</ringer>
+            <ringer bell="6">Sam N O Norman</ringer>
+            <ringer bell="7">David T G Jones</ringer>
+            <ringer bell="8">Stephen R Aldridge</ringer>
+        </ringers>
+        <footnote>First date touch: 1, 4, 6</footnote>
+        <timestamp>2024-12-12T21:07:12</timestamp>
+        <rwref>5933.11</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1793912">
+        <association>Lancashire Association</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2024-12-06</date>
+        <duration>45m</duration>
+        <title>
+            <changes>1250</changes>
+            <method>Yorkshire Surprise Major</method>
+        </title>
+        <composition ref="2301225"/>
+        <composer role="composed">trad</composer>
+        <ringers>
+            <ringer bell="1">Matthew J W Townson</ringer>
+            <ringer bell="2">D Robert Pettifor</ringer>
+            <ringer bell="3">Carolina M Goodship</ringer>
+            <ringer bell="4">Nigel J Goodship</ringer>
+            <ringer bell="5" conductor="true">Simon A Percy</ringer>
+            <ringer bell="6">Robin A Daw</ringer>
+            <ringer bell="7">Anne E Pettifor</ringer>
+            <ringer bell="8">Jayden R Milby</ringer>
+        </ringers>
+        <footnote>First Quarter away from the tenor - 1</footnote>
+        <timestamp>2024-12-07T00:05:20</timestamp>
+        <rwref>5930.1248</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1829190">
+        <association>The Quarter and Curry Society</association>
+        <place towerbase-id="7239" dove-tower-id="10114">
+            <place-name type="place">Over Kellet</place-name>
+            <place-name type="dedication">St Cuthbert</place-name>
+            <place-name type="county">Lancashire</place-name>
+            <ring type="tower" dove-ring-id="115" tenor="9-1-24 in F#"/>
+        </place>
+        <date>2024-11-24</date>
+        <duration>44m</duration>
+        <title>
+            <changes>1296</changes>
+            <method>Stedman Triples</method>
+        </title>
+        <composition ref="2301001"/>
+        <composer role="composed">Jonathan Young</composer>
+        <ringers>
+            <ringer bell="1">Anne E Pettifor</ringer>
+            <ringer bell="2">Robin A Daw</ringer>
+            <ringer bell="3">D Robert Pettifor</ringer>
+            <ringer bell="4">Frances M Ross</ringer>
+            <ringer bell="5">Carolina M Goodship</ringer>
+            <ringer bell="6">Nigel J Goodship</ringer>
+            <ringer bell="7" conductor="true">Simon A Percy</ringer>
+            <ringer bell="8">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>Circled the tower - 2</footnote>
+        <footnote>First quarter on the 8 since the recasting of the Treble and Second.</footnote>
+        <footnote>Best quarter of Stedman Triples - 5</footnote>
+        <footnote>First for the society.</footnote>
+        <timestamp>2025-03-02T19:13:31</timestamp>
+        <rwref>5929.1175</rwref>
+    </performance>
+    <performance
+        xmlns="http://bb.ringingworld.co.uk/NS/performances#" id="P1773552">
+        <association>Chester Diocesan Guild</association>
+        <place towerbase-id="4926" dove-tower-id="13819">
+            <place-name type="place">Tarporley</place-name>
+            <place-name type="dedication">St Helen</place-name>
+            <place-name type="county">Cheshire</place-name>
+            <ring type="tower" dove-ring-id="3820" tenor="11-0-7 in G"/>
+        </place>
+        <date>2024-09-12</date>
+        <duration>43m</duration>
+        <title>
+            <changes>1288</changes>
+            <method>Grandsire Triples</method>
+        </title>
+        <composition ref="2299483"/>
+        <ringers>
+            <ringer bell="1">Merlyn Gilldaley</ringer>
+            <ringer bell="2">Diana M Anderson</ringer>
+            <ringer bell="3">Matthew O Hall</ringer>
+            <ringer bell="4">David T G Jones</ringer>
+            <ringer bell="5">Henry J Stephenson</ringer>
+            <ringer bell="6">Duncan L C Hyde</ringer>
+            <ringer bell="7" conductor="true">Sam N O Norman</ringer>
+            <ringer bell="8">Matthew J W Townson</ringer>
+        </ringers>
+        <footnote>First quarter at first attempt: 8</footnote>
+        <footnote>First in method as conductor: 7</footnote>
+        <donation>£6.00</donation>
+        <flag type="first-quarter" bell="8"/>
+        <timestamp>2024-10-02T11:17:17</timestamp>
+        <rwref>5927.1120</rwref>
+    </performance>
+</performances>
