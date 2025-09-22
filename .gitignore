@@ -28,3 +28,6 @@ dovedata/archive/*
 
 # BellBoard data
 bbdata/*.csv
+
+# node package lock
+package-lock.json
