@@ -1,0 +1,146 @@
+.breadcrumb-nav {
+    margin-bottom: 1rem;
+}
+
+.breadcrumb-nav a {
+    color: #8ee3ef;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-nav a:hover {
+    text-decoration: underline;
+}
+
+.performance-detail-container {
+    background: #23262b;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.performance-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: #f3f4f6;
+    text-align: left;
+}
+
+.association {
+    font-size: 1rem;
+    color: #8ee3ef;
+    margin: 0;
+    font-weight: 600;
+}
+
+.location {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #f3f4f6;
+    margin: 0;
+}
+
+.dedication {
+    font-size: 1rem;
+    color: #d1d5db;
+    margin: 0;
+    font-weight: normal;
+}
+
+.date-details {
+    font-size: 1rem;
+    color: #a1a1aa;
+    margin: 0;
+    font-weight: normal;
+}
+
+.method-changes {
+    font-size: 1.3rem;
+    color: #f3f4f6;
+    margin: 0.25rem 0;
+    font-weight: 600;
+}
+
+.ringers-section {
+    margin: 0.25rem 0;
+    text-align: left;
+}
+
+.ringers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: left;
+}
+
+.ringer-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: left;
+}
+
+.bell-number {
+    color: #8ee3ef;
+    font-weight: 600;
+    min-width: 2rem;
+}
+
+.ringer-name {
+    color: #f3f4f6;
+    font-weight: normal;
+}
+
+.footnotes-section {
+    margin: 0.25rem 0;
+}
+
+.footnotes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.footnote-item {
+    color: #d1d5db;
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    font-weight: normal;
+}
+
+.external-links {
+    margin: 1rem 0 0.5rem 0;
+}
+
+.external-heading {
+    color: #8ee3ef;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.external-link {
+    margin-top: 0.5rem;
+}
+
+.external-link a {
+    color: #8ee3ef;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.external-link a:hover {    
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .performance-detail-container {
+        padding: 1rem;
+        margin: 0 1rem 2rem 1rem;
+    }
+}

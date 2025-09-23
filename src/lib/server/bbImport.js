@@ -201,7 +201,6 @@ export async function importBBData(userId) {
 
                     if (!towerExists) {
                         log.warn(`No matching Tower record for Performance ${perfObj.performanceID}: TowerID=${perfObj.towerID} RingID=${perfObj.ringID} — clearing to avoid FK error`);
-                        perfObj.towerID = null;
                         perfObj.ringID = null;
                     }
                 }

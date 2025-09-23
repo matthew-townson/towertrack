@@ -60,9 +60,9 @@ export async function load({ params, locals }) {
 
         const [perfRows] = await db.query(
             `SELECT * FROM Performance 
-             WHERE TowerID = ? AND RingID = ? 
+             WHERE TowerID = ?
              ORDER BY Date DESC LIMIT 10`,
-            [tower.TowerID, tower.RingID || 1]
+            [tower.TowerID]
         );
 
         const performances = perfRows.map(perf => {

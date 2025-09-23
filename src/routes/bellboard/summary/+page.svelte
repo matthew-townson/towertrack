@@ -27,6 +27,20 @@
         const finalLbs = remaining % 28;
         return `${cwt}-${qtr}-${finalLbs}`;
     }
+
+    // Helpers to display bell numbers when provided in the ringer object.
+    // Show the bell number only for the first person listed for that bell.
+    function isDuplicateBell(ringers, ringer, index) {
+        return (ringer?.bell != null) && (ringers.findIndex(r => r?.bell === ringer.bell) !== index);
+    }
+
+    function getBellLabel(ringers, ringer, index) {
+        if (ringer?.bell != null) {
+            const firstIndex = ringers.findIndex(r => r?.bell === ringer.bell);
+            return firstIndex === index ? String(ringer.bell) : null;
+        }
+        return String(index + 1);
+    }
 </script>
 
 <svelte:head>
@@ -98,7 +112,12 @@
                                 {#if perf.ringers && perf.ringers.length > 0}
                                     <div class="footnotes-list">
                                         {#each perf.ringers as ringer, index}
-                                            <span class="footnote-item">{ringer.name}{#if ringer.conductor} (C){/if}{#if index < perf.ringers.length - 1}, {/if}</span>
+                                            <div class="footnote-item">
+                                                {#if getBellLabel(perf.ringers, ringer, index)}
+                                                    <strong class="bell-number">{getBellLabel(perf.ringers, ringer, index)}.</strong>&nbsp;
+                                                {/if}
+                                                {ringer.name}{ringer.conductor ? ' (C)' : ''}
+                                            </div>
                                         {/each}
                                     </div>
                                 {/if}

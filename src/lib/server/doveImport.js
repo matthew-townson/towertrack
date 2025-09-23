@@ -100,10 +100,13 @@ export async function importDoveData() {
     // Filter towers data first - only import if RingType is full-circle ring
     const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
 
-    // If different, overwrite database with new data
-    log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
+    // Filter bells data - only import if bell collection type is full-circle ring
+    const filteredBellsData = bellsData.filter(bell => bell.CollectionType && bell.CollectionType.startsWith('full-circle ring'));
+
+    // log
+    log.info(`Of ${towersData.length} towers and ${bellsData.length} bells, importing ${filteredTowersData.length} towers and ${filteredBellsData.length} bells`);
+
     const batchSize = 500;
-    
     try {
         // Start transaction
         await pool.query('START TRANSACTION');

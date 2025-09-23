@@ -34,6 +34,19 @@
         
         return new Date(year, month, day);
     }
+
+    // Helpers to show bell numbers when present on ringer objects.
+    function isDuplicateBell(ringers, ringer, index) {
+        return (ringer?.bell != null) && (ringers.findIndex(r => r?.bell === ringer.bell) !== index);
+    }
+
+    function getBellLabel(ringers, ringer, index) {
+        if (ringer?.bell != null) {
+            const firstIndex = ringers.findIndex(r => r?.bell === ringer.bell);
+            return firstIndex === index ? String(ringer.bell) : null;
+        }
+        return String(index + 1);
+    }
 </script>
 
 <svelte:head>
@@ -191,19 +204,21 @@
             
             {#if data.performances && data.performances.length > 0}
                 <div class="performances-card">
-                    <h2>Recent Performances</h2>
+                    <h2>Recent Indexed Performances</h2>
                     <div class="performances-list">
-                        {#each data.performances as performance}
+                        {#each data.performances.slice(0, 3) as performance}
                             <div class="performance-item">
                                 <div class="performance-header">
-                                    <h3>{performance.Changes || ''} {performance.Method || 'Unknown Method'}</h3>
+                                    <h3>{performance.Changes || ''} {performance.Method || ''}</h3>
                                     <span class="performance-date">{formatDate(performance.Date)}</span>
                                 </div>
                                 {#if performance.ringers && performance.ringers.length > 0}
                                     <div class="ringers-list">
                                         {#each performance.ringers as ringer, i}
                                             <div class="ringer">
-                                                <span class="ringer-position">{i+1}.</span>
+                                                {#if getBellLabel(performance.ringers, ringer, i)}
+                                                    <span class="ringer-position">{getBellLabel(performance.ringers, ringer, i)}.</span>
+                                                {/if}
                                                 <span class="ringer-name">{ringer.name}</span>
                                                 {#if ringer.conductor}
                                                     <span class="conductor-badge">(C)</span>
