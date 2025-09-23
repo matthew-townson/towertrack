@@ -16,14 +16,11 @@ export async function importBBData(userId) {
     let insertedCount = 0;
     let updatedCount = 0;
 
-    // Normalise name for matching
     function normName(n) {
         if (!n) return '';
         return String(n).trim().toLowerCase().replace(/\s+/g, ' ');
     }
     const normalizedNames = names.map(normName);
-    // user's minimum percent of the full ring required to auto-count a grab.
-    // If unset, default to 100 (require full ring).
     const userMinPercent = typeof settings?.bellsPercent === 'number' ? Number(settings.bellsPercent) : (settings?.bellsPercent ? Number(settings.bellsPercent) : 100);
 
     function buildUrl(name, length) {
@@ -76,7 +73,6 @@ export async function importBBData(userId) {
         return null;
     }
 
-    // small helper: return Number(x) or null if not a valid finite number
     function numOrNull(x) {
         const n = Number(x);
         return Number.isFinite(n) ? n : null;
@@ -157,20 +153,15 @@ export async function importBBData(userId) {
         };
     }
 
-    // Determine whether this performance should create/update a grab for the user,
-// and insert corresponding Grab and GrabBell rows mapping the performance bell numbers
-// to actual BellIDs in the tower.
     async function addGrab(perfObj) {
         try {
             if (!perfObj || !perfObj.towerID) return;
 
             log.debug(`addGrab: checking perf ${perfObj.performanceID} (tower=${perfObj.towerID}, ring=${perfObj.ringID}, date=${perfObj.date})`);
 
-            // ensure we have ringers
             const perfRingers = Array.isArray(perfObj.ringers?.ringers) ? perfObj.ringers.ringers : (Array.isArray(perfObj.ringers) ? perfObj.ringers : []);
             if (!perfRingers || perfRingers.length === 0) return;
 
-            // find any ringer entries that match this user (username or aliases)
             const matchedRingers = perfRingers.filter(r => {
                 const candidate = normName(typeof r.name === 'string' ? r.name.replace(/\s*\(.*?\)\s*$/, '') : r.name);
                 return normalizedNames.includes(candidate);
@@ -178,7 +169,6 @@ export async function importBBData(userId) {
             log.debug(`addGrab: matchedRingers for perf ${perfObj.performanceID}: ${matchedRingers.length}`);
             if (matchedRingers.length === 0) return;
 
-            // load tower bells for the ring (ordered treble -> tenor)
             let bellRows = [];
             try {
                 if (perfObj.ringID) {
@@ -489,7 +479,6 @@ export async function importBBData(userId) {
         if (!exShort) tasks.push(() => fetchAndInsert(name, 'vshort', true));
     }
 
-    // simple limited-runner
     async function runLimited(funcs, limit) {
         const results = [];
         let index = 0;

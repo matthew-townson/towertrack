@@ -72,7 +72,7 @@
                 View on Dove
             </a>
             {#if data.tower.Lat && data.tower.Long}
-                <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=25" class="button map-button">
+                <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=18" class="button map-button">
                     View on Map
                 </a>
             {/if}

@@ -33,7 +33,7 @@ export async function load({ locals }) {
               ) as dateGrabbed,
               t.Place, t.Dedicn, t.County, t.Bells, t.Wt
              FROM Grab g
-             JOIN Tower t ON g.towerID = t.TowerID AND g.ringID = t.RingID
+             JOIN Tower t ON g.towerID = t.TowerID
              WHERE g.userId = ?
              ORDER BY g.yearGrabbed DESC, g.monthGrabbed DESC, g.dateGrabbed DESC, g.lastUpdated DESC
              LIMIT 5`,
@@ -57,7 +57,7 @@ export async function load({ locals }) {
               ) as dateGrabbed,
               t.Place, t.Dedicn, t.County, t.Bells, t.UR, t.Wt
              FROM Grab g
-             JOIN Tower t ON g.towerID = t.TowerID AND g.ringID = t.RingID
+             JOIN Tower t ON g.towerID = t.TowerID
              WHERE g.userID = ?
              ORDER BY 
                CASE WHEN g.yearGrabbed IS NULL THEN 1 ELSE 0 END,
@@ -72,8 +72,8 @@ export async function load({ locals }) {
                 `SELECT gb.bellID, b.BellRole, b.BellName
                  FROM GrabBell gb
                  JOIN Bell b ON gb.bellID = b.BellID
-                 WHERE gb.userID = ? AND gb.towerID = ? AND gb.ringID = ?`,
-                [locals.user.id, grab.towerID, grab.ringID]
+                 WHERE gb.userID = ? AND gb.towerID = ?`,
+                [locals.user.id, grab.towerID]
             );
             
             grab.bells = bellRows;

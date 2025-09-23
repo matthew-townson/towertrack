@@ -39,7 +39,7 @@ export async function load({ locals }) {
                   ) as dateGrabbed,
                   t.Place, t.Dedicn, t.County, t.Bells
                  FROM Grab g
-                 JOIN Tower t ON g.towerID = t.TowerID AND g.ringID = t.RingID
+                 JOIN Tower t ON g.towerID = t.TowerID
                  WHERE g.userID = ?`,
                 [locals.user.id]
             );
@@ -52,8 +52,8 @@ export async function load({ locals }) {
         if (userGrabs.length > 0) {
             for (let grab of userGrabs) {
                 const [bellRows] = await db.query(
-                    `SELECT bellID FROM GrabBell WHERE userID = ? AND towerID = ? AND ringID = ?`,
-                    [locals.user.id, grab.towerID, grab.ringID]
+                    `SELECT bellID FROM GrabBell WHERE userID = ? AND towerID = ?`,
+                    [locals.user.id, grab.towerID]
                 );
                 grab.bells = bellRows.map(row => row.bellID);
             }
@@ -155,10 +155,10 @@ export const actions = {
 
             const selectedTower = towerRows[0];
 
-            // check if tower already grabbed
+            // check if tower already grabbed (match only on towerID; ringID ignored)
             const [grabRows] = await db.query(
-                `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ? AND ringID = ?`,
-                [locals.user.id, towerId, ringId]
+                `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ?`,
+                [locals.user.id, towerId]
             );
 
             const towerAlreadyGrabbed = grabRows.length > 0;
@@ -184,20 +184,21 @@ export const actions = {
                 }
 
                 if (towerAlreadyGrabbed) {
-                    // update
+                    // update (match by user + towerID only)
                     await db.query(
                         `UPDATE Grab SET 
                          dateGrabbed = ?, 
                          monthGrabbed = ?, 
                          yearGrabbed = ?,
                          lastUpdated = CURRENT_TIMESTAMP 
-                         WHERE userID = ? AND towerID = ? AND ringID = ?`,
-                        [day, month, year, locals.user.id, towerId, ringId]
+                         WHERE userID = ? AND towerID = ?`,
+                        [day, month, year, locals.user.id, towerId]
                     );
                     
+                    // delete any existing grabbed-bell rows for this user+tower (ignore ringID differences)
                     await db.query(
-                        `DELETE FROM GrabBell WHERE userID = ? AND towerID = ? AND ringID = ?`,
-                        [locals.user.id, towerId, ringId]
+                        `DELETE FROM GrabBell WHERE userID = ? AND towerID = ?`,
+                        [locals.user.id, towerId]
                     );
                 } else {
                     await db.query(
@@ -238,14 +239,15 @@ export const actions = {
                     selectedBells
                 };
             } else if (towerAlreadyGrabbed) {
+                // remove grab for this tower (match by user + towerID only)
                 await db.query(
-                    `DELETE FROM Grab WHERE userID = ? AND towerID = ? AND ringID = ?`,
-                    [locals.user.id, towerId, ringId]
+                    `DELETE FROM Grab WHERE userID = ? AND towerID = ?`,
+                    [locals.user.id, towerId]
                 );
                 
                 await db.query(
-                    `DELETE FROM GrabBell WHERE userID = ? AND towerID = ? AND ringID = ?`,
-                    [locals.user.id, towerId, ringId]
+                    `DELETE FROM GrabBell WHERE userID = ? AND towerID = ?`,
+                    [locals.user.id, towerId]
                 );
 
                 log.info(`User ${locals.user.username} (ID: ${locals.user.id}) removed grab for tower ID ${towerId}`);

@@ -11,7 +11,7 @@ export async function load({ params, locals }) {
     try {
         const [towerRows] = await db.query(
             `SELECT t.*, 
-                (SELECT COUNT(*) FROM Grab g WHERE g.towerID = t.TowerID AND g.ringID = t.RingID) AS grabCount
+                (SELECT COUNT(*) FROM Grab g WHERE g.towerID = t.TowerID) AS grabCount
              FROM Tower t 
              WHERE t.TowerID = ?`,
             [towerId]
@@ -25,7 +25,7 @@ export async function load({ params, locals }) {
 
         const [bellRows] = await db.query(
             `SELECT * FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY BellRole`,
-            [tower.TowerID, tower.RingID || 1]
+            [tower.TowerID, tower.RingID || 0]
         );
 
         let userGrab = null;
@@ -35,10 +35,10 @@ export async function load({ params, locals }) {
                     GROUP_CONCAT(gb.bellID) as bellIDs,
                     GROUP_CONCAT(gb.bellRole) as bellRoles
                  FROM Grab g
-                 LEFT JOIN GrabBell gb ON g.userId = gb.userId AND g.towerID = gb.towerID AND g.ringID = gb.ringID
-                 WHERE g.userId = ? AND g.towerID = ? AND g.ringID = ?
-                 GROUP BY g.userId, g.towerID, g.ringID`,
-                [locals.user.id, tower.TowerID, tower.RingID || 1]
+                 LEFT JOIN GrabBell gb ON g.userId = gb.userId AND g.towerID = gb.towerID
+                 WHERE g.userId = ? AND g.towerID = ?
+                 GROUP BY g.userId, g.towerID`,
+                [locals.user.id, tower.TowerID]
             );
 
             if (grabRows.length > 0) {
