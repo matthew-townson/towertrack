@@ -692,7 +692,7 @@
                     </div>
                     
                     <div class="field mb-5">
-                        <label class="label">Legend</label>
+                        <span class="label">Legend</span>
                         <div class="is-flex is-align-items-center">
                             <div class="legend-item mr-3" style="display:flex;align-items:center;">
                                 <div class="legend-icon mr-2" style="width:28px;height:40px;">{@html legendQuarterSVG}</div>
