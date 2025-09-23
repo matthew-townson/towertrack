@@ -192,7 +192,6 @@ async function initialiseDatabase() {
                     \`Timestamp\` TIMESTAMP,
                     \`Footnotes\` JSON,
                     PRIMARY KEY (\`PerformanceID\`),
-                    FOREIGN KEY (\`TowerID\`, \`RingID\`) REFERENCES \`Tower\`(\`TowerID\`, \`RingID\`),
                     INDEX \`idx_tower_ring\` (\`TowerID\`, \`RingID\`)
                 )
             `);
@@ -207,14 +206,13 @@ async function initialiseDatabase() {
                 CREATE TABLE IF NOT EXISTS \`Grab\` (
                     \`userId\` INTEGER UNSIGNED NOT NULL,
                     \`towerID\` INTEGER UNSIGNED NOT NULL,
-                    \`ringID\` INTEGER UNSIGNED NOT NULL,
+                    \`ringID\` INTEGER UNSIGNED,
                     \`dateGrabbed\` TINYINT,
                     \`monthGrabbed\` TINYINT,
                     \`yearGrabbed\` YEAR,
                     \`lastUpdated\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (\`userId\`, \`towerID\`, \`ringID\`),
+                    PRIMARY KEY (\`userId\`, \`towerID\`),
                     FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
-                    FOREIGN KEY (\`towerID\`, \`ringID\`) REFERENCES \`Tower\`(\`TowerID\`, \`RingID\`) ON DELETE NO ACTION,
                     INDEX \`idx_user_grabs\` (\`userId\`),
                     INDEX \`idx_tower_grabs\` (\`towerID\`, \`ringID\`),
                     INDEX \`idx_date_grabbed\` (\`yearGrabbed\`, \`monthGrabbed\`, \`dateGrabbed\`)
@@ -234,9 +232,9 @@ async function initialiseDatabase() {
                     \`bellRole\` VARCHAR(50) NOT NULL,
                     \`towerID\` INTEGER UNSIGNED NOT NULL,
                     \`ringID\` INTEGER UNSIGNED NOT NULL,
-                    PRIMARY KEY (\`userId\`, \`bellID\`, \`towerID\`, \`ringID\`),
-                    FOREIGN KEY (\`userId\`, \`towerID\`, \`ringID\`) 
-                        REFERENCES \`Grab\`(\`userId\`, \`towerID\`, \`ringID\`) 
+                    PRIMARY KEY (\`userId\`, \`bellID\`),
+                    FOREIGN KEY (\`userId\`, \`towerID\`) 
+                        REFERENCES \`Grab\`(\`userId\`, \`towerID\`) 
                         ON DELETE NO ACTION,
                     FOREIGN KEY (\`bellID\`)
                         REFERENCES \`Bell\`(\`BellID\`)
