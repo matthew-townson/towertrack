@@ -49,75 +49,93 @@
     }
     
     function generatePinSVG(bellNumber, options = {}) {
-        const colors = [
-            '#999999', '#aa4488', '#fd99cc', '#ff8800', '#face27', '#039b16', '#44ffaa', '#fa1d1a',
-            '#aa4488', '#2f27ca', '#aaaa44', '#000000', '#aa8844', '#ff8888', '#88ff88', '#680098'
-        ];
-        
-        const color = colors[bellNumber - 1] || '#888888';
-        const isUnringable = options.unringable || false;
-        const isGrabbed = options.grabbed || false;
-        const isCircled = options.circled || false;
-        const isQuartered = options.quartered || false;
-        const isPealed = options.pealed || false;
-        
-        const scaleFactor = 1.4;
-        const baseWidth = Math.round((isCircled ? 26 : 25) * scaleFactor);
-        const baseHeight = Math.round((isGrabbed ? (isCircled ? 51 : 50) : (isCircled ? 42 : 41)) * scaleFactor);
-        const viewBoxOffset = isCircled ? '-0.5 -0.5' : '0 0';
-        const viewBoxWidth = isCircled ? 26 : 25;
-        const viewBoxHeight = isGrabbed ? (isCircled ? 51 : 50) : (isCircled ? 42 : 41);
-        
-        const height = isGrabbed ? 50 : 41;
-        const pinOffset = isGrabbed ? 9 : 0;
-        const circleY = isGrabbed ? 21.5 : 12.5;
-        const textY = isGrabbed ? 26 : 17;
-        
-        const strokeColor = isCircled ? '#FF6600' : 'none';
-        const strokeWidth = isCircled ? 2 : 0;
-        const strokeAttr = isCircled ? ` stroke="${strokeColor}" stroke-width="${strokeWidth}"` : '';
-        
-        let svg = `<svg width="${baseWidth}" height="${baseHeight}" viewBox="${viewBoxOffset} ${viewBoxWidth} ${viewBoxHeight}" xmlns="http://www.w3.org/2000/svg">`;
-        
-        if (isQuartered || isPealed) {
-            svg += '<defs>';
-            if (isQuartered) {
-                svg += `<pattern id="dots_${bellNumber}_${Math.random().toString(36).substr(2, 9)}" patternUnits="userSpaceOnUse" width="4" height="4">
-                    <circle cx="2" cy="2" r="1" fill="#ffffff" opacity="0.6"/></pattern>
-                    <clipPath id="leftHalf_${bellNumber}_${Math.random().toString(36).substr(2, 9)}"><rect x="0" y="${pinOffset}" width="12.5" height="41"/></clipPath>`;
-            }
-            if (isPealed) {
-                svg += `<pattern id="stripes_${bellNumber}_${Math.random().toString(36).substr(2, 9)}" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
-                    <rect width="2" height="4" fill="#ffffff" opacity="0.6"/></pattern>
-                    <clipPath id="rightHalf_${bellNumber}_${Math.random().toString(36).substr(2, 9)}"><rect x="12.5" y="${pinOffset}" width="12.5" height="41"/></clipPath>`;
-            }
-            svg += '</defs>';
-        }
-        
-        if (isGrabbed) {
-            svg += '<path d="M8 3 L12 7 L17 2" stroke="#00aa00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
-        }
-        
-        svg += `<path d="M12.5 ${pinOffset}C5.6 ${pinOffset} 0 ${5.6 + pinOffset} 0 ${12.5 + pinOffset}C0 ${19.6 + pinOffset} 12.5 ${41 + pinOffset} 12.5 ${41 + pinOffset}S25 ${19.6 + pinOffset} 25 ${12.5 + pinOffset}C25 ${5.6 + pinOffset} 19.4 ${pinOffset} 12.5 ${pinOffset}Z" fill="${color}"${strokeAttr}/>`;
-        
-        const centerColor = isUnringable ? '#888888' : color;
-        svg += `<circle cx="12.5" cy="${circleY}" r="10" fill="${centerColor}"/>`;
-        
-        if (isUnringable) {
-            const fontSize = bellNumber >= 10 ? 10 : 12;
-            const urFontSize = 6;
-            const numberY = textY - 2;
-            const urY = textY + 4;
-            
-            svg += `<text x="12.5" y="${numberY}" text-anchor="middle" fill="black" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold">${bellNumber}</text>`;
-            svg += `<text x="12.5" y="${urY}" text-anchor="middle" fill="black" font-family="Inter, sans-serif" font-size="${urFontSize}" font-weight="normal">UR</text>`;
-        } else {
-            const fontSize = bellNumber >= 10 ? 12 : 14;
-            svg += `<text x="12.5" y="${textY}" text-anchor="middle" fill="white" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold">${bellNumber}</text>`;
-        }
-        
-        svg += '</svg>';
-        return svg;
+	const colors = [
+		'#999999', '#aa4488', '#fd99cc', '#ff8800', '#face27', '#039b16', '#44ffaa', '#fa1d1a',
+		'#aa4488', '#2f27ca', '#aaaa44', '#000000', '#aa8844', '#ff8888', '#88ff88', '#680098'
+	];
+
+	const color = colors[bellNumber - 1] || '#888888';
+	const isUnringable = options.unringable || false;
+	const isGrabbed = options.grabbed || false;
+	const isCircled = options.circled || false;
+	const isQuartered = options.quartered || false;
+	const isPealed = options.pealed || false;
+
+	const uid = Math.random().toString(36).substr(2, 9);
+	const dotsId = `dots_${uid}`;
+	const stripesId = `stripes_${uid}`;
+	const leftClipId = `leftHalf_${uid}`;
+	const rightClipId = `rightHalf_${uid}`;
+
+	const scaleFactor = 1.4;
+	const baseWidth = Math.round((isCircled ? 26 : 25) * scaleFactor);
+	const baseHeight = Math.round((isGrabbed ? (isCircled ? 51 : 50) : (isCircled ? 42 : 41)) * scaleFactor);
+	const viewBoxOffset = isCircled ? '-0.5 -0.5' : '0 0';
+	const viewBoxWidth = isCircled ? 26 : 25;
+	const viewBoxHeight = isGrabbed ? (isCircled ? 51 : 50) : (isCircled ? 42 : 41);
+
+	const pinOffset = isGrabbed ? 9 : 0;
+	const circleY = isGrabbed ? 21.5 : 12.5;
+	const textY = isGrabbed ? 26 : 17;
+
+	const strokeColor = isCircled ? '#FF6600' : 'none';
+	const strokeWidth = isCircled ? 2 : 0;
+	const strokeAttr = isCircled ? ` stroke="${strokeColor}" stroke-width="${strokeWidth}"` : '';
+
+	const pinPathD = `M12.5 ${pinOffset}C5.6 ${pinOffset} 0 ${5.6 + pinOffset} 0 ${12.5 + pinOffset}C0 ${19.6 + pinOffset} 12.5 ${41 + pinOffset} 12.5 ${41 + pinOffset}S25 ${19.6 + pinOffset} 25 ${12.5 + pinOffset}C25 ${5.6 + pinOffset} 19.4 ${pinOffset} 12.5 ${pinOffset}Z`;
+
+	let svg = `<svg width="${baseWidth}" height="${baseHeight}" viewBox="${viewBoxOffset} ${viewBoxWidth} ${viewBoxHeight}" xmlns="http://www.w3.org/2000/svg">`;
+
+	if (isQuartered || isPealed) {
+		svg += `<defs>`;
+		if (isQuartered) {
+			svg += `<pattern id="${dotsId}" patternUnits="userSpaceOnUse" width="4" height="4">
+					<circle cx="2" cy="2" r="1" fill="#ffffff" opacity="0.6"/></pattern>
+					<clipPath id="${leftClipId}"><rect x="0" y="${pinOffset}" width="${viewBoxWidth/2}" height="${viewBoxHeight}"/></clipPath>`;
+		}
+		if (isPealed) {
+			svg += `<pattern id="${stripesId}" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+					<rect width="2" height="4" fill="#ffffff" opacity="0.6"/></pattern>
+					<clipPath id="${rightClipId}"><rect x="${viewBoxWidth/2}" y="${pinOffset}" width="${viewBoxWidth/2}" height="${viewBoxHeight}"/></clipPath>`;
+		}
+		svg += `</defs>`;
+	}
+
+	if (isGrabbed) {
+		svg += '<path d="M8 3 L12 7 L17 2" stroke="black" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+		svg += '<path d="M8 3 L12 7 L17 2" stroke="#16e616ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>';
+	}
+
+	// base pin body
+	svg += `<path d="${pinPathD}" fill="${color}"${strokeAttr}/>`;
+
+	// patterned overlays applied to the main pin body (clipped halves)
+	if (isQuartered) {
+		svg += `<g clip-path="url(#${leftClipId})"><path d="${pinPathD}" fill="url(#${dotsId})" /></g>`;
+	}
+	if (isPealed) {
+		svg += `<g clip-path="url(#${rightClipId})"><path d="${pinPathD}" fill="url(#${stripesId})" /></g>`;
+	}
+
+	const centerColor = isUnringable ? '#888888' : color;
+	svg += `<circle cx="12.5" cy="${circleY}" r="10" fill="${centerColor}"/>`;
+
+	// number / UR
+	if (isUnringable) {
+		const fontSize = bellNumber >= 10 ? 10 : 12;
+		const urFontSize = 6;
+		const numberY = textY - 2;
+		const urY = textY + 4;
+
+		svg += `<text x="12.5" y="${numberY}" text-anchor="middle" fill="black" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold">${bellNumber}</text>`;
+		svg += `<text x="12.5" y="${urY}" text-anchor="middle" fill="black" font-family="Inter, sans-serif" font-size="${urFontSize}" font-weight="normal">UR</text>`;
+	} else {
+		const fontSize = bellNumber >= 10 ? 12 : 14;
+		svg += `<text x="12.5" y="${textY}" text-anchor="middle" fill="white" font-family="Inter, sans-serif" font-size="${fontSize}" font-weight="bold">${bellNumber}</text>`;
+	}
+
+	svg += '</svg>';
+	return svg;
     }
     
     function convertToHundredweight(weight) {
@@ -126,20 +144,30 @@
         
         if (isNaN(weightValue)) return 'Unknown';
 
-        const totalPounds = Math.round(weightValue);
-        const hundredweight = Math.floor(totalPounds / 112);
-        const remainingAfterCwt = totalPounds % 112;
-        const quarters = Math.floor(remainingAfterCwt / 28);
-        const pounds = remainingAfterCwt % 28;
-
-        if (hundredweight > 0) {
-            return `${hundredweight}-${quarters}-${pounds}`;
-        } else {
-            let result = '';
-            if (quarters > 0) result += `${quarters}-`;
-            if (pounds > 0 || result === '') result += `${pounds}`;
-            return result.trim();
+        // Handle the possibility that the weight might already be in cwt-qtr-lb format
+        if (typeof weight === 'string' && weight.includes('-')) {
+            const parts = weight.split('-');
+            if (parts.length === 3) {
+                return weight; // Already in correct format
+            }
         }
+
+        const totalPounds = Math.round(weightValue);
+        
+        // 1 cwt = 112 pounds
+        const cwt = Math.floor(totalPounds / 112);
+        
+        // Remaining after cwt
+        const remainingAfterCwt = totalPounds % 112;
+        
+        // 1 qtr = 28 pounds (quarter of a hundredweight)
+        const qtr = Math.floor(remainingAfterCwt / 28);
+        
+        // Remaining pounds
+        const lb = remainingAfterCwt % 28;
+        
+        // Always use standard cwt-qtr-lb format
+        return `${cwt}-${qtr}-${lb}`;
     }
 
     function toggleLocationTracking() {
@@ -221,6 +249,8 @@
     }
     
     let lastTowerUpdate = 0;
+
+    let queryLocationUsed = false;
 
     function getUserLocation() {
         if (!navigator.geolocation) {
@@ -363,6 +393,13 @@
                 pealed: tower.pealed || false
             });
             
+            // Extract the pin color directly from the color array for consistency
+            const colors = [
+                '#999999', '#aa4488', '#fd99cc', '#ff8800', '#face27', '#039b16', '#44ffaa', '#fa1d1a',
+                '#aa4488', '#2f27ca', '#aaaa44', '#000000', '#aa8844', '#ff8888', '#88ff88', '#680098'
+            ];
+            const pinColor = isUnringable ? 'red' : colors[(bellCount - 1) % colors.length] || '#888888';
+            
             const customIcon = window.L.divIcon({
                 className: 'tower-pin',
                 html: pinSVG,
@@ -378,16 +415,22 @@
             const popupContent = `
                 <div class="tower-popup">
                     <h4><strong>
-                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" rel="noopener noreferrer" style="${isUnringable ? 'color: red;' : ''}">
+                        <a href="/tower/${tower.TowerID}" style="${isUnringable ? 'color: red;' : ''}">
                             ${isUnringable ? 'U/R' : ''} ${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}
                         </a>
-                    </strong></h4>
+                        </strong></h4>
                     <p style="${isUnringable ? 'color: red;' : ''}">${tower.County || tower.Country}</br>
-                        <strong style="color:${isUnringable ? 'red' : pinSVG.match(/fill="([^"]+)"/)?.[1] || '#888'}">
-                            ${tower.Bells || ''}
-                        </strong>, ${tower.Wt || ''} in ${tower.Note || ''}
+                        <strong style="color:${pinColor}">
+                            ${tower.Bells || ''}</strong>, ${tower.Wt ? convertToHundredweight(tower.Wt) : ''} in ${tower.Note || ''}
                         ${tower.Practice ? `<br>${tower.Practice}` : ''}
+                        ${tower.grabbed ? '<br><strong style="color: #00aa00;">✓ Grabbed</strong>' : ''}
+                        ${tower.quartered ? '<br><strong style="color:#ff8800;">✓ Quarter Pealed</strong>' : ''}
+                        ${tower.pealed ? '<br><strong style="color:#0a66ff;">✓ Pealed</strong>' : ''}
                     </p>
+                    <div class="popup-actions">
+                        <a href="/tower/${tower.TowerID}" class="popup-link">View Details</a>
+                        <a href="https://dove.cccbr.org.uk/tower/${tower.TowerID}" target="_blank" rel="noopener noreferrer" class="popup-link">Dove</a>
+                    </div>
                 </div>
             `;
             
@@ -422,17 +465,47 @@
     onMount(async () => {
         const L = await import('leaflet');
         window.L = L;
-        
+
         map = L.map(mapContainer).setView([52.0, 0.0], 6);
-        
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
-        
-        getUserLocation();
-        
+
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const latParam = params.get('lat');
+            const lngParam = params.get('lng');
+            const zoomParam = params.get('zoom');
+
+            if (latParam && lngParam) {
+                const lat = parseFloat(latParam);
+                const lng = parseFloat(lngParam);
+                const zoom = zoomParam ? parseFloat(zoomParam) : map.getZoom();
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    queryLocationUsed = true;
+                    isProgramMove = true;
+                    if (!isNaN(zoom)) {
+                        map.setView([lat, lng], zoom);
+                    } else {
+                        map.setView([lat, lng]);
+                    }
+                    setTimeout(() => {
+                        isProgramMove = false;
+                    }, 100);
+                }
+            }
+        } catch (err) {
+            console.warn('Error parsing query params for map location:', err);
+        }
+
+        if (!queryLocationUsed) {
+            getUserLocation();
+        }
+
         updateDisplayedTowers();
-        
+
         map.on('movestart', () => {
             if (isTrackingLocation && !isProgramMove) {
                 isTrackingLocation = false;
@@ -449,6 +522,9 @@
     $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter)) {
         updateDisplayedTowers();
     }
+
+    $: legendQuarterSVG = generatePinSVG(8, { quartered: true });
+    $: legendPealSVG = generatePinSVG(8, { pealed: true });
 </script>
 
 <svelte:head>
@@ -614,6 +690,20 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="field mb-5">
+                        <span class="label">Legend</span>
+                        <div class="is-flex is-align-items-center">
+                            <div class="legend-item mr-3" style="display:flex;align-items:center;">
+                                <div class="legend-icon mr-2" style="width:28px;height:40px;">{@html legendQuarterSVG}</div>
+                                <div class="is-size-7">Quarter Pealed</div>
+                            </div>
+                            <div class="legend-item" style="display:flex;align-items:center;">
+                                <div class="legend-icon mr-2" style="width:28px;height:40px;">{@html legendPealSVG}</div>
+                                <div class="is-size-7">Pealed</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </aside>
             
@@ -625,3 +715,8 @@
 </main>
 
 <Footer />
+
+<style>
+    :global(.legend-icon svg) { display: block; width: 100%; height: 100%; }
+    .legend-item { gap: 0.5rem; }
+</style>

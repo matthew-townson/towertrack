@@ -1,5 +1,4 @@
-
-FROM oven/bun:1-alpine AS builder
+FROM oven/bun:1.2 AS builder
 WORKDIR /app
 
 # Copy package files
@@ -17,15 +16,20 @@ COPY . .
 RUN bun --bun run build
 
 # Production stage
-FROM oven/bun:1-alpine AS runner
+FROM oven/bun:1.2 AS runner
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1001 -S bunjs
-RUN adduser -S sveltekit -u 1001
+RUN groupadd -g 1001 bunjs
+RUN useradd -m -u 1001 -g bunjs sveltekit
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
 # Copy built application and dependencies
 COPY --from=builder --chown=sveltekit:bunjs /app/build ./build/
@@ -36,8 +40,5 @@ COPY --from=builder --chown=sveltekit:bunjs /app/bun.lock* ./
 USER sveltekit
 EXPOSE 3000
 
-CMD ["bun", "--bun", "build/index.js"]
-
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
+# Use dumb-init to handle signals properly
+CMD ["dumb-init", "bun", "--bun", "build/index.js"]

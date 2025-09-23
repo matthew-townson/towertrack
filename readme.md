@@ -17,7 +17,7 @@ This app is dockerised!
 To run the containers, navigate to the towertracker directory and run  
 
 ```bash
-docker-compose --profile main up --build
+docker compose --profile main up --build
 ```
 
 This by default runs the app on port `3000` and the database on port `3306`  
@@ -25,8 +25,10 @@ This by default runs the app on port `3000` and the database on port `3306`
 ## Running towertracker in Development mode
 
 ```bash
-docker-compose --profile dev up --build
+docker compose --profile dev up --build
 ```
+
+This runs the app on port `5173` and will reload whenever changes are made to files
 
 ## Setup
 

@@ -9,8 +9,8 @@ export async function importDoveData() {
 
     // Fetch CSVs
     log.info('Fetching towers.csv and bells.csv from Dove website');
-    const towers = await fetch('https://mtownson.com/dovedata/towers.csv');
-    const bells = await fetch('https://mtownson.com/dovedata/bells.csv');
+    const towers = await fetch('https://mtownson.com/dovedata/towers.csv'); // Amend to real dove link when out of frequent testing
+    const bells = await fetch('https://mtownson.com/dovedata/bells.csv');   // Amend to real dove link when out of frequent testing
 
     if (!towers.ok) {
         log.error(`HTTP error fetching towers.csv! status: ${towers.status}`);
@@ -100,10 +100,13 @@ export async function importDoveData() {
     // Filter towers data first - only import if RingType is full-circle ring
     const filteredTowersData = towersData.filter(tower => tower.RingType && tower.RingType.startsWith('Full-circle ring'));
 
-    // If different, overwrite database with new data
-    log.info(`Importing ${towersData.length} tower records and ${bellsData.length} bell records into the database`);
+    // Filter bells data - only import if bell collection type is full-circle ring
+    const filteredBellsData = bellsData.filter(bell => bell.CollectionType && bell.CollectionType.startsWith('full-circle ring'));
+
+    // log
+    log.info(`Of ${towersData.length} towers and ${bellsData.length} bells, importing ${filteredTowersData.length} towers and ${filteredBellsData.length} bells`);
+
     const batchSize = 500;
-    
     try {
         // Start transaction
         await pool.query('START TRANSACTION');

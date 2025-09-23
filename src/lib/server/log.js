@@ -13,8 +13,24 @@ const colours = {
 async function log(type, message) {
     const timestamp = new Date().toISOString();
     const colour = colours[type] || '';
-    console.log(`${timestamp} ${colour}[ ${type} ]${colours.RESET} ${message}`);
+    const isDevProfile = process.env.DOCKER_PROFILE === 'dev';
+    const ignoreDebug = false;
 
+    /*console.log(isDevProfile);
+
+    if (isDevProfile && type === 'DEBUG') {
+        return;
+    } else {
+        }
+    */
+
+
+    if (type === 'DEBUG' && ignoreDebug) {
+        return;
+    }
+       
+    console.log(`${timestamp} ${colour}[ ${type} ]${colours.RESET} ${message}`);
+       
     // Save non-debug logs to database
     if (type !== 'DEBUG') {
         try {

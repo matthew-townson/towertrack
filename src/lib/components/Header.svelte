@@ -29,9 +29,10 @@
 		<div class="navbar-start">
 			{#if user}
 				<a class="navbar-item has-text-white" href="/home">Home</a>
+				<a class="navbar-item has-text-white" href="/grab">Grabs</a>
+				<a class="navbar-item has-text-white" href="/bellboard">BellBoard Data</a>
 				<a class="navbar-item has-text-white" href="/profile">Profile</a>
 				<a class="navbar-item has-text-white" href="/map">Map</a>
-				<a class="navbar-item has-text-white" href="/account/settings">Settings</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/">Home</a>
 				<a class="navbar-item has-text-white" href="/about">About</a>
@@ -42,6 +43,7 @@
 				{#if user.permission === 0}
 					<a class="navbar-item has-text-white" href="/admin">Admin</a>
 				{/if}
+				<a class="navbar-item has-text-white" href="/account/settings">Settings</a>
 				<a class="navbar-item has-text-white" href="/account/logout">Logout</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/account/register">Register</a>

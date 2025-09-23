@@ -4,16 +4,25 @@ import fetch from 'node-fetch';
 import xml2js from 'xml2js';
 
 export async function importBBData(userId) {
-    // Get username, aliases, and exShort setting
     const [[user]] = await pool.query('SELECT username FROM User WHERE id = ?', [userId]);
     const [aliases] = await pool.query('SELECT Name FROM OtherNames WHERE userId = ?', [userId]);
-    const [[settings]] = await pool.query('SELECT exShort FROM UserSettings WHERE userId = ?', [userId]);
+    const [[settings]] = await pool.query('SELECT exShort, bellsPercent FROM UserSettings WHERE userId = ?', [userId]);
     const names = [user.username, ...aliases.map(a => a.Name)];
     const exShort = !!settings?.exShort;
 
     log.info(`Importing BellBoard data for ${user.username}`);
+    const importStart = Date.now();
+    let processedCount = 0;
+    let insertedCount = 0;
+    let updatedCount = 0;
 
-    // Helper to build BellBoard search URL
+    function normName(n) {
+        if (!n) return '';
+        return String(n).trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+    const normalizedNames = names.map(normName);
+    const userMinPercent = typeof settings?.bellsPercent === 'number' ? Number(settings.bellsPercent) : (settings?.bellsPercent ? Number(settings.bellsPercent) : 100);
+
     function buildUrl(name, length) {
         const params = new URLSearchParams({
             ringer: name,
@@ -27,7 +36,6 @@ export async function importBBData(userId) {
         return `https://bb.ringingworld.co.uk/export.php?${params.toString()}`;
     }
 
-    // Helper to clean XML objects by removing $ keys and flattening _ keys
     function cleanXml(obj) {
         if (Array.isArray(obj)) {
             return obj.map(cleanXml);
@@ -45,11 +53,9 @@ export async function importBBData(userId) {
         return obj;
     }
 
-    // Helper to convert hundredweight format (e.g. "30-2-2 in Db") to lbs
     function cwtToLbs(str) {
         if (!str) return null;
         
-        // First try to match the full format (e.g. "30-2-2")
         let match = str.match(/(\d{1,2})-(\d{1,2})-(\d{1,2})/);
         if (match) {
             const [_, cwt, qtr, lbs] = match;
@@ -57,7 +63,6 @@ export async function importBBData(userId) {
             return total;
         }
         
-        // If no full format match, try to match just a single number (hundredweight only)
         match = str.match(/(\d{1,2})/);
         if (match) {
             const cwt = match[1];
@@ -68,26 +73,29 @@ export async function importBBData(userId) {
         return null;
     }
 
-    // Helper to extract ringers from <ringers> XML
+    function numOrNull(x) {
+        const n = Number(x);
+        return Number.isFinite(n) ? n : null;
+    }
+
     function parseRingersTag(ringersTag) {
         if (!Array.isArray(ringersTag)) return [];
         return ringersTag.map(r => ({
+            bell: r.$?.bell ? numOrNull(r.$?.bell) : null,
             name: typeof r._ === 'string' ? r._ : r,
             conductor: r.$?.conductor === 'true' ? 1 : 0
         }));
     }
 
-    // Helper to extract footnotes from <footnote> XML
     function parseFootnotesTag(footnotesTag) {
         if (!Array.isArray(footnotesTag)) return [];
         return footnotesTag.map(f => typeof f === 'string' ? f : f._).filter(Boolean);
     }
 
-    // Helper to extract place, dedication, county, towerid, tenor from place XML
     function extractPlaceFields(placeObj) {
         let Place = null, Dedication = null, County = null, towerID = null, tenorWeightLbs = null, tenorKey = null, ringID = null;
         if (placeObj) {
-            towerID = placeObj.$?.['dove-tower-id'] ? parseInt(placeObj.$['dove-tower-id']) : null;
+            towerID = placeObj.$?.['dove-tower-id'] ? numOrNull(placeObj.$['dove-tower-id']) : null;
             if (placeObj['place-name']) {
                 for (const pn of Array.isArray(placeObj['place-name']) ? placeObj['place-name'] : [placeObj['place-name']]) {
                     const type = pn.$?.type || pn.type || null;
@@ -110,7 +118,7 @@ export async function importBBData(userId) {
             }
 
             if (ringObj && ringObj.$?.['dove-ring-id']) {
-                ringID = parseInt(ringObj.$['dove-ring-id']);
+                ringID = numOrNull(ringObj.$['dove-ring-id']);
             }
         }
         return { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey, ringID };
@@ -119,13 +127,14 @@ export async function importBBData(userId) {
     function buildPerformanceObject(perf, perfId) {
         const placeObj = perf.place?.[0];
         const { Place, Dedication, County, towerID, tenorWeightLbs, tenorKey, ringID } = extractPlaceFields(placeObj);
-        const changes = perf.title?.[0]?.changes?.[0] ? parseInt(perf.title[0].changes[0]) : null;
+        const rawChanges = perf.title?.[0]?.changes?.[0];
+        const changes = numOrNull(rawChanges ? rawChanges : null);
         const method = perf.title?.[0]?.method?.[0] || null;
         const ringers = parseRingersTag(perf.ringers?.[0]?.ringer || []);
         const footnotes = parseFootnotesTag(perf.footnote || []);
 
         return {
-            performanceID: perfId ? parseInt(perfId) : null,
+            performanceID: perfId ? numOrNull(perfId) : null,
             association: perf.association?.[0] || null,
             towerID: towerID,
             ringID: ringID,
@@ -144,8 +153,190 @@ export async function importBBData(userId) {
         };
     }
 
+    async function addGrab(perfObj) {
+        try {
+            if (!perfObj || !perfObj.towerID) return;
+
+            log.debug(`addGrab: checking perf ${perfObj.performanceID} (tower=${perfObj.towerID}, ring=${perfObj.ringID}, date=${perfObj.date})`);
+
+            const perfRingers = Array.isArray(perfObj.ringers?.ringers) ? perfObj.ringers.ringers : (Array.isArray(perfObj.ringers) ? perfObj.ringers : []);
+            if (!perfRingers || perfRingers.length === 0) return;
+
+            const matchedRingers = perfRingers.filter(r => {
+                const candidate = normName(typeof r.name === 'string' ? r.name.replace(/\s*\(.*?\)\s*$/, '') : r.name);
+                return normalizedNames.includes(candidate);
+            });
+            log.debug(`addGrab: matchedRingers for perf ${perfObj.performanceID}: ${matchedRingers.length}`);
+            if (matchedRingers.length === 0) return;
+
+            let bellRows = [];
+            try {
+                if (perfObj.ringID) {
+                    const [rows] = await pool.query(
+                        `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                        [perfObj.towerID, perfObj.ringID]
+                    );
+                    bellRows = rows;
+                }
+                if (!bellRows || bellRows.length === 0) {
+                    // fallback: any bells for tower
+                    const [rows] = await pool.query(
+                        `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                        [perfObj.towerID]
+                    );
+                    bellRows = rows;
+                }
+            } catch (err) {
+                log.error(`Failed to load bells for tower ${perfObj.towerID}: ${err.message}`);
+                return;
+            }
+            log.debug(`Loaded ${bellRows.length} bell rows for tower ${perfObj.towerID}`);
+
+            if (!bellRows || bellRows.length === 0) {
+                log.debug(`No bell records for tower ${perfObj.towerID} - cannot map grabbed bells`);
+                return;
+            }
+
+            // exclude sharp or flat bells
+            const numericBellRows = bellRows.filter(b => {
+                const role = String(b.BellRole || '').trim();
+                return /^\d+$/.test(role);
+            });
+            const bellRowsForMapping = numericBellRows.length > 0 ? numericBellRows : bellRows;
+            if (numericBellRows.length > 0 && numericBellRows.length !== bellRows.length) {
+                log.debug(`Excluding ${bellRows.length - numericBellRows.length} extra/non-numeric bells from tower ${perfObj.towerID} when calculating grab eligibility`);
+            }
+
+            log.debug(`Using ${bellRowsForMapping.length} bells for mapping (perf ring count), total physical bells ${bellRows.length}`);
+
+            let numericToPhysical = null;
+            if (numericBellRows.length > 0 && numericBellRows.length !== bellRows.length) {
+                numericToPhysical = numericBellRows.map(nb => bellRows.indexOf(nb)).map(i => (i >= 0 ? i : null));
+                log.debug(`numericToPhysical map: ${JSON.stringify(numericToPhysical)}`);
+            } else {
+                numericToPhysical = bellRows.map((_, i) => i);
+            }
+            
+            const towerBellCount = bellRowsForMapping.length;
+            const perfBellCount = perfRingers.length;
+
+            log.debug(`perf ${perfObj.performanceID}: perfBellCount=${perfBellCount}, towerBellCount=${towerBellCount}, userMinPercent=${userMinPercent}`);
+
+            const percentOfRing = (perfBellCount / towerBellCount) * 100;
+
+            if (percentOfRing < userMinPercent) {
+                log.debug(`Performance ${perfObj.performanceID} uses ${percentOfRing.toFixed(1)}% of tower ${perfObj.towerID} (user requires ${userMinPercent}%) — skipping grab`);
+                return;
+            }
+
+            let ringIdToUse = perfObj.ringID != null ? perfObj.ringID : null;
+            if (ringIdToUse != null) {
+                try {
+                    const [trows] = await pool.query(
+                        `SELECT 1 FROM Tower WHERE TowerID = ? AND RingID = ? LIMIT 1`,
+                        [perfObj.towerID, ringIdToUse]
+                    );
+                    if (!trows || trows.length === 0) {
+                        // ringID does not match current Tower record(s) — use tower only (null ringid)
+                        log.debug(`RingID ${ringIdToUse} for Tower ${perfObj.towerID} not found; will insert Grab with NULL ringID`);
+                        ringIdToUse = null;
+                    }
+                } catch (err) {
+                    log.error(`Error validating Tower/Ring for tower ${perfObj.towerID} ring ${ringIdToUse}: ${err.message}`);
+                    ringIdToUse = null;
+                }
+            }
+
+            const M = towerBellCount;
+            const k = perfBellCount;
+            const startIndex = Math.max(0, M - k);
+
+            log.debug(`Mapping: M=${M}, k=${k}, startIndex=${startIndex}`);
+
+            let day = null, month = null, year = null;
+            if (perfObj.date) {
+                const d = new Date(perfObj.date);
+                if (!isNaN(d.getTime())) {
+                    day = d.getDate();
+                    month = d.getMonth() + 1;
+                    year = d.getFullYear();
+                }
+            }
+
+            try {
+                await pool.query(
+                    `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
+                     VALUES (?, ?, ?, ?, ?, ?)
+                     ON DUPLICATE KEY UPDATE
+                       dateGrabbed = VALUES(dateGrabbed),
+                       monthGrabbed = VALUES(monthGrabbed),
+                       yearGrabbed = VALUES(yearGrabbed),
+                       lastUpdated = CURRENT_TIMESTAMP`,
+                    [userId, perfObj.towerID, ringIdToUse, day, month, year]
+                );
+                log.debug(`Upserted Grab for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
+            } catch (err) {
+                log.error(`Failed to upsert Grab for user ${userId} tower ${perfObj.towerID}: ${err.message}`);
+                return;
+            }
+
+            for (const mr of matchedRingers) {
+                const bellNum = (mr.bell != null && !isNaN(Number(mr.bell))) ? Number(mr.bell) : null;
+                if (bellNum == null) {
+                    const idx = perfRingers.findIndex(r => normName(r.name.replace(/\s*\(.*?\)\s*$/, '')) === normName(mr.name.replace(/\s*\(.*?\)\s*$/, '')));
+                    if (idx >= 0) {
+                        const targetIndex = startIndex + idx;
+                        const physicalIndex = (numericToPhysical && numericToPhysical[targetIndex] != null) ? numericToPhysical[targetIndex] : targetIndex;
+                        log.debug(`Fallback mapping for ringer "${mr.name}" idx=${idx} -> targetIndex=${targetIndex} physicalIndex=${physicalIndex}`);
+                        const bell = bellRows[physicalIndex];
+                        if (bell) {
+                            log.debug(`Inserting GrabBell for user ${userId} -> BellID=${bell.BellID} role=${bell.BellRole}`);
+                            try {
+                                await pool.query(
+                                    `INSERT IGNORE INTO GrabBell (userID, bellID, bellRole, towerID, ringID)
+                                     VALUES (?, ?, ?, ?, ?)`,
+                                    [userId, bell.BellID, bell.BellRole || String(targetIndex + 1), perfObj.towerID, ringIdToUse]
+                                );
+                            } catch (err) {
+                                log.error(`Failed to insert GrabBell for user ${userId}, bell ${bell?.BellID}: ${err.message}`);
+                            }
+                        } else {
+                            log.debug(`No bell found at physicalIndex=${physicalIndex} for fallback ringer ${mr.name}`);
+                        }
+                    } else {
+                        log.debug(`Could not locate ringer name "${mr.name}" in perfRingers for fallback mapping`);
+                    }
+                } else {
+                    const targetIndex = startIndex + (bellNum - 1);
+                    const physicalIndex = (numericToPhysical && numericToPhysical[targetIndex] != null) ? numericToPhysical[targetIndex] : targetIndex;
+                    log.debug(`Explicit bell mapping for ringer "${mr.name}" bellNum=${bellNum} -> targetIndex=${targetIndex} physicalIndex=${physicalIndex}`);
+                    const bell = bellRows[physicalIndex];
+                    if (bell) {
+                        log.debug(`Inserting GrabBell for user ${userId} -> BellID=${bell.BellID} role=${bell.BellRole}`);
+                        try {
+                            await pool.query(
+                                `INSERT IGNORE INTO GrabBell (userID, bellID, bellRole, towerID, ringID)
+                                 VALUES (?, ?, ?, ?, ?)`,
+                                [userId, bell.BellID, bell.BellRole || String(targetIndex + 1), perfObj.towerID, ringIdToUse]
+                            );
+                        } catch (err) {
+                            log.error(`Failed to insert GrabBell for user ${userId}, bell ${bell?.BellID}: ${err.message}`);
+                        }
+                    } else {
+                        log.debug(`Could not map performance bell ${bellNum} -> physicalIndex ${physicalIndex} for tower ${perfObj.towerID}`);
+                    }
+                }
+            }
+
+            log.info(`Auto-added grab for user ${user.username} on tower ${perfObj.towerID} from performance ${perfObj.performanceID} (ringID=${ringIdToUse})`);
+        } catch (err) {
+            log.error(`Error in addGrab for perf ${perfObj?.performanceID}: ${err.message}`);
+        }
+    }
+
     async function fetchAndInsert(name, length, filterChanges = false) {
         const url = buildUrl(name, length);
+        log.info(`fetchAndInsert: fetching ${url} for name="${name}" length="${length}"`);
         const res = await fetch(url);
         if (!res.ok) {
             log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}, Status: ${res.status})`);
@@ -154,45 +345,78 @@ export async function importBBData(userId) {
         const xml = await res.text();
         const data = await xml2js.parseStringPromise(xml, { explicitArray: true });
         const performances = data.performances?.performance || [];
+
+        log.debug(`fetchAndInsert: parsed ${performances.length} performances for name="${name}" length="${length}"`);
+
+        const perfObjs = [];
         for (const perf of performances) {
             let perfId = perf.$?.id || perf.id?.[0];
             if (perfId && perfId.startsWith('P')) perfId = perfId.slice(1);
-            const perfObj = buildPerformanceObject(perf, perfId);
+            perfObjs.push(buildPerformanceObject(perf, perfId));
+        }
 
+        log.debug(`fetchAndInsert: built ${perfObjs.length} perfObjs for name="${name}"`);
+
+        if (perfObjs.length === 0) return;
+
+        const ids = perfObjs.map(p => p.performanceID).filter(Boolean);
+        log.debug(`fetchAndInsert: checking existing DB for ${ids.length} perf IDs`);
+        const existingMap = new Map();
+        if (ids.length > 0) {
             try {
-                if (!perfObj.ringID && perfObj.towerID) {
-                    const [rows] = await pool.query('SELECT RingID FROM Tower WHERE TowerID = ? LIMIT 1', [perfObj.towerID]);
-                    if (rows.length > 0 && rows[0].RingID != null) {
-                        perfObj.ringID = rows[0].RingID;
-                        log.debug(`Filled missing ringID for performance ${perfObj.performanceID} using Tower ${perfObj.towerID} -> RingID ${perfObj.ringID}`);
+                const chunkSize = 500;
+                for (let i = 0; i < ids.length; i += chunkSize) {
+                    const chunk = ids.slice(i, i + chunkSize);
+                    const [rows] = await pool.query(
+                        `SELECT PerformanceID, Timestamp FROM Performance WHERE PerformanceID IN (${chunk.map(() => '?').join(',')})`,
+                        chunk
+                    );
+                    for (const r of rows) {
+                        existingMap.set(Number(r.PerformanceID), r.Timestamp ? new Date(r.Timestamp).getTime() : null);
                     }
                 }
-            } catch (lookupErr) {
-                log.error(`Error looking up RingID for tower ${perfObj.towerID}: ${lookupErr.message}`);
+                log.debug(`fetchAndInsert: found ${existingMap.size} existing performances in DB`);
+            } catch (err) {
+                log.error(`Failed to fetch existing performance IDs: ${err.message}`);
             }
+        }
 
+        // For each perfObj, skip DB write and addGrab if timestamp matches existing DB timestamp.
+        for (const perfObj of perfObjs) {
             try {
+                const existingTs = perfObj.performanceID ? existingMap.get(perfObj.performanceID) : undefined;
+                const incomingTs = perfObj.timestamp ? new Date(perfObj.timestamp).getTime() : null;
+
+                if (typeof existingTs !== 'undefined' && existingTs !== null && incomingTs !== null && existingTs === incomingTs) {
+                    log.debug(`Skipping perf ${perfObj.performanceID} because timestamps match (ts=${incomingTs})`);
+                    continue;
+                }
+
+                log.debug(`Upserting performance ${perfObj.performanceID}: tower=${perfObj.towerID}, ring=${perfObj.ringID}, ts=${perfObj.timestamp}`);
+
+                // determine whether this perf is new (no existing DB row) or an update
+                const isNew = perfObj.performanceID ? !existingMap.has(perfObj.performanceID) : true;
+                
+                // if there is a ringID discrepancy, null ringID and use towerID only
                 if (perfObj.towerID) {
-                    let towerExists = false;
-                    if (perfObj.ringID) {
-                        const [trows] = await pool.query('SELECT 1 FROM Tower WHERE TowerID = ? AND RingID = ? LIMIT 1', [perfObj.towerID, perfObj.ringID]);
-                        towerExists = trows.length > 0;
-                    } else {
-                        const [trows] = await pool.query('SELECT 1 FROM Tower WHERE TowerID = ? LIMIT 1', [perfObj.towerID]);
-                        towerExists = trows.length > 0;
-                    }
-
-                    if (!towerExists) {
-                        log.warn(`No matching Tower record for Performance ${perfObj.performanceID}: TowerID=${perfObj.towerID} RingID=${perfObj.ringID} — clearing to avoid FK error`);
-                        perfObj.towerID = null;
-                        perfObj.ringID = null;
+                    if (perfObj.ringID != null) {
+                        try {
+                            const [trows] = await pool.query(
+                                `SELECT 1 FROM Tower WHERE TowerID = ? AND RingID = ? LIMIT 1`,
+                                [perfObj.towerID, perfObj.ringID]
+                            );
+                            if (!trows || trows.length === 0) {
+                                log.debug(`Performance ${perfObj.performanceID}: ringID ${perfObj.ringID} for Tower ${perfObj.towerID} not found — clearing ringID before insert`);
+                                perfObj.ringID = null;
+                            }
+                        } catch (err) {
+                            log.error(`Error validating Tower/Ring for performance ${perfObj.performanceID}: ${err.message}`);
+                            // safest fallback: clear ringID to avoid FK failure
+                            perfObj.ringID = null;
+                        }
                     }
                 }
-            } catch (verifyErr) {
-                log.error(`Error verifying Tower for performance ${perfObj.performanceID}: ${verifyErr.message}`);
-            }
 
-            try {
                 const [result] = await pool.query(
                     `INSERT INTO Performance (PerformanceID, Association, TowerID, RingID, Place, Dedication, County, TenorWeightLbs, TenorKey, Date, Duration, Changes, Method, Ringers, Timestamp, Footnotes)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -233,8 +457,14 @@ export async function importBBData(userId) {
                     ]
                 );
 
-                if (result && typeof result.affectedRows !== 'undefined') {
-                    //log.debug(`Upsert perfID ${perfObj.performanceID}: affectedRows=${result.affectedRows}, warnings=${result.warningStatus || 0}`);
+                processedCount++;
+                if (isNew) insertedCount++; else updatedCount++;
+                
+                log.debug(`Upsert completed for performance ${perfObj.performanceID}`);
+                try {
+                    await addGrab(perfObj);
+                } catch (err) {
+                    log.error(`addGrab failed for performance ${perfObj.performanceID}: ${err.message}`);
                 }
             } catch (err) {
                 log.error(`DB error inserting/updating performance ID: ${perfObj.performanceID} - ${err.message}`);
@@ -242,15 +472,32 @@ export async function importBBData(userId) {
         }
     }
 
-    // Main import logic
+    const CONCURRENCY = 3;
+    const tasks = [];
     for (const name of names) {
-        log.debug(`Begin importing for name/alias: ${name}`);
-        if (exShort) {
-            await fetchAndInsert(name, 'e-plus');
-        } else {
-            await fetchAndInsert(name, 'e-plus');
-            await fetchAndInsert(name, 'vshort', true);
-        }
+        tasks.push(() => fetchAndInsert(name, 'e-plus'));
+        if (!exShort) tasks.push(() => fetchAndInsert(name, 'vshort', true));
     }
-    log.success(`${user.username} imported performances from BellBoard`);
+
+    async function runLimited(funcs, limit) {
+        const results = [];
+        let index = 0;
+        const workers = new Array(Math.min(limit, funcs.length)).fill(0).map(async function worker() {
+            while (index < funcs.length) {
+                const i = index++;
+                try {
+                    results[i] = await funcs[i]();
+                } catch (err) {
+                    results[i] = err;
+                }
+            }
+        });
+        await Promise.all(workers);
+        return results;
+    }
+    
+    await runLimited(tasks, CONCURRENCY);
+
+    const elapsedMs = Date.now() - importStart;
+    log.success(`${user.username} imported ${processedCount} performances (${insertedCount} new, ${updatedCount} updated) from BellBoard in ${(elapsedMs/1000).toFixed(2)}s`);
 }

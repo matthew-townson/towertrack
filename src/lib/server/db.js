@@ -124,15 +124,17 @@ async function initialiseDatabase() {
                     \`Postcode\` VARCHAR(20),
                     \`Practice\` VARCHAR(255),
                     \`LGrade\` VARCHAR(10),
-                    PRIMARY KEY (\`TowerID\`),
-                    INDEX \`idx_ring\` (\`RingID\`),
-                    INDEX \`idx_tower_ring\` (\`TowerID\`, \`RingID\`)
+                    PRIMARY KEY (\`TowerID\`, \`RingID\`)
                 )
             `);
             console.log('[ INFO ] Tower table created successfully or already exists');
         } catch (error) {
             console.error('[ ERROR ] Failed to create Tower table:', error.message);
         }
+
+        /*
+            Critical for this to use TowerID + RingID as PK - in examples where there are two rings in the same tower, eg Bampton (ID 15240)
+        */
 
         // create bells table
         try {
@@ -160,6 +162,15 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create Bell table:', error.message);
         }
 
+        /*
+            Note regarding bells table, reason why TowerID and RingID are not foreign keys is because some bells may reference Rings that are no longer in existence,
+                due to modifications or otherwise.
+
+            Use TowerID for as authoritative link between bell and tower, as ring is not always integral.
+
+            (Bells also includes bells that are not part of FC rings - TODO: remove these from import)
+        */
+
         // create BB performances table
         try {
             await connection.query(`
@@ -181,7 +192,6 @@ async function initialiseDatabase() {
                     \`Timestamp\` TIMESTAMP,
                     \`Footnotes\` JSON,
                     PRIMARY KEY (\`PerformanceID\`),
-                    FOREIGN KEY (\`TowerID\`) REFERENCES \`Tower\`(\`TowerID\`),
                     INDEX \`idx_tower_ring\` (\`TowerID\`, \`RingID\`)
                 )
             `);
@@ -196,15 +206,16 @@ async function initialiseDatabase() {
                 CREATE TABLE IF NOT EXISTS \`Grab\` (
                     \`userId\` INTEGER UNSIGNED NOT NULL,
                     \`towerID\` INTEGER UNSIGNED NOT NULL,
-                    \`ringID\` INTEGER UNSIGNED NOT NULL,
-                    \`dateGrabbed\` DATE NOT NULL,
+                    \`ringID\` INTEGER UNSIGNED,
+                    \`dateGrabbed\` TINYINT,
+                    \`monthGrabbed\` TINYINT,
+                    \`yearGrabbed\` YEAR,
                     \`lastUpdated\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (\`userId\`, \`towerID\`, \`ringID\`),
+                    PRIMARY KEY (\`userId\`, \`towerID\`),
                     FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
-                    FOREIGN KEY (\`towerID\`) REFERENCES \`Tower\`(\`TowerID\`) ON DELETE NO ACTION,
                     INDEX \`idx_user_grabs\` (\`userId\`),
                     INDEX \`idx_tower_grabs\` (\`towerID\`, \`ringID\`),
-                    INDEX \`idx_date_grabbed\` (\`dateGrabbed\`)
+                    INDEX \`idx_date_grabbed\` (\`yearGrabbed\`, \`monthGrabbed\`, \`dateGrabbed\`)
                 )
             `);
             console.log('[ INFO ] Grab table created successfully or already exists');
@@ -221,9 +232,9 @@ async function initialiseDatabase() {
                     \`bellRole\` VARCHAR(50) NOT NULL,
                     \`towerID\` INTEGER UNSIGNED NOT NULL,
                     \`ringID\` INTEGER UNSIGNED NOT NULL,
-                    PRIMARY KEY (\`userId\`, \`bellID\`, \`towerID\`, \`ringID\`),
-                    FOREIGN KEY (\`userId\`, \`towerID\`, \`ringID\`) 
-                        REFERENCES \`Grab\`(\`userId\`, \`towerID\`, \`ringID\`) 
+                    PRIMARY KEY (\`userId\`, \`bellID\`),
+                    FOREIGN KEY (\`userId\`, \`towerID\`) 
+                        REFERENCES \`Grab\`(\`userId\`, \`towerID\`) 
                         ON DELETE NO ACTION,
                     FOREIGN KEY (\`bellID\`)
                         REFERENCES \`Bell\`(\`BellID\`)
