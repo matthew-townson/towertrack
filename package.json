@@ -18,7 +18,7 @@
     "mysql2": "^3.15.0",
     "node-fetch": "^3.3.2",
     "svelte": "^5.39.2",
-    "svelte-adapter-bun": "^0.5.2",
+    "svelte-adapter-bun": "^1.0.0",
     "svelte-kit": "^1.2.0",
     "xml2js": "^0.6.2"
   },
