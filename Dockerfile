@@ -20,11 +20,11 @@ FROM oven/bun:1.2 AS runner
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN addgroup -g 1001 -S bunjs
-RUN adduser -S sveltekit -u 1001
+RUN groupadd -g 1001 bunjs
+RUN useradd -m -u 1001 -g bunjs sveltekit
 
 # Set environment variables
 ENV NODE_ENV=production
