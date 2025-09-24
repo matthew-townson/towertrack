@@ -226,222 +226,244 @@
     <div class="settings-section">
         <h2>Search for a Tower</h2>
 
-        <!--- Go back --->
         <a href="/grab" class="button is-light mb-4">← Back to Grabs</a>
         
         <div class="search-container">
             <div class="field">
                 <label for="searchQuery" class="label">Tower Name</label>
-                <div class="search-input-container">
-                    <input 
-                        type="text" 
-                        id="searchQuery" 
-                        name="searchQuery"
-                        class="input" 
-                        placeholder="Start typing to search towers..." 
-                        bind:value={searchQuery}
-                        on:keydown={handleKeydown}
-                        autocomplete="off"
-                    />
-                    {#if loading}
-                        <div class="search-loading-indicator">Searching...</div>
-                    {/if}
+                <div class={"dropdown " + (searchResults.length > 0 ? 'is-active' : '')} style="width:100%;">
+                    <div class="dropdown-trigger" style="width:100%;">
+                        <div class="control has-icons-right" style="width:100%;">
+                            <input
+                                type="text"
+                                id="searchQuery"
+                                name="searchQuery"
+                                class="input"
+                                placeholder="Start typing to search towers..."
+                                bind:value={searchQuery}
+                                on:keydown={handleKeydown}
+                                autocomplete="off"
+                                aria-autocomplete="list"
+                                aria-expanded={searchResults.length > 0}
+                                style="width:100%;"
+                            />
+                            {#if loading}
+                                <span class="icon is-small is-right search-loading-indicator">⏳</span>
+                            {/if}
+                        </div>
+                    </div>
+
+                    <div class="dropdown-menu" role="menu">
+                        <div class="dropdown-content search-results-dropdown" style="max-height:300px; overflow:auto;">
+                            {#if searchResults.length > 0}
+                                {#each searchResults as tower}
+                                    <a href="#" class="dropdown-item" on:click|preventDefault={() => selectTower(tower)}>
+                                        <strong style="display:block; color:var(--accent,#8ee3ef);">{tower.Place}</strong>
+                                        <div style="color:var(--muted,#a1a1aa); font-size:0.9rem;">
+                                            {tower.Dedicn ? `${tower.Dedicn}, ` : ''}{tower.County ? `${tower.County}` : ''}{tower.Country && tower.Country !== tower.County ? `, ${tower.Country}` : ''}
+                                            <div style="font-size:0.85rem; margin-top:0.25rem;">
+                                                {tower.Bells} bells {tower.UR === '1' || tower.UR === 1 ? ' • Unringable' : ''}
+                                            </div>
+                                        </div>
+                                    </a>
+                                {/each}
+                            {:else if searchQuery.length >= 2 && !loading}
+                                <div class="dropdown-item" style="color:var(--muted,#a1a1aa);">
+                                    No towers found matching your search
+                                </div>
+                            {/if}
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            {#if searchResults.length > 0}
-                <div class="search-results">
-                    {#each searchResults as tower}
-                        <button 
-                            type="button"
-                            class="search-result-item" 
-                            on:click={() => selectTower(tower)}
-                        >
-                            <strong>{tower.Place}</strong>
-                            {tower.Dedicn ? `${tower.Dedicn}, ` : ''}{tower.County ? `${tower.County}` : ''}{tower.Country && tower.Country !== tower.County ? `, ${tower.Country}` : ''}
-                            <br>
-                            <small>
-                                {tower.Bells} bells
-                                {tower.UR === '1' || tower.UR === 1 ? ' (Unringable)' : ''}
-                            </small>
-                        </button>
-                    {/each}
+        </div>            
+            {#if selectedTower}
+                <div class="selected-tower-container">
+                    <h3>Selected Tower</h3>
+                    <div class="selected-tower-info">
+                        <p class="tower-name">
+                            <strong>{selectedTower.Place}</strong>{#if selectedTower.Dedicn}, {selectedTower.Dedicn}{/if}
+                        </p>
+                        <p class="tower-location">
+                            {selectedTower.County ? selectedTower.County : ''}{#if selectedTower.Country && selectedTower.Country !== selectedTower.County}, {selectedTower.Country}{/if}
+                        </p>
+                        <p class="tower-bells">
+                            <strong>{selectedTower.Bells} bells</strong>
+                            {#if selectedTower.Wt}
+                                <span class="tenor-weight">• Tenor: {lbsToHundredweight(selectedTower.Wt)}</span>
+                            {/if}
+                            {#if selectedTower.UR === '1' || selectedTower.UR === 1}
+                                <span class="unringable-tag">Unringable</span>
+                            {/if}
+                        </p>
+                    </div>
+                    
+                    <form method="POST" action="?/addGrab" use:enhance={() => {
+                        loading = true;
+                        const currentSelectedBells = [...selectedBells];
+                        const currentTowerName = selectedTower ? 
+                            `${selectedTower.Place}${selectedTower.Dedicn ? `, ${selectedTower.Dedicn}` : ''}` :
+                            'Tower';
+                        
+                        return async ({ result, update }) => {
+                            loading = false;
+                            if (result.type === 'success') {
+                                if (result.data && result.data.message) {
+                                    successMessage = result.data.message;
+                                    setTimeout(() => {
+                                        successMessage = '';
+                                    }, 5000);
+                                }
+                                
+                                resetFormState();
+                                
+                                await update();
+                            } else {
+                                const updatedProps = { 
+                                    ...result.data,
+                                    selectedBells: currentSelectedBells 
+                                };
+                                await update({ ...result, data: updatedProps });
+                            }
+                        };
+                    }}>
+                        <input type="hidden" name="towerId" value={selectedTower.TowerID} />
+                        <input type="hidden" name="ringId" value={selectedTower.RingID || 1} />
+                        <input type="hidden" name="isGrabbed" value={isGrabbed} />
+                        
+                        <div class="grab-toggle-container">
+                            <label class="grab-toggle">
+                                <span class="grab-label">Have you grabbed this tower?</span>
+                                <div class="toggle-switch-container">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={isGrabbed} 
+                                        on:change={() => isGrabbed = !isGrabbed}
+                                    />
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        {#if isGrabbed}
+                            <div class="date-grabbed-container">
+                                <div class="date-field-header">
+                                    <label for="dateGrabbed" class="label">Date Grabbed (Optional)</label>
+                                    <label class="checkbox date-required-toggle">
+                                        <input 
+                                            type="checkbox" 
+                                            bind:checked={isDateRequired}
+                                            on:change={() => {
+                                                if (!isDateRequired && !dateGrabbed) {
+                                                    dateGrabbed = '';
+                                                }
+                                            }}
+                                        />
+                                        <span>Include Date</span>
+                                    </label>
+                                </div>
+                                <input 
+                                    type="date" 
+                                    id="dateGrabbed" 
+                                    name="dateGrabbed" 
+                                    bind:value={dateGrabbed}
+                                    max={new Date().toISOString().split('T')[0]}
+                                    class="input"
+                                    disabled={!isDateRequired}
+                                />
+                            </div>
+                            
+                            {#if towerBells.length > 0}
+                                <div class="bells-selection-container">
+                                    <div class="bells-header">
+                                        <h4>Select the bells you've rung</h4>
+                                        <label class="checkbox select-all">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={allBells}
+                                                on:change={() => {
+                                                    allBells = !allBells;
+                                                    toggleAllBells();
+                                                }}
+                                            />
+                                            <span>Select All</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="columns is-multiline bells-grid">
+                                        {#each towerBells as bell}
+                                            <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+                                                <div
+                                                    class="box bell-box {selectedBells.has(bell.BellID) ? 'is-selected' : ''}"
+                                                    on:click={() => toggleBell(bell.BellID)}
+                                                    role="checkbox"
+                                                    aria-checked={selectedBells.has(bell.BellID)}
+                                                    tabindex="0"
+                                                    on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBell(bell.BellID); } }}
+                                                >
+                                                    <label class="checkbox" style="display:flex; align-items:flex-start; gap:0.5rem; width:100%;">
+                                                        <input
+                                                            type="checkbox"
+                                                            name={"bell_" + bell.BellID}
+                                                            checked={selectedBells.has(bell.BellID)}
+                                                            on:change={() => toggleBell(bell.BellID)}
+                                                            on:click|stopPropagation
+                                                        />
+                                                        <div class="bell-info" style="margin-left:0.5rem; flex:1;">
+                                                            <div class="bell-number" style="font-weight:600; color:var(--accent, #8ee3ef);">
+                                                                {bell.BellRole || 'Bell'}
+                                                            </div>
+                                                            {#if bell.WeightLbs}
+                                                                <div class="bell-weight" style="color:var(--muted,#a1a1aa); font-size:0.9rem;">
+                                                                    {lbsToHundredweight(bell.WeightLbs)}
+                                                                </div>
+                                                            {/if}
+                                                            {#if bell.Note}
+                                                                <div class="bell-note" style="color:var(--muted,#a1a1aa); font-size:0.9rem;">
+                                                                    {bell.Note}
+                                                                </div>
+                                                            {/if}
+                                                            {#if bell.BellName}
+                                                                <div class="bell-name" style="font-style:italic; color:var(--muted,#d1d5db); font-size:0.9rem;">
+                                                                    {bell.BellName}
+                                                                </div>
+                                                            {/if}
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {/each}
+                                    </div>
+                                </div>
+                            {/if}
+                        {/if}
+                        
+                        <input 
+                            type="hidden" 
+                            name="selectedBellsJson" 
+                            value={JSON.stringify([...selectedBells])} 
+                        />
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="button submit-btn" disabled={loading}>
+                                {#if loading}
+                                    Saving...
+                                {:else if isGrabbed}
+                                    Save Grab
+                                {:else}
+                                    Remove Grab
+                                {/if}
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            {:else if searchQuery.length >= 2 && !loading && searchResults.length === 0}
-                <div class="search-results">
-                    <div class="search-result-empty">No towers found matching your search</div>
+            {/if}
+            {#if successMessage}
+                <div class="notification is-success">
+                    <p>{successMessage}</p>
                 </div>
             {/if}
         </div>
-        
-        {#if selectedTower}
-            <div class="selected-tower-container">
-                <h3>Selected Tower</h3>
-                <div class="selected-tower-info">
-                    <p class="tower-name">
-                        <strong>{selectedTower.Place}</strong>{#if selectedTower.Dedicn}, {selectedTower.Dedicn}{/if}
-                    </p>
-                    <p class="tower-location">
-                        {selectedTower.County ? selectedTower.County : ''}{#if selectedTower.Country && selectedTower.Country !== selectedTower.County}, {selectedTower.Country}{/if}
-                    </p>
-                    <p class="tower-bells">
-                        <strong>{selectedTower.Bells} bells</strong>
-                        {#if selectedTower.Wt}
-                            <span class="tenor-weight">• Tenor: {lbsToHundredweight(selectedTower.Wt)}</span>
-                        {/if}
-                        {#if selectedTower.UR === '1' || selectedTower.UR === 1}
-                            <span class="unringable-tag">Unringable</span>
-                        {/if}
-                    </p>
-                </div>
-                
-                <form method="POST" action="?/addGrab" use:enhance={() => {
-                    loading = true;
-                    const currentSelectedBells = [...selectedBells];
-                    const currentTowerName = selectedTower ? 
-                        `${selectedTower.Place}${selectedTower.Dedicn ? `, ${selectedTower.Dedicn}` : ''}` :
-                        'Tower';
-                    
-                    return async ({ result, update }) => {
-                        loading = false;
-                        if (result.type === 'success') {
-                            if (result.data && result.data.message) {
-                                successMessage = result.data.message;
-                                setTimeout(() => {
-                                    successMessage = '';
-                                }, 5000);
-                            }
-                            
-                            resetFormState();
-                            
-                            await update();
-                        } else {
-                            const updatedProps = { 
-                                ...result.data,
-                                selectedBells: currentSelectedBells 
-                            };
-                            await update({ ...result, data: updatedProps });
-                        }
-                    };
-                }}>
-                    <input type="hidden" name="towerId" value={selectedTower.TowerID} />
-                    <input type="hidden" name="ringId" value={selectedTower.RingID || 1} />
-                    <input type="hidden" name="isGrabbed" value={isGrabbed} />
-                    
-                    <div class="grab-toggle-container">
-                        <label class="grab-toggle">
-                            <span class="grab-label">Have you grabbed this tower?</span>
-                            <div class="toggle-switch-container">
-                                <input 
-                                    type="checkbox" 
-                                    checked={isGrabbed} 
-                                    on:change={() => isGrabbed = !isGrabbed}
-                                />
-                                <span class="toggle-slider"></span>
-                            </div>
-                        </label>
-                    </div>
-                    
-                    {#if isGrabbed}
-                        <div class="date-grabbed-container">
-                            <div class="date-field-header">
-                                <label for="dateGrabbed" class="label">Date Grabbed (Optional)</label>
-                                <label class="checkbox date-required-toggle">
-                                    <input 
-                                        type="checkbox" 
-                                        bind:checked={isDateRequired}
-                                        on:change={() => {
-                                            if (!isDateRequired && !dateGrabbed) {
-                                                dateGrabbed = '';
-                                            }
-                                        }}
-                                    />
-                                    <span>Include Date</span>
-                                </label>
-                            </div>
-                            <input 
-                                type="date" 
-                                id="dateGrabbed" 
-                                name="dateGrabbed" 
-                                bind:value={dateGrabbed}
-                                max={new Date().toISOString().split('T')[0]}
-                                class="input"
-                                disabled={!isDateRequired}
-                            />
-                        </div>
-                        
-                        {#if towerBells.length > 0}
-                            <div class="bells-selection-container">
-                                <div class="bells-header">
-                                    <h4>Select the bells you've rung</h4>
-                                    <label class="checkbox select-all">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={allBells}
-                                            on:change={() => {
-                                                allBells = !allBells;
-                                                toggleAllBells();
-                                            }}
-                                        />
-                                        <span>Select All</span>
-                                    </label>
-                                </div>
-                                
-                                <div class="bells-grid">
-                                    {#each towerBells as bell}
-                                        <label class="bell-checkbox">
-                                            <input 
-                                                type="checkbox" 
-                                                name="bell_{bell.BellID}" 
-                                                checked={selectedBells.has(bell.BellID)}
-                                                on:change={() => toggleBell(bell.BellID)}
-                                            />
-                                            <div class="bell-info">
-                                                <span class="bell-number">{bell.BellRole || 'Bell'}</span>
-                                                {#if bell.WeightLbs}
-                                                    <span class="bell-weight">{lbsToHundredweight(bell.WeightLbs)}</span>
-                                                {/if}
-                                                {#if bell.Note}
-                                                    <span class="bell-note">{bell.Note}</span>
-                                                {/if}
-                                                {#if bell.BellName}
-                                                    <span class="bell-name">{bell.BellName}</span>
-                                                {/if}
-                                            </div>
-                                        </label>
-                                    {/each}
-                                </div>
-                            </div>
-                        {/if}
-                    {/if}
-                    
-                    <!-- Add a hidden input to pass the selected bells as JSON -->
-                    <input 
-                        type="hidden" 
-                        name="selectedBellsJson" 
-                        value={JSON.stringify([...selectedBells])} 
-                    />
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="button submit-btn" disabled={loading}>
-                            {#if loading}
-                                Saving...
-                            {:else if isGrabbed}
-                                Save Grab
-                            {:else}
-                                Remove Grab
-                            {/if}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        {/if}
-        {#if successMessage}
-            <div class="notification is-success">
-                <p>{successMessage}</p>
-            </div>
-        {/if}
-    </div>
 </main>
 
 <Footer />
