@@ -648,37 +648,82 @@ input:checked + .toggle-slider:before {
     font-style: italic;
 }
 
+/* Bell box styling (Bulma-compatible boxes, dark mode) */
+.bell-box {
+    background: #23262b;
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    display: flex;
+    align-items: flex-start;
+    min-height: 64px;
+}
+
+.bell-box .bell-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+/* hover/active */
+.bell-box:hover {
+    background: #2d3139;
+}
+
+/* selected state */
+.bell-box.is-selected {
+    border-color: rgba(142,227,239,0.22);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45), 0 0 0 4px rgba(142,227,239,0.04);
+}
+
+/* ensure checkbox inside box sits nicely */
+.bell-box input[type="checkbox"] {
+    margin-top: 6px;
+    transform: scale(1.05);
+}
+
+/* small screens: tighter layout */
 @media (max-width: 768px) {
-    .bells-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .grab-toggle {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        text-align: center;
-    }
-    
-    .bells-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 0.5rem;
-    }
-    
-    .search-input-container {
-        flex-direction: column;
-    }
-    
-    .search-btn {
-        width: 100%;
-    }
-    
-    .date-field-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: 0.5rem;
-    }
+    .bell-box { min-height: 56px; padding: 0.6rem; }
+}
+
+/* Bulma dropdown dark-mode overrides for search results */
+.dropdown.is-active .dropdown-menu {
+    display: block;
+}
+
+.search-results-dropdown {
+    background: #23262b;
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 6px;
+    padding: 0.25rem 0;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+
+.search-results-dropdown .dropdown-item {
+    color: #f3f4f6;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+}
+
+.search-results-dropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.search-results-dropdown .dropdown-item:hover {
+    background: #2d3139;
+    color: #f3f4f6;
+}
+
+/* small loading indicator right icon */
+.search-loading-indicator {
+    right: 0.75rem;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    pointer-events: none;
 }

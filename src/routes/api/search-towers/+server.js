@@ -36,7 +36,7 @@ export async function GET({ url, locals }) {
                  WHERE (Place LIKE ? OR Place LIKE ?)
                  AND (Dedicn LIKE ? OR Dedicn LIKE ? OR Dedicn LIKE ? OR Dedicn LIKE ?)
                  ORDER BY Place
-                 LIMIT 20`,
+                 `,
                 [
                     `%${place}%`, 
                     `${place}%`,            // Prioritise starts-with matches
@@ -70,7 +70,7 @@ export async function GET({ url, locals }) {
                          WHEN Dedicn LIKE ? THEN 4
                          ELSE 5 END,
                     Place
-                 LIMIT 20`,
+                 `,
                 [
                     `%${query}%`,
                     `${query}%`,        // Prioritise starts-with matches for Place

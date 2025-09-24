@@ -91,8 +91,7 @@ export const actions = {
                 `SELECT TowerID, RingID, Place, Dedicn, County, Country, Bells, UR
                  FROM Tower
                  WHERE Place LIKE ? OR Dedicn LIKE ? OR County LIKE ?
-                 ORDER BY Place
-                 LIMIT 20`,
+                 ORDER BY Place`,
                 [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`]
             );
 
@@ -232,7 +231,7 @@ export const actions = {
                 
                 return {
                     success: true,
-                    message: `Tower ${selectedTower.Place} ${towerAlreadyGrabbed ? 'updated' : 'added'} to your grabs.`,
+                    message: `Grab at ${selectedTower.Place} ${towerAlreadyGrabbed ? 'updated' : 'added'}.`,
                     selectedTower,
                     isGrabbed,
                     dateGrabbed,
