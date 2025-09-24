@@ -57,6 +57,8 @@
         <label for="confirmEmail">Confirm Email</label>
         <input type="email" id="confirmEmail" name="confirmEmail" placeholder="ringer@email.com" value={form?.confirmEmail ?? ''} autocomplete="off" required />
         <br>
+        <label for="accessCode">Access Code</label>
+        <input type="text" id="accessCode" name="accessCode" placeholder="Enter the beta access code" value={form?.accessCode ?? ''} autocomplete="off" required />
         <button type="submit">Register</button>
         {#if form?.error}
             <p class="error">{form.message}</p>

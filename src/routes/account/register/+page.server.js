@@ -16,6 +16,13 @@ export const actions = {
         const tEmail = email.trim();
         const tConfEmail = confirmEmail.trim();
 
+        // BETA: validate access code
+        const accessCode = data.get('accessCode');
+
+        if (accessCode !== "grabMadRinger") {
+            return fail(400, { error: true, message: 'Invalid access code', tUsername, tEmail, tConfEmail });
+        }
+
         // check if values exist
         if (!tUsername || !password || !tEmail || !tConfEmail) {
             return fail(400, { error: true, message: 'All fields are required' });
