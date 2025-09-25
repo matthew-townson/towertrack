@@ -223,10 +223,47 @@ export const actions = {
             
             const targetUsername = existingUser[0].username;
             const targetEmail = existingUser[0].email;
-            
-            // Delete user
+
+            // Delete performances
+            try {
+                await db.execute(
+                    'DELETE FROM Performance WHERE JSON_CONTAINS(ringers, ?, \'$.ringers\');',
+                    [JSON.stringify({ name: targetUsername })]
+                );
+            } catch (error) {
+                console.error(`Failed to delete performances for user ID ${userId}:`, error);
+            }
+
+            // Delete grabs
+            try {
+                await db.execute('DELETE FROM GrabBell WHERE userId = ?', [userId]);
+            } catch (error) {
+                console.error(`Failed to delete bellgrabs for user ID ${userId}:`, error);
+            }
+
+            try {
+                await db.execute('DELETE FROM Grab WHERE userId = ?', [userId]);
+            } catch (error) {
+                console.error(`Failed to delete grabs for user ID ${userId}:`, error);
+            }
+
+            // Delete user settings
+            try {
+                await db.execute('DELETE FROM UserSettings WHERE userId = ?', [userId]);
+            } catch (error) {
+                console.error(`Failed to delete user settings for user ID ${userId}:`, error);
+            }
+
+            // Delete aliases
+            try {
+                await db.execute('DELETE FROM OtherNames WHERE userId = ?', [userId]);
+            } catch (error) {
+                console.error(`Failed to delete aliases for user ID ${userId}:`, error);
+            }
+
+            // Delete User
             await db.execute('DELETE FROM User WHERE id = ?', [userId]);
-            
+                        
             // Log the deletion
             console.log(`[USER DELETION] Admin "${locals.user.username}" (ID: ${locals.user.id}) deleted user "${targetUsername}" (ID: ${userId}, Email: ${targetEmail})`);
             
