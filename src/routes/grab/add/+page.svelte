@@ -20,7 +20,8 @@
     let searchResults = [];
     let typingTimeout = null;
     let successMessage = '';
-
+    let suppressSearch = false;
+    
     function debounce(func, wait) {
         return function(...args) {
             clearTimeout(typingTimeout);
@@ -29,6 +30,14 @@
     }
     
     async function performSearch() {
+        // If we've just selected a tower, skip the immediate automatic search
+        if (suppressSearch) {
+            // reset loading state and clear suppression (allow future searches)
+            loading = false;
+            suppressSearch = false;
+            return;
+        }
+
         if (searchQuery.length < 2) {
             searchResults = [];
             return;
@@ -117,7 +126,12 @@
 
     async function selectTower(tower) {
         selectedTower = tower;
-        
+        clearTimeout(typingTimeout);
+        suppressSearch = true;
+        searchQuery = `${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}`;
+        searchResults = [];
+        setTimeout(() => { suppressSearch = false; }, 300);
+
         const existingGrab = data.userGrabs?.find(grab => 
             grab.towerID === tower.TowerID && grab.ringID === (tower.RingID || 1)
         );
