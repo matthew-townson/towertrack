@@ -32,8 +32,9 @@ export const actions = {
             return fail(400, { error: true, message: 'Username must be 3-50 characters long and can only contain letters, numbers, spaces, and hyphens', tEmail, tConfEmail });
         }
         // check if password is valid - at least 8 characters, less than 250, at least one letter and one number
-        if (!/^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{8,250}$/.test(password)) {
-            return fail(400, { error: true, message: 'Password must be at least 8 characters long and contain at least one letter and one number', tUsername, tEmail, tConfEmail });
+        // allow special characters, require at least one letter and one number, length 8-250
+        if (!/^(?=.*[A-Za-z])(?=.*\d).{8,250}$/.test(password)) {
+            return fail(400, { error: true, message: 'Password must be 8-250 characters long, contain at least one letter and one number, and may include special characters', tUsername, tEmail, tConfEmail });
         }
         // check if email is valid
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tEmail) || tEmail.length > 250) {
