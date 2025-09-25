@@ -13,7 +13,7 @@
 
 <main>
     <h1>Welcome to towertracker</h1>
-    <p>Tracking tower grabs and bellringing statistics of {data.userCount ? `${data.userCount} users` : 'no users'}</p>
+    <p>Tracking {data.grabCount} tower grabs and {data.performanceCount} performances of {data.userCount ? `${data.userCount} users` : 'no users'}</p>
     <br>
     <h2>See your tower grabs and peal locations</h2>
     <img src="assets/image/homepage/map.png" alt="Map of tower grabs" width="30%" height="auto"/>
