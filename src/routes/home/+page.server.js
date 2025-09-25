@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
+import { getWhatsAppLink } from '$lib/server/secretLinks.js';
 
 export async function load({ locals }) {
   // Check if user is logged in
@@ -7,6 +8,9 @@ export async function load({ locals }) {
     console.error('User not logged in');
     throw redirect(303, '/');
   }
+
+  // get whatsapp link
+  const whatsappLink = getWhatsAppLink();
   
   try {
     const [grabCountResult] = await db.query(
@@ -43,7 +47,8 @@ export async function load({ locals }) {
     return {
       user: locals.user,
       grabCount,
-      recentGrabs
+      recentGrabs,
+      whatsappLink
     };
   } catch (error) {
     console.error('Failed to load user data:', error);

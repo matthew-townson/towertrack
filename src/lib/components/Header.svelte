@@ -5,15 +5,9 @@
 
 <nav class="navbar has-shadow is-spaced custom-banner-bg" aria-label="main navigation">
 	<div class="navbar-brand">
-		{#if user}
-			<a class="navbar-item" href="/home">
-				<h1 class="title is-4 has-text-white">towertracker</h1>
-			</a>
-		{:else}
-			<a class="navbar-item" href="/">
-				<h1 class="title is-4 has-text-white">towertracker</h1>
-			</a>
-		{/if}
+		<a class="navbar-item" href="/">
+			<h1 class="title is-4 has-text-white">towertracker</h1>
+		</a>
 		<button type="button"
 			class="navbar-burger has-text-white"
 			aria-label="menu"
@@ -30,11 +24,13 @@
 			{#if user}
 				<a class="navbar-item has-text-white" href="/home">Home</a>
 				<a class="navbar-item has-text-white" href="/grab">Grabs</a>
+				<a class="navbar-item has-text-white" href="/tower/search">Towers</a>
 				<a class="navbar-item has-text-white" href="/bellboard">BellBoard Data</a>
 				<a class="navbar-item has-text-white" href="/profile">Profile</a>
 				<a class="navbar-item has-text-white" href="/map">Map</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/">Home</a>
+				<a class="navbar-item has-text-white" href="/tower/search">Towers</a>
 				<a class="navbar-item has-text-white" href="/about">About</a>
 			{/if}
 		</div>

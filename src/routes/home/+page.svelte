@@ -1,4 +1,4 @@
-<script>
+	<script>
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	export let data;
@@ -11,11 +11,43 @@
 <Header user={data.user} />
 
 <main>
-	<h1>Welcome back {data.user.username}!</h1>
-	
 	<div class="dashboard-container">
-	    <div class="dashboard-section">
-	        <h2>Tower grabbing</h2>
+		<div class="dashboard-section">
+			<h2>Beta feedback</h2>
+			<p class="section-description">Welcome to the beta! Please report any issues or feedback.</p>
+
+			<div class="feature-links">
+				<a href="{data.whatsappLink}" class="feature-card" target="_blank" rel="noopener noreferrer">
+					<span class="feature-icon">🗣️</span>
+					<div class="feature-text">
+						<h3>Join the WhatsApp Community</h3>
+						<p>Found a bug or want to suggest new features or improvements?
+							<br>Let me know!
+						</p>
+					</div>
+				</a>
+
+				<a href="/updates" class="feature-card">
+					<span class="feature-icon">🛜</span>
+					<div class="feature-text">
+						<h3>See Latest Updates</h3>
+						<p>Find out about the latest features and improvements here</p>
+					</div>
+				</a>
+
+				<a href="/roadmap" class="feature-card">
+					<span class="feature-icon">🗺️</span>
+					<div class="feature-text">
+						<h3>View the Roadmap</h3>
+						<p>See what's planned for towertracker and upcoming features</p>
+					</div>
+				</a>
+			</div>
+		</div>
+
+		<div class="dashboard-section">
+			<h1>Welcome back {data.user.username}!</h1>
+			<h2>Tower grabbing</h2>
             <p class="section-description">Track the towers you've rung at and the bells you've grabbed.</p>
 	        
 	        <div class="stat-summary">
@@ -73,7 +105,7 @@
 		            </div>
 		        </a>
 		    </div>
-	    </div>
+		</div>
 	</div>
 </main>
 
