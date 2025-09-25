@@ -26,6 +26,11 @@
     
     let practiceNightFilter = ''; // '' means no filter
 
+    // New filters for grabbed / quartered / pealed
+    let filterGrabbed = false;
+    let filterQuartered = false;
+    let filterPealed = false;
+
     // Extract unique practice nights (Mon-Sun) from tower.Practice, allow multiple per tower
     const nightPattern = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/gi;
     $: practiceNights = Array.from(
@@ -311,6 +316,17 @@
         return tower.Practice.match(nightPattern)?.some(n => n.toLowerCase() === practiceNightFilter.toLowerCase());
     }
 
+    // Helper to check the special filters (OR semantics; if none selected => include all)
+    function matchesSpecialFilters(tower) {
+        if (!filterGrabbed && !filterQuartered && !filterPealed) return true;
+
+        const hasGrabbed = tower.grabbed === 1 || tower.grabbed === '1' || tower.grabbed === true;
+        const hasQuartered = tower.quartered === 1 || tower.quartered === '1' || tower.quartered === true;
+        const hasPealed = tower.pealed === 1 || tower.pealed === '1' || tower.pealed === true;
+
+        return (filterGrabbed && hasGrabbed) || (filterQuartered && hasQuartered) || (filterPealed && hasPealed);
+    }
+
     function updateDisplayedTowers() {
         if (!map) return;
 
@@ -340,6 +356,7 @@
                 return true;
             })
             .filter(matchesPracticeNight)
+            .filter(matchesSpecialFilters)
             .map(tower => {
                 const distance = centre.distanceTo([tower.Lat, tower.Long]);
                 return { ...tower, distance };
@@ -366,6 +383,7 @@
                     return true;
                 })
                 .filter(matchesPracticeNight)
+                .filter(matchesSpecialFilters)
                 .map(tower => {
                     const userLatLng = window.L.latLng(userLocation.lat, userLocation.lng);
                     const towerLatLng = window.L.latLng(tower.Lat, tower.Long);
@@ -441,6 +459,7 @@
         currentlyDisplayed = allMarkers.length;
     }
     
+    // Update reactive filteredTowerCount to include the new special filters
     $: filteredTowerCount = data.towers
         .filter(tower => tower.Lat && tower.Long)
         .filter(tower => {
@@ -460,6 +479,7 @@
             return true;
         })
         .filter(matchesPracticeNight)
+        .filter(matchesSpecialFilters) // <-- apply grabbed/quartered/pealed filters
         .length;
 
     onMount(async () => {
@@ -519,10 +539,12 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter)) {
+    // Trigger updates when relevant filter or map state changes
+    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || filterGrabbed || filterQuartered || filterPealed)) {
         updateDisplayedTowers();
     }
-
+    
+    $: legendGrabbedSVG = generatePinSVG(8, { grabbed: true });
     $: legendQuarterSVG = generatePinSVG(8, { quartered: true });
     $: legendPealSVG = generatePinSVG(8, { pealed: true });
 </script>
@@ -692,8 +714,33 @@
                     </div>
                     
                     <div class="field mb-5">
+                        <label class="label">Special Filters</label>
+                        <div class="control">
+                            <label class="checkbox" title="If checked, towers that you've marked as grabbed will be included. If one or more of these are checked, only towers matching at least one checked attribute will be shown.">
+                                <input type="checkbox" bind:checked={filterGrabbed} />
+                                Grabbed
+                            </label>
+                            <br/>
+                            <label class="checkbox" title="Include towers that have been quarter pealed.">
+                                <input type="checkbox" bind:checked={filterQuartered} />
+                                Quarter Pealed
+                            </label>
+                            <br/>
+                            <label class="checkbox" title="Include towers that have been pealed.">
+                                <input type="checkbox" bind:checked={filterPealed} />
+                                Pealed
+                            </label>
+                            <p class="is-size-7 has-text-grey mt-2">If none are checked, all towers are shown (subject to other filters). When one or more are checked, towers matching any selected attribute are shown.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="field mb-5">
                         <span class="label">Legend</span>
                         <div class="is-flex is-align-items-center">
+                            <div class="legend-item mr-3" style="display:flex;align-items:center;">
+                                <div class="legend-icon mr-2" style="width:28px;height:40px;">{@html legendGrabbedSVG}</div>
+                                <div class="is-size-7">Grabbed</div>
+                            </div>
                             <div class="legend-item mr-3" style="display:flex;align-items:center;">
                                 <div class="legend-icon mr-2" style="width:28px;height:40px;">{@html legendQuarterSVG}</div>
                                 <div class="is-size-7">Quarter Pealed</div>
