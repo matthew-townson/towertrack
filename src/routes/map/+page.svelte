@@ -26,7 +26,6 @@
     
     let practiceNightFilter = ''; // '' means no filter
 
-    // New filters for grabbed / quartered / pealed
     let filterGrabbed = false;
     let filterQuartered = false;
     let filterPealed = false;
@@ -316,7 +315,6 @@
         return tower.Practice.match(nightPattern)?.some(n => n.toLowerCase() === practiceNightFilter.toLowerCase());
     }
 
-    // Helper to check the special filters (OR semantics; if none selected => include all)
     function matchesSpecialFilters(tower) {
         if (!filterGrabbed && !filterQuartered && !filterPealed) return true;
 
@@ -459,7 +457,6 @@
         currentlyDisplayed = allMarkers.length;
     }
     
-    // Update reactive filteredTowerCount to include the new special filters
     $: filteredTowerCount = data.towers
         .filter(tower => tower.Lat && tower.Long)
         .filter(tower => {
@@ -479,7 +476,7 @@
             return true;
         })
         .filter(matchesPracticeNight)
-        .filter(matchesSpecialFilters) // <-- apply grabbed/quartered/pealed filters
+        .filter(matchesSpecialFilters)
         .length;
 
     onMount(async () => {
@@ -539,7 +536,6 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    // Trigger updates when relevant filter or map state changes
     $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || filterGrabbed || filterQuartered || filterPealed)) {
         updateDisplayedTowers();
     }
