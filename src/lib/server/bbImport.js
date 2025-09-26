@@ -3,6 +3,39 @@ import pool from '$lib/server/db.js';
 import fetch from 'node-fetch';
 import xml2js from 'xml2js';
 
+export const importProgress = new Map();
+
+function initProgress(userId) {
+    importProgress.set(userId, {
+        stage: 'starting',
+        message: 'Initializing import',
+        total: 0,
+        processed: 0,
+        percent: 0,
+        lastUpdated: Date.now()
+    });
+}
+
+function setProgress(userId, update) {
+    const cur = importProgress.get(userId) || {
+        stage: 'starting',
+        message: '',
+        total: 0,
+        processed: 0,
+        percent: 0,
+        lastUpdated: Date.now()
+    };
+    const merged = { ...cur, ...update, lastUpdated: Date.now() };
+    if (typeof merged.total === 'number' && typeof merged.processed === 'number') {
+        merged.percent = merged.total > 0 ? Math.round((merged.processed / merged.total) * 100) : (merged.stage === 'done' ? 100 : merged.percent || 0);
+    }
+    importProgress.set(userId, merged);
+}
+
+function getProgress(userId) {
+    return importProgress.get(userId) || { stage: 'idle', message: '', total: 0, processed: 0, percent: 0 };
+}
+
 export async function importBBData(userId) {
     const [[user]] = await pool.query('SELECT username FROM User WHERE id = ?', [userId]);
     const [aliases] = await pool.query('SELECT Name FROM OtherNames WHERE userId = ?', [userId]);
@@ -15,6 +48,9 @@ export async function importBBData(userId) {
     let processedCount = 0;
     let insertedCount = 0;
     let updatedCount = 0;
+
+    initProgress(userId);
+    setProgress(userId, { stage: 'starting', message: 'Starting BellBoard import', total: 0, processed: 0 });
 
     function normName(n) {
         if (!n) return '';
@@ -337,11 +373,23 @@ export async function importBBData(userId) {
     async function fetchAndInsert(name, length, filterChanges = false) {
         const url = buildUrl(name, length);
         log.info(`fetchAndInsert: fetching ${url} for name="${name}" length="${length}"`);
-        const res = await fetch(url);
-        if (!res.ok) {
-            log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}, Status: ${res.status})`);
+        setProgress(userId, { stage: 'downloading', message: `Downloading performances for ${name}...` });
+
+        let res;
+        try {
+            res = await fetch(url);
+        } catch (err) {
+            log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}): ${err.message}`);
+            setProgress(userId, { stage: 'error', message: `Download failed for ${name}: ${err.message}` });
             return;
         }
+
+        if (!res.ok) {
+            log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}, Status: ${res.status})`);
+            setProgress(userId, { stage: 'error', message: `Failed to download for ${name}: ${res.status}` });
+            return;
+        }
+
         const xml = await res.text();
         const data = await xml2js.parseStringPromise(xml, { explicitArray: true });
         const performances = data.performances?.performance || [];
@@ -356,6 +404,16 @@ export async function importBBData(userId) {
         }
 
         log.debug(`fetchAndInsert: built ${perfObjs.length} perfObjs for name="${name}"`);
+
+        if (perfObjs.length > 0) {
+            const prev = getProgress(userId);
+            setProgress(userId, {
+                stage: 'processing',
+                message: `Processing performances for ${name}`,
+                total: (prev.total || 0) + perfObjs.length,
+                processed: prev.processed || 0
+            });
+        }
 
         if (perfObjs.length === 0) return;
 
@@ -384,11 +442,16 @@ export async function importBBData(userId) {
         // For each perfObj, skip DB write and addGrab if timestamp matches existing DB timestamp.
         for (const perfObj of perfObjs) {
             try {
-                const existingTs = perfObj.performanceID ? existingMap.get(perfObj.performanceID) : undefined;
-                const incomingTs = perfObj.timestamp ? new Date(perfObj.timestamp).getTime() : null;
-
-                if (typeof existingTs !== 'undefined' && existingTs !== null && incomingTs !== null && existingTs === incomingTs) {
-                    log.debug(`Skipping perf ${perfObj.performanceID} because timestamps match (ts=${incomingTs})`);
+                // if performance exists, still attempt addGrab, but count as processed
+                if (perfObj.performanceID && existingMap.has(perfObj.performanceID)) {
+                    log.debug(`Performance ${perfObj.performanceID} already exists in DB; skipping Performance upsert and running addGrab`);
+                    try {
+                        await addGrab(perfObj);
+                    } catch (err) {
+                        log.error(`addGrab failed for existing performance ${perfObj.performanceID}: ${err.message}`);
+                    }
+                    const cur = getProgress(userId);
+                    setProgress(userId, { processed: (cur.processed || 0) + 1, stage: 'processing', message: `Processed ${cur.processed + 1} / ${cur.total || '?'}` });
                     continue;
                 }
 
@@ -466,13 +529,19 @@ export async function importBBData(userId) {
                 } catch (err) {
                     log.error(`addGrab failed for performance ${perfObj.performanceID}: ${err.message}`);
                 }
+
+                const cur2 = getProgress(userId);
+                setProgress(userId, { processed: (cur2.processed || 0) + 1, stage: 'processing', message: `Processed ${cur2.processed + 1} / ${cur2.total || '?'}` });
+
             } catch (err) {
                 log.error(`DB error inserting/updating performance ID: ${perfObj.performanceID} - ${err.message}`);
+                const cur3 = getProgress(userId);
+                setProgress(userId, { processed: (cur3.processed || 0) + 1, stage: 'processing', message: `Processed ${cur3.processed + 1} / ${cur3.total || '?'}` });
             }
         }
     }
 
-    const CONCURRENCY = 3;
+    const CONCURRENCY = 6;
     const tasks = [];
     for (const name of names) {
         tasks.push(() => fetchAndInsert(name, 'e-plus'));
@@ -496,8 +565,15 @@ export async function importBBData(userId) {
         return results;
     }
     
-    await runLimited(tasks, CONCURRENCY);
-
-    const elapsedMs = Date.now() - importStart;
-    log.success(`${user.username} imported ${processedCount} performances (${insertedCount} new, ${updatedCount} updated) from BellBoard in ${(elapsedMs/1000).toFixed(2)}s`);
+    try {
+        await runLimited(tasks, CONCURRENCY);
+        const finalTotal = getProgress(userId).total || processedCount;
+        setProgress(userId, { stage: 'done', message: 'Import complete', processed: finalTotal, total: finalTotal });
+        const elapsedMs = Date.now() - importStart;
+        log.success(`${user.username} imported ${processedCount} performances (${insertedCount} new, ${updatedCount} updated) from BellBoard in ${(elapsedMs/1000).toFixed(2)}s`);
+    } catch (err) {
+        setProgress(userId, { stage: 'error', message: `Import failed: ${err.message}` });
+        log.error(`Import failed for ${user.username}: ${err.message}`);
+        throw err;
+    }
 }

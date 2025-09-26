@@ -7,6 +7,12 @@
     let loading = false;
     let showNotification = false;
 
+    let progressStage = 'idle';
+    let progressPercent = 0;
+    let progressMessage = '';
+
+    let pollHandle = null;
+
     // show notification when form result arrives
     $: if (form?.success || form?.error) showNotification = true;
 
@@ -41,6 +47,38 @@
         }
         return String(index + 1);
     }
+
+    async function pollProgressLoop(updateOnComplete) {
+        try {
+            while (loading) {
+                const res = await fetch('/api/import-progress', { credentials: 'same-origin' });
+                if (!res.ok) {
+                    const jsonErr = await res.json().catch(() => ({}));
+                    progressStage = jsonErr?.stage || 'error';
+                    progressMessage = jsonErr?.message || `Progress endpoint returned ${res.status}`;
+                    break;
+                }
+                const p = await res.json();
+                progressStage = p.stage || 'idle';
+                progressPercent = p.percent || 0;
+                progressMessage = p.message || '';
+
+                if (progressStage === 'done' || progressPercent >= 100) {
+                    loading = false;
+                    if (typeof updateOnComplete === 'function') {
+                        await updateOnComplete();
+                    }
+                    break;
+                }
+
+                await new Promise(r => setTimeout(r, 800));
+            }
+        } catch (err) {
+            progressStage = 'error';
+            progressMessage = err.message || String(err);
+            loading = false;
+        }
+    }
 </script>
 
 <svelte:head>
@@ -61,10 +99,17 @@
             <p><strong>Total Performances:</strong> {data.stats.performance_count}</p>
             <form method="POST" action="?/importBBData" use:enhance={() => {
                 loading = true;
+                progressStage = 'starting';
+                progressPercent = 0;
+                progressMessage = 'Starting import...';
+
                 return async ({ result, update }) => {
-                    loading = false;
-                    if (result.type === 'success') {
-                        await update();
+                    if (result?.type === 'success') {
+                        await pollProgressLoop(update);
+                    } else {
+                        loading = false;
+                        progressStage = 'error';
+                        progressMessage = (result && result.data && result.data.message) ? result.data.message : 'Import failed to start';
                     }
                 };
             }}>
@@ -72,6 +117,17 @@
                     {loading ? 'Updating...' : 'Update performances'}
                 </button>
             </form>
+
+            {#if loading}
+                <div class="notification is-info mt-3">
+                    <strong>Importing:</strong> {progressStage} — {progressPercent}%<br>
+                    <small>{progressMessage}</small>
+                </div>
+                <div style="height:8px;background:#e6e6e6;border-radius:4px;margin-top:6px;">
+                    <div style="height:8px;background:#8ee3ef;border-radius:4px;width:{progressPercent}%;transition:width 200ms;"></div>
+                </div>
+            {/if}
+
             {#if form?.success && showNotification}
                 <div class="notification is-success">
                     <button class="notification-close" aria-label="Close" on:click={() => showNotification = false}>×</button>
