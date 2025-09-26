@@ -74,7 +74,7 @@
 		            </div>
 		        </a>
 		        
-		        <a href="/map" class="feature-card">
+		        <a href="/map?grabbed=true&quartered=true&pealed=true" class="feature-card">
 		            <span class="feature-icon">🗺️</span>
 		            <div class="feature-text">
 		                <h3>View on Map</h3>

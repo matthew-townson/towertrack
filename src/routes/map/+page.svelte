@@ -29,6 +29,7 @@
     let filterGrabbed = false;
     let filterQuartered = false;
     let filterPealed = false;
+    let filterExcludeSpecial = false;
 
     // Extract unique practice nights (Mon-Sun) from tower.Practice, allow multiple per tower
     const nightPattern = /\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/gi;
@@ -316,6 +317,13 @@
     }
 
     function matchesSpecialFilters(tower) {
+        if (filterExcludeSpecial) {
+            const hasGrabbed = tower.grabbed === 1 || tower.grabbed === '1' || tower.grabbed === true;
+            const hasQuartered = tower.quartered === 1 || tower.quartered === '1' || tower.quartered === true;
+            const hasPealed = tower.pealed === 1 || tower.pealed === '1' || tower.pealed === true;
+            return !(hasGrabbed || hasQuartered || hasPealed);
+        }
+
         if (!filterGrabbed && !filterQuartered && !filterPealed) return true;
 
         const hasGrabbed = tower.grabbed === 1 || tower.grabbed === '1' || tower.grabbed === true;
@@ -480,6 +488,50 @@
         .length;
 
     onMount(async () => {
+        const params = new URLSearchParams(window.location.search);
+
+        const bells = params.get('bells');
+        if (bells) {
+            bellsFilter = parseInt(bells);
+        }
+        const minBells = params.get('minBells');
+        if (minBells !== null) {
+            isMinimumBells = minBells === '1' || minBells === 'true';
+        }
+
+        const unringable = params.get('unringable');
+        if (unringable !== null) {
+            showUnringable = unringable === '1' || unringable === 'true';
+        }
+
+        const limit = params.get('limit');
+        if (limit) {
+            displayLimit = parseInt(limit);
+        }
+
+        const excludeSpecial = params.get('excludeSpecial');
+        if (excludeSpecial !== null) {
+            filterExcludeSpecial = excludeSpecial === '1' || excludeSpecial === 'true';
+        }
+
+        const night = params.get('night');
+        if (night) {
+            practiceNightFilter = night;
+        }
+
+        const grabbed = params.get('grabbed');
+        if (grabbed !== null) {
+            filterGrabbed = grabbed === '1' || grabbed === 'true';
+        }
+        const quartered = params.get('quartered');
+        if (quartered !== null) {
+            filterQuartered = quartered === '1' || quartered === 'true';
+        }
+        const pealed = params.get('pealed');
+        if (pealed !== null) {
+            filterPealed = pealed === '1' || pealed === 'true';
+        }
+
         const L = await import('leaflet');
         window.L = L;
 
@@ -536,7 +588,7 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || filterGrabbed || filterQuartered || filterPealed)) {
+    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || filterGrabbed || filterQuartered || filterPealed || filterExcludeSpecial)) {
         updateDisplayedTowers();
     }
     
@@ -577,18 +629,23 @@
                 </div>
                 
                 {#if userLocation && closestTower}
-                    <div class="card closest-tower-display has-background-light">
+                    <div class="card closest-tower-display has-background-dark">
                         <div class="card-content py-2 px-3">
                             <h4 class="title is-6 mb-2">Closest Tower:</h4>
                             <p>
                                 <strong>
-                                    <a href="https://dove.cccbr.org.uk/tower/{closestTower.TowerID}" target="_blank" rel="noopener noreferrer" class="has-text-link">
+                                    <a href="/tower/{closestTower.TowerID}" class="has-text-link">
                                         {closestTower.Place}, {closestTower.Dedicn || 'Unknown Dedication'}
                                     </a>
                                 </strong>
                             </p>
-                            <p>{closestTower.County || 'Unknown'} • <strong>{closestTower.Bells || 'Unknown'}</strong> bells</p>
-                            <p>{(closestTower.distance / 1000).toFixed(1)}km away</p>
+                            <p>
+                                {closestTower.County || 'Unknown'} • 
+                                <strong style="color: {closestTower.UR === 1 || closestTower.UR === '1' ? 'red' : ['#999999', '#aa4488', '#fd99cc', '#ff8800', '#face27', '#039b16', '#44ffaa', '#fa1d1a', '#aa4488', '#2f27ca', '#aaaa44', '#000000', '#aa8844', '#ff8888', '#88ff88', '#680098'][(parseInt(closestTower.Bells) - 1) % 16] || '#888888'};">
+                                    {closestTower.Bells || 'Unknown'}
+                                </strong> bells
+                            </p>
+                            <p>{(closestTower.distance / 1609.344).toFixed(1)} miles away</p>
                         </div>
                     </div>
                 {/if}
@@ -712,21 +769,40 @@
                     <div class="field mb-5">
                         <label class="label">Special Filters</label>
                         <div class="control">
-                            <label class="checkbox" title="If checked, towers that you've marked as grabbed will be included. If one or more of these are checked, only towers matching at least one checked attribute will be shown.">
-                                <input type="checkbox" bind:checked={filterGrabbed} />
+                            <label class="checkbox" title="Include towers that you've marked as grabbed.">
+                                <input type="checkbox" bind:checked={filterGrabbed} disabled={filterExcludeSpecial} />
                                 Grabbed
                             </label>
                             <br/>
                             <label class="checkbox" title="Include towers that have been quarter pealed.">
-                                <input type="checkbox" bind:checked={filterQuartered} />
+                                <input type="checkbox" bind:checked={filterQuartered} disabled={filterExcludeSpecial} />
                                 Quarter Pealed
                             </label>
                             <br/>
                             <label class="checkbox" title="Include towers that have been pealed.">
-                                <input type="checkbox" bind:checked={filterPealed} />
+                                <input type="checkbox" bind:checked={filterPealed} disabled={filterExcludeSpecial} />
                                 Pealed
                             </label>
-                            <p class="is-size-7 has-text-grey mt-2">If none are checked, all towers are shown (subject to other filters). When one or more are checked, towers matching any selected attribute are shown.</p>
+                            <br/>
+                            <label class="checkbox mt-2" title="Exclude towers that are grabbed, quartered, or pealed.">
+                                <input 
+                                    type="checkbox" 
+                                    bind:checked={filterExcludeSpecial}
+                                    on:change={() => {
+                                        if (filterExcludeSpecial) {
+                                            filterGrabbed = false;
+                                            filterQuartered = false;
+                                            filterPealed = false;
+                                        }
+                                    }}
+                                />
+                                Exclude Grabbed/Quartered/Pealed
+                            </label>
+                            <p class="is-size-7 has-text-grey mt-2">
+                                If none are checked, all towers are shown (subject to other filters).<br>
+                                When one or more of Grabbed/Quartered/Pealed are checked, towers matching any selected attribute are shown.<br>
+                                If "Exclude Grabbed/Quartered/Pealed" is checked, only towers with none of those attributes are shown.
+                            </p>
                         </div>
                     </div>
                     
