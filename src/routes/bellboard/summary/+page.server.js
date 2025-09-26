@@ -185,7 +185,9 @@ export const actions = {
             throw redirect(303, '/account/login');
         }
         try {
-            await importBBData(locals.user.id);
+            importBBData(locals.user.id).catch(err => {
+                try { console.error('Background importBBData failed:', err); } catch (e) {}
+            });
             return { success: true, message: 'BellBoard performances updated.' };
         } catch (error) {
             return fail(500, { error: true, message: 'Failed to update performances: ' + error.message });
