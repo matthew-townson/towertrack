@@ -15,7 +15,7 @@ export async function load({ locals }) {
         
         const grabCount = grabCountResult[0]?.count || 0;
         
-        // Get latest grabs (limited to 5)
+        // Get latest grabs (limited to 3)
         const [recentGrabs] = await db.query(
             `SELECT g.towerID, g.ringID, 
               DATE_FORMAT(
@@ -36,7 +36,7 @@ export async function load({ locals }) {
              JOIN Tower t ON g.towerID = t.TowerID
              WHERE g.userId = ?
              ORDER BY g.yearGrabbed DESC, g.monthGrabbed DESC, g.dateGrabbed DESC, g.lastUpdated DESC
-             LIMIT 5`,
+             LIMIT 3`,
             [locals.user.id]
         );
         
@@ -76,6 +76,36 @@ export async function load({ locals }) {
                 [locals.user.id, grab.towerID]
             );
             
+            bellRows.sort((a, b) => {
+              const parseRole = (role) => {
+              const match = role.match(/^(\d+)(.*)$/);
+              if (!match) return { num: Number.MAX_SAFE_INTEGER, suffix: role };
+              return { num: parseInt(match[1], 10), suffix: match[2] };
+              };
+
+              if (a.BellRole === "0extra" && b.BellRole !== "0extra") return -1;
+              if (b.BellRole === "0extra" && a.BellRole !== "0extra") return 1;
+
+              const aRole = parseRole(a.BellRole);
+              const bRole = parseRole(b.BellRole);
+
+              if (!aRole.suffix && !bRole.suffix) {
+              return aRole.num - bRole.num;
+              }
+
+              if (aRole.suffix && bRole.suffix) {
+              if (aRole.num !== bRole.num) {
+                return aRole.num - bRole.num;
+              }
+              return aRole.suffix.localeCompare(bRole.suffix);
+              }
+
+              if (!aRole.suffix && bRole.suffix) return -1;
+              if (aRole.suffix && !bRole.suffix) return 1;
+
+              return 0;
+            });
+
             grab.bells = bellRows;
         }
         
