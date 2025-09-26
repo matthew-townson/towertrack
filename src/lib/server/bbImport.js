@@ -387,8 +387,15 @@ export async function importBBData(userId) {
                 const existingTs = perfObj.performanceID ? existingMap.get(perfObj.performanceID) : undefined;
                 const incomingTs = perfObj.timestamp ? new Date(perfObj.timestamp).getTime() : null;
 
-                if (typeof existingTs !== 'undefined' && existingTs !== null && incomingTs !== null && existingTs === incomingTs) {
-                    log.debug(`Skipping perf ${perfObj.performanceID} because timestamps match (ts=${incomingTs})`);
+
+                // if performance exists, skip insert, but keep grab
+                if (perfObj.performanceID && existingMap.has(perfObj.performanceID)) {
+                    log.debug(`Performance ${perfObj.performanceID} already exists in DB; skipping Performance upsert and running addGrab`);
+                    try {
+                        await addGrab(perfObj);
+                    } catch (err) {
+                        log.error(`addGrab failed for existing performance ${perfObj.performanceID}: ${err.message}`);
+                    }
                     continue;
                 }
 
@@ -472,7 +479,7 @@ export async function importBBData(userId) {
         }
     }
 
-    const CONCURRENCY = 3;
+    const CONCURRENCY = 6;
     const tasks = [];
     for (const name of names) {
         tasks.push(() => fetchAndInsert(name, 'e-plus'));
