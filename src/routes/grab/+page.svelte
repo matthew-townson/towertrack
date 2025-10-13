@@ -101,7 +101,7 @@
                 Add a New Grab
             </a>
             
-            <a href="/map" class="button map-btn">
+            <a href="/map?grabbed=true" class="button map-btn">
                 <span class="icon">🗺️</span>
                 View on Map
             </a>

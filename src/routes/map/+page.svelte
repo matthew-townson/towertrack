@@ -448,7 +448,7 @@
                             ${tower.Bells || ''}</strong>, ${tower.Wt ? convertToHundredweight(tower.Wt) : ''} in ${tower.Note || ''}
                         ${tower.Practice ? `<br>${tower.Practice}` : ''}
                         ${tower.grabbed ? '<br><strong style="color: #00aa00;">✓ Grabbed</strong>' : ''}
-                        ${tower.quartered ? '<br><strong style="color:#ff8800;">✓ Quarter Pealed</strong>' : ''}
+                        ${tower.quartered ? '<br><strong style="color:#0CD7DB;">✓ Quarter Pealed</strong>' : ''}
                         ${tower.pealed ? '<br><strong style="color:#0a66ff;">✓ Pealed</strong>' : ''}
                     </p>
                     <div class="popup-actions">
@@ -622,14 +622,14 @@
             <div class="map-container" style="width:100%; position:relative;">
                 <div bind:this={mapContainer} class="map" style="width:100%; min-height:0;"></div>
                 
-                <div class="notification is-info tower-count-display py-2 px-3 mb-0">
+                <div class="notification tower-count-display py-2 px-3 mb-0">
                     <p>
                         <strong>Showing {currentlyDisplayed} of {filteredTowerCount} towers</strong> that match the filter (from a total of {data.towers.length} towers)
                     </p>
                 </div>
                 
                 {#if userLocation && closestTower}
-                    <div class="card closest-tower-display has-background-dark">
+                    <div class="card closest-tower-display">
                         <div class="card-content py-2 px-3">
                             <h4 class="title is-6 mb-2">Closest Tower:</h4>
                             <p>
@@ -678,7 +678,7 @@
             </div>
             
             <aside class="sidebar {sidebarOpen ? 'open' : ''} box p-0" style="max-width: 350px;">
-                <div class="sidebar-header has-background-light py-3 px-4 is-flex is-align-items-center is-justify-content-space-between">
+                <div class="sidebar-header py-3 px-4 is-flex is-align-items-center is-justify-content-space-between">
                     <h3 class="title is-6 mb-0">Tower Filter</h3>
                     <button class="delete close-btn" on:click={toggleSidebar} aria-label="Close sidebar"></button>
                 </div>
