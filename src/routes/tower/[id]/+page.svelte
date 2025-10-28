@@ -65,14 +65,14 @@
         </div>
         
         <div class="tower-actions">
-            <a href="/grab/add?towerId={data.tower.TowerID}" class="button action-button">
+            <a href="/grab/add?towerId={data.tower.TowerID}" class="button action-button edit-grab-button has-text-white">
                 {data.userGrab ? 'Edit Grab' : 'Add Grab'}
             </a>
-            <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button" target="_blank" rel="noopener noreferrer">
+            <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button has-text-white" target="_blank" rel="noopener noreferrer">
                 View on Dove
             </a>
             {#if data.tower.Lat && data.tower.Long}
-                <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=18" class="button map-button">
+                <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=18" class="button map-btn has-text-dark">
                     View on Map
                 </a>
             {/if}
@@ -194,7 +194,7 @@
                             </div>
                         {/if}
                         <div class="grab-actions">
-                            <a href="/grab/add?towerId={data.tower.TowerID}" class="button edit-grab-button">
+                            <a href="/grab/add?towerId={data.tower.TowerID}" class="button edit-grab-button has-text-white">
                                 Edit Grab
                             </a>
                         </div>

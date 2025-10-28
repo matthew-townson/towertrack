@@ -90,23 +90,23 @@
         <div class="stat-card">
             <div class="stat-number">{data.grabCount}</div>
             <div class="stat-label">Total Grabs</div>
-            <a href="#" class="view-all-link" on:click|preventDefault={() => showSummary = false}>View all grabs</a>
+            <button type="button" class="view-all-link" on:click={() => showSummary = false}>View all grabs</button>
         </div>
     </div>
     
     <div class="settings-section">
         <div class="action-buttons">
-            <a href="/grab/add" class="button add-grab-btn">
+            <a href="/grab/add" class="button add-grab-btn has-text-white">
                 <span class="icon">+</span>
                 Add a New Grab
             </a>
             
-            <a href="/map?grabbed=true" class="button map-btn">
+            <a href="/map?grabbed=true" class="button map-btn has-text-dark">
                 <span class="icon">🗺️</span>
                 View on Map
             </a>
 
-            <button class="button toggle-summary-btn" on:click={toggleSummary}>
+            <button class="button toggle-summary-btn has-text-white" on:click={toggleSummary}>
                 <span class="icon">{showSummary ? '📋' : 'ℹ️'}</span>
                 {showSummary ? 'Show List' : 'Show Summary'}
             </button>
@@ -139,7 +139,7 @@
         {/if}
         
         {#if showSummary}
-            <div class="grab-stats">                
+            <div class="grab-stats">
                 <h3>Grab Statistics</h3>
                 <p>Total Towers Grabbed: {data.grabCount || 0}</p>
             </div>

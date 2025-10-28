@@ -13,7 +13,7 @@
 }
 
 .performance-detail-container {
-    background: #23262b;
+    border: 1px solid #3b3f45;
     border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -26,13 +26,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
-    color: #f3f4f6;
     text-align: left;
 }
 
 .association {
     font-size: 1rem;
-    color: #8ee3ef;
     margin: 0;
     font-weight: 600;
 }
@@ -40,13 +38,11 @@
 .location {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #f3f4f6;
     margin: 0;
 }
 
 .dedication {
     font-size: 1rem;
-    color: #d1d5db;
     margin: 0;
     font-weight: normal;
 }
@@ -60,7 +56,6 @@
 
 .method-changes {
     font-size: 1.3rem;
-    color: #f3f4f6;
     margin: 0.25rem 0;
     font-weight: 600;
 }
@@ -85,13 +80,11 @@
 }
 
 .bell-number {
-    color: #8ee3ef;
     font-weight: 600;
     min-width: 2rem;
 }
 
 .ringer-name {
-    color: #f3f4f6;
     font-weight: normal;
 }
 
@@ -106,7 +99,6 @@
 }
 
 .footnote-item {
-    color: #d1d5db;
     font-style: italic;
     font-size: 0.95rem;
     line-height: 1.4;
@@ -117,25 +109,46 @@
     margin: 1rem 0 0.5rem 0;
 }
 
-.external-heading {
-    color: #8ee3ef;
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem 0;
-}
-
 .external-link {
     margin-top: 0.5rem;
 }
 
-.external-link a {
-    color: #8ee3ef;
-    text-decoration: none;
-    font-size: 0.9rem;
+@media (prefers-color-scheme: light) {
+    .external-heading {
+        color: #c33c54;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
 }
 
-.external-link a:hover {    
-    text-decoration: underline;
+    .external-link a {
+        color: #c33c54;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .external-link a:hover {
+        text-decoration: underline;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .external-heading {
+        color: #8ee3ef;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .external-link a {
+        color: #8ee3ef;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .external-link a:hover {
+        text-decoration: underline;
+    }
 }
 
 @media (max-width: 768px) {

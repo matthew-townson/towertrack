@@ -16,11 +16,9 @@ main {
 .tower-title h1 {
     font-size: 2rem;
     margin-bottom: 0.25rem;
-    color: #8ee3ef;
 }
 
 .tower-location {
-    color: #a1a1aa;
     font-size: 1.1rem;
 }
 
@@ -28,21 +26,6 @@ main {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
-}
-
-.action-button {
-    background-color: #c33c54;
-    color: white;
-}
-
-.dove-button {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.map-button {
-    background-color: #10b981;
-    color: white;
 }
 
 .button {
@@ -73,7 +56,6 @@ main {
 }
 
 .details-card, .bells-card, .grab-card, .performances-card {
-    background: #2d3139;
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: none;
@@ -82,7 +64,6 @@ main {
 h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: #8ee3ef;
     border-bottom: 1px solid #3b3f45;
     padding-bottom: 0.5rem;
 }
@@ -97,11 +78,6 @@ h2 {
 .detail-label {
     font-weight: 600;
     min-width: 130px;
-    color: #f3f4f6;
-}
-
-.detail-value {
-    color: #d1d5db;
 }
 
 .detail-value a {
@@ -130,15 +106,10 @@ h2 {
 
 .bells-list th {
     font-weight: 600;
-    color: #f3f4f6;
-}
-
-.bells-list td {
-    color: #d1d5db;
 }
 
 .bell-grabbed {
-    background-color: rgba(16, 185, 129, 0.1);
+    background-color: rgba(16, 185, 129, 0.257);
 }
 
 .bell-name {
@@ -161,8 +132,15 @@ h2 {
 }
 
 .edit-grab-button {
+    background-color: #c33c54;
+}
+
+.map-btn {
     background-color: #8ee3ef;
-    color: #14161a;
+}
+
+.dove-button {
+    background-color: #3b82f6;
 }
 
 .performances-list {
@@ -172,7 +150,7 @@ h2 {
 }
 
 .performance-item {
-    background: #23262b;
+    border: 1px solid #3b3f45;
     border-radius: 6px;
     padding: 1rem;
 }
@@ -189,7 +167,6 @@ h2 {
 .performance-header h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #f3f4f6;
     margin: 0;
 }
 
@@ -212,14 +189,9 @@ h2 {
 }
 
 .ringer-position {
-    color: #8ee3ef;
     font-weight: 600;
     min-width: 1.5rem;
     text-align: right;
-}
-
-.ringer-name {
-    color: #d1d5db;
 }
 
 .conductor-badge {
@@ -237,7 +209,6 @@ h2 {
 }
 
 .view-link {
-    color: #8ee3ef;
     text-decoration: none;
     font-size: 0.9rem;
 }
