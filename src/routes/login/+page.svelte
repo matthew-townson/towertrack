@@ -15,18 +15,24 @@
 <main>
     <h1>Login</h1>
     <form class="login-box" method="post">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Enter your name as it appears on BellBoard" value={form?.username ?? ''} autocomplete="off" required />
-        <br>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" autocomplete="off" required />
-        <br>
-        <a href="/account/register">Don't have an account? Register here</a>
-        <br>
+        <div class="field">
+            <label for="username">Username</label>
+            <input class="input" type="text" id="username" name="username" placeholder="Enter your name as it appears on BellBoard" value={form?.username ?? ''} autocomplete="off" required />
+            <br>
+        </div>
+        <div class="field">
+            <label for="password">Password</label>
+            <input class="input" type="password" id="password" name="password" autocomplete="off" required />
+            <br>
+        </div>
+        <div class="field">
+            <a href="/account/register">Register for an account</a>
+            <br>
+        </div>
         <button type="submit">Login</button>
-
+        
         {#if form?.error}
-            <p class="error">{form.message}</p>
+        <p class="error is-warning">{form.message}</p>
         {/if}
     </form>
 </main>
