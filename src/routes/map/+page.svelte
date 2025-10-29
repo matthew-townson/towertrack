@@ -316,21 +316,46 @@
         return tower.Practice.match(nightPattern)?.some(n => n.toLowerCase() === practiceNightFilter.toLowerCase());
     }
 
+    // replace old single flags with include/exclude pairs
+    let includeGrabbed = false;
+    let excludeGrabbed = false;
+    let includeQuartered = false;
+    let excludeQuartered = false;
+    let includePealed = false;
+    let excludePealed = false;
+
     function matchesSpecialFilters(tower) {
-        if (filterExcludeSpecial) {
-            const hasGrabbed = tower.grabbed === 1 || tower.grabbed === '1' || tower.grabbed === true;
-            const hasQuartered = tower.quartered === 1 || tower.quartered === '1' || tower.quartered === true;
-            const hasPealed = tower.pealed === 1 || tower.pealed === '1' || tower.pealed === true;
-            return !(hasGrabbed || hasQuartered || hasPealed);
-        }
-
-        if (!filterGrabbed && !filterQuartered && !filterPealed) return true;
-
+        // evaluate tower attributes
         const hasGrabbed = tower.grabbed === 1 || tower.grabbed === '1' || tower.grabbed === true;
         const hasQuartered = tower.quartered === 1 || tower.quartered === '1' || tower.quartered === true;
         const hasPealed = tower.pealed === 1 || tower.pealed === '1' || tower.pealed === true;
 
-        return (filterGrabbed && hasGrabbed) || (filterQuartered && hasQuartered) || (filterPealed && hasPealed);
+        const anyInclude = includeGrabbed || includeQuartered || includePealed;
+        const anyExclude = excludeGrabbed || excludeQuartered || excludePealed;
+
+        // If any include flags are set, show towers that match ANY of the included attributes (OR)
+        if (anyInclude) {
+            const included = (includeGrabbed && hasGrabbed) ||
+                             (includeQuartered && hasQuartered) ||
+                             (includePealed && hasPealed);
+            if (!included) return false;
+            // if also excluded for some reason, ensure not excluded
+            if ((excludeGrabbed && hasGrabbed) || (excludeQuartered && hasQuartered) || (excludePealed && hasPealed)) {
+                return false;
+            }
+            return true;
+        }
+
+        // No includes: if any excludes are set, exclude towers that match ANY exclude
+        if (anyExclude) {
+            if ((excludeGrabbed && hasGrabbed) || (excludeQuartered && hasQuartered) || (excludePealed && hasPealed)) {
+                return false;
+            }
+            return true;
+        }
+
+        // No include/exclude filters set -> accept all
+        return true;
     }
 
     function updateDisplayedTowers() {
@@ -509,27 +534,29 @@
             displayLimit = parseInt(limit);
         }
 
+        const grabbed = params.get('grabbed');
+        if (grabbed !== null) {
+            includeGrabbed = grabbed === '1' || grabbed === 'true';
+        }
+        const quartered = params.get('quartered');
+        if (quartered !== null) {
+            includeQuartered = quartered === '1' || quartered === 'true';
+        }
+        const pealed = params.get('pealed');
+        if (pealed !== null) {
+            includePealed = pealed === '1' || pealed === 'true';
+        }
+
         const excludeSpecial = params.get('excludeSpecial');
         if (excludeSpecial !== null) {
-            filterExcludeSpecial = excludeSpecial === '1' || excludeSpecial === 'true';
+            const val = excludeSpecial === '1' || excludeSpecial === 'true';
+            excludeGrabbed = excludeQuartered = excludePealed = val;
+            if (val) includeGrabbed = includeQuartered = includePealed = false;
         }
 
         const night = params.get('night');
         if (night) {
             practiceNightFilter = night;
-        }
-
-        const grabbed = params.get('grabbed');
-        if (grabbed !== null) {
-            filterGrabbed = grabbed === '1' || grabbed === 'true';
-        }
-        const quartered = params.get('quartered');
-        if (quartered !== null) {
-            filterQuartered = quartered === '1' || quartered === 'true';
-        }
-        const pealed = params.get('pealed');
-        if (pealed !== null) {
-            filterPealed = pealed === '1' || pealed === 'true';
         }
 
         const L = await import('leaflet');
@@ -588,7 +615,7 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || filterGrabbed || filterQuartered || filterPealed || filterExcludeSpecial)) {
+    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed)) {
         updateDisplayedTowers();
     }
     
@@ -769,40 +796,72 @@
                     <div class="field mb-5">
                         <label class="label">Special Filters</label>
                         <div class="control">
-                            <label class="checkbox" title="Include towers that you've marked as grabbed.">
-                                <input type="checkbox" bind:checked={filterGrabbed} disabled={filterExcludeSpecial} />
-                                Grabbed
-                            </label>
-                            <br/>
-                            <label class="checkbox" title="Include towers that have been quarter pealed.">
-                                <input type="checkbox" bind:checked={filterQuartered} disabled={filterExcludeSpecial} />
-                                Quarter Pealed
-                            </label>
-                            <br/>
-                            <label class="checkbox" title="Include towers that have been pealed.">
-                                <input type="checkbox" bind:checked={filterPealed} disabled={filterExcludeSpecial} />
-                                Pealed
-                            </label>
-                            <br/>
-                            <label class="checkbox mt-2" title="Exclude towers that are grabbed, quartered, or pealed.">
-                                <input 
-                                    type="checkbox" 
-                                    bind:checked={filterExcludeSpecial}
-                                    on:change={() => {
-                                        if (filterExcludeSpecial) {
-                                            filterGrabbed = false;
-                                            filterQuartered = false;
-                                            filterPealed = false;
-                                        }
-                                    }}
-                                />
-                                Exclude Grabbed/Quartered/Pealed
-                            </label>
-                            <p class="is-size-7 has-text-grey mt-2">
-                                If none are checked, all towers are shown (subject to other filters).<br>
-                                When one or more of Grabbed/Quartered/Pealed are checked, towers matching any selected attribute are shown.<br>
-                                If "Exclude Grabbed/Quartered/Pealed" is checked, only towers with none of those attributes are shown.
-                            </p>
+                            <div class="table-container">
+                                <table class="table is-fullwidth is-narrow">
+                                    <thead>
+                                        <tr>
+                                            <th>Filter</th>
+                                            <th class="has-text-centered" style="width:1px;">Include</th>
+                                            <th class="has-text-centered" style="width:1px;">Exclude</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Grabbed</td>
+                                            <td class="has-text-centered">
+                                                <label class="checkbox" title="Include towers you've marked as grabbed">
+                                                    <input type="checkbox"
+                                                           bind:checked={includeGrabbed}
+                                                           on:change={() => { if (includeGrabbed) excludeGrabbed = false; }} />
+                                                </label>
+                                            </td>
+                                            <td class="has-text-centered">
+                                                <label class="checkbox" title="Exclude towers you've marked as grabbed">
+                                                    <input type="checkbox"
+                                                           bind:checked={excludeGrabbed}
+                                                           on:change={() => { if (excludeGrabbed) includeGrabbed = false; }} />
+                                                </label>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Quarter Pealed</td>
+                                            <td class="has-text-centered">
+                                                <label class="checkbox" title="Include towers that have been quarter pealed">
+                                                    <input type="checkbox"
+                                                           bind:checked={includeQuartered}
+                                                           on:change={() => { if (includeQuartered) excludeQuartered = false; }} />
+                                                </label>
+                                            </td>
+                                            <td class="has-text-centered">
+                                                <label class="checkbox" title="Exclude towers that have been quarter pealed">
+                                                    <input type="checkbox"
+                                                           bind:checked={excludeQuartered}
+                                                           on:change={() => { if (excludeQuartered) includeQuartered = false; }} />
+                                                </label>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>Pealed</td>
+                                            <td class="has-text-centered">
+                                                <label class="checkbox" title="Include towers that have been pealed">
+                                                    <input type="checkbox"
+                                                           bind:checked={includePealed}
+                                                           on:change={() => { if (includePealed) excludePealed = false; }} />
+                                                </label>
+                                            </td>
+                                            <td class="has-text-centered">
+                                                <label class="checkbox" title="Exclude towers that have been pealed">
+                                                    <input type="checkbox"
+                                                           bind:checked={excludePealed}
+                                                           on:change={() => { if (excludePealed) includePealed = false; }} />
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     
