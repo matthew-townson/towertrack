@@ -551,7 +551,11 @@
         if (excludeSpecial !== null) {
             const val = excludeSpecial === '1' || excludeSpecial === 'true';
             excludeGrabbed = excludeQuartered = excludePealed = val;
-            if (val) includeGrabbed = includeQuartered = includePealed = false;
+            if (val) {
+                includeGrabbed = false;
+                includeQuartered = false;
+                includePealed = false;
+            }
         }
 
         const night = params.get('night');
