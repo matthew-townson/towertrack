@@ -85,69 +85,84 @@
 <Header user={data.user} />
 
 <main class="section">
-	<div class="settings-section" style="width:750px">
-		<h1 class="title">Search Towers</h1>
+	<div class="container">
+		<div class="columns is-centered">
+			<div class="column is-two-thirds">
+				<h1 class="title">Search Towers</h1>
 
-		<div class="field" style="max-width:720px;">
-			<label class="label" for="tower-search">Place, dedication or county</label>
-			<div class="control has-icons-right">
-				<input
-					id="tower-search"
-					class="input"
-					type="search"
-					placeholder="e.g. Lancaster, Priory Ch of S Mary"
-					bind:value={query}
-					on:keydown={onKeydown}
-					autocomplete="off"
-					aria-label="Search towers"
-				/>
-				{#if loading}
-					<span class="icon is-small is-right">⏳</span>
+				<div class="box">
+					<div class="field">
+						<label class="label" for="tower-search">Place, dedication or county</label>
+						<div class="control has-icons-left has-icons-right">
+							<input
+								id="tower-search"
+								class="input is-medium"
+								type="search"
+								placeholder="e.g. Lancaster, Priory Ch of S Mary"
+								bind:value={query}
+								on:keydown={onKeydown}
+								autocomplete="off"
+								aria-label="Search towers"
+							/>
+							<span class="icon is-left">🔍</span>
+							{#if loading}
+								<span class="icon is-right">⏳</span>
+							{/if}
+						</div>
+						<p class="help">Type at least 2 characters. Press Enter to open the top result.</p>
+					</div>
+				</div>
+
+				{#if error}
+					<div class="notification is-danger">{error}</div>
+				{/if}
+
+				{#if !loading && results.length === 0 && query && query.trim().length >= 2 && !error}
+					<div class="notification is-warning">No towers found matching "{query}"</div>
+				{/if}
+
+				{#if results.length > 0}
+					<div class="box">
+						<ul style="list-style:none; margin:0; padding:0;">
+							{#each results as t}
+								<li>
+									<article class="media">
+										<div class="media-content">
+											<div class="content">
+												<p class="mb-1">
+													<a href={"/tower/" + t.TowerID} class="has-text-weight-semibold is-size-5">
+														{t.Place}{t.Dedicn ? `, ${t.Dedicn}` : ''}
+													</a>
+													{#if t.UR === '1' || t.UR === 1}
+														<span class="tag is-danger is-light" style="margin-left:0.5rem;">U/R</span>
+													{/if}
+												</p>
+												<p class="is-size-7 has-text-grey">
+													{formatBrief(t)}
+												</p>
+											</div>
+										</div>
+
+										<div class="media-right">
+											<div class="buttons">
+												<a class="button is-small is-info" href={"/tower/" + t.TowerID}>Details</a>
+												<a class="button is-small" href={"/grab/add?towerId=" + t.TowerID}>Grab</a>
+											</div>
+										</div>
+									</article>
+									<hr class="m-0" />
+								</li>
+							{/each}
+						</ul>
+					</div>
 				{/if}
 			</div>
-			<p class="help">Type at least 2 characters. Press Enter to open the top result.</p>
 		</div>
-
-		{#if error}
-			<div class="notification is-danger">{error}</div>
-		{/if}
-
-		{#if !loading && results.length === 0 && query && query.trim().length >= 2 && !error}
-			<div class="notification is-warning">No towers found matching "{query}"</div>
-		{/if}
-
-		{#if results.length > 0}
-			<div class="box" style="max-width:900px;">
-				<ul style="list-style:none; margin:0; padding:0;">
-					{#each results as t}
-						<li style="border-bottom:1px solid #eee; padding:0.75rem 0;">
-							<div style="display:flex; justify-content:space-between; align-items:center; gap:1rem;">
-								<div>
-									<a href={"/tower/" + t.TowerID} class="has-text-weight-semibold" style="font-size:1.05rem;">
-										{t.Place}{t.Dedicn ? `, ${t.Dedicn}` : ''}
-										{#if t.UR === '1' || t.UR === 1}
-											<span style="color:#c00; margin-left:0.5rem; font-weight:600;">(U/R)</span>
-										{/if}
-									</a>
-									<div style="color:var(--muted,#6b6b6b); font-size:0.9rem; margin-top:0.25rem;">
-										{formatBrief(t)}
-									</div>
-								</div>
-
-								<div style="display:flex; gap:0.5rem; align-items:center;">
-									<a class="button is-small" href={"/tower/" + t.TowerID}>Details</a>
-									<a class="button is-small" href={"/grab/add?towerId=" + t.TowerID}>Grab</a>
-								</div>
-							</div>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
 	</div>
 </main>
 
 <Footer />
+
 <style>
 	/* minimal page-local tweaks */
 	:global(.help) { margin-top:0.25rem; }

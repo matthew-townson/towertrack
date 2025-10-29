@@ -1,7 +1,9 @@
 main {
+    width: 75%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
+    box-sizing: border-box;
 }
 
 .tower-header {
@@ -217,6 +219,53 @@ h2 {
     text-decoration: underline;
 }
 
+/* Ensure Bulma .box uses all available width inside its container/column */
+.box {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    /* keep existing visual feel, but allow CSS below to tune spacing */
+}
+
+/* Slightly reduce padding and radius on small screens for better fit */
+@media (max-width: 768px) {
+    .box {
+        padding: 0.85rem;
+        border-radius: 6px;
+    }
+}
+
+/* Increase padding a touch on larger screens for comfortable spacing */
+@media (min-width: 769px) {
+    .box {
+        padding: 1.25rem;
+    }
+}
+
+/* Optional: utility class for full-bleed boxes that span the viewport.
+   Use by adding `class="box full-bleed-box"` when you want the box to escape
+   the normal container and extend edge-to-edge on larger screens. */
+.full-bleed-box {
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    box-sizing: border-box;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Ensure the full-bleed utility remains mobile-friendly */
+@media (max-width: 480px) {
+    .full-bleed-box {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        border-radius: 6px;
+    }
+}
+
 @media (max-width: 768px) {
     .tower-header {
         flex-direction: column;
@@ -235,5 +284,19 @@ h2 {
     
     .ringers-list {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Replace main sizing: use 75% on larger viewports, fallback to full-width on smaller screens */
+@media (max-width: 900px) {
+    main {
+        width: 100%;
+        padding: 0.75rem;
+    }
+
+    /* make sure columns that assumed a two-thirds layout don't remain constrained on mobile */
+    .column.is-two-thirds {
+        width: 100%;
+        flex: none;
     }
 }
