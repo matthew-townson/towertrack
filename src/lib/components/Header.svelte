@@ -1,6 +1,8 @@
 <script>
 	export let user = null;
 	let menuOpen = false;
+
+	$: userSlug = user ? user.username.replace(/ /g, '-') : '';
 </script>
 
 <nav class="navbar has-shadow is-spaced custom-banner-bg" aria-label="main navigation">
@@ -25,8 +27,8 @@
 				<a class="navbar-item has-text-white" href="/home">Home</a>
 				<a class="navbar-item has-text-white" href="/grab">Grabs</a>
 				<a class="navbar-item has-text-white" href="/tower/search">Towers</a>
-				<a class="navbar-item has-text-white" href="/bellboard">BellBoard Data</a>
-				<a class="navbar-item has-text-white" href="/profile">Profile</a>
+				<a class="navbar-item has-text-white" href="/bellboard/summary">BellBoard Data</a>
+				<a class="navbar-item has-text-white" href="/profile/{userSlug}">Profile</a>
 				<a class="navbar-item has-text-white" href="/map">Map</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/">Home</a>
