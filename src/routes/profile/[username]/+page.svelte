@@ -40,7 +40,7 @@
 </script>
 
 <svelte:head>
-	<title>{profile.username ? `${profile.username} — Profile` : 'Profile'} | towertracker</title>
+	<title>{profile.username ? `${profile.username}` : 'Profile'} | towertracker</title>
 </svelte:head>
 
 <Header user={data.user} />
