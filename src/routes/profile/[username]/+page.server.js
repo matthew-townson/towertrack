@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import pool from '$lib/server/db.js';
+import { getUserStats } from '$lib/server/userstats.js';
 
 export async function load({ params }) {
 	const { username } = params;
@@ -53,6 +54,8 @@ export async function load({ params }) {
 			};
 		}
 
+		const userStats = await getUserStats(user.id);
+
 		// public: return sanitized user data and settings
 		return {
 			profile: {
@@ -60,13 +63,15 @@ export async function load({ params }) {
 				email: user.email,
 				permission: user.permission,
 				otherNames: user.otherNames || null,
-				isPrivate: false
+				isPrivate: false,
 			},
-			settings
+			settings,
+			stats: userStats
 		};
 	} catch (err) {
 		if (err?.status) throw err;
 		console.error('Profile load error:', err);
 		throw error(500, 'Failed to load profile');
 	}
+
 }
