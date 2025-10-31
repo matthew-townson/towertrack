@@ -2,7 +2,9 @@ import { error } from '@sveltejs/kit';
 import pool from '$lib/server/db.js';
 import { getUserStats } from '$lib/server/userstats.js';
 
-export async function load({ params }) {
+export async function load({ params, depends }) {
+	depends('app:profile');
+	
 	const { username } = params;
 	if (!username) {
 		throw error(400, 'Missing username');
