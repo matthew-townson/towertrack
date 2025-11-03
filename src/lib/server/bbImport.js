@@ -265,12 +265,28 @@ export async function importBBData(userId) {
                     bellRows = rows;
                 }
                 if (!bellRows || bellRows.length === 0) {
-                    // fallback: any bells for tower
-                    const [rows] = await pool.query(
-                        `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                    // fallback: get bells for the tower, prioritizing the most common ringID
+                    const [ringRows] = await pool.query(
+                        `SELECT RingID, COUNT(*) as cnt FROM Bell WHERE TowerID = ? AND RingID IS NOT NULL GROUP BY RingID ORDER BY cnt DESC LIMIT 1`,
                         [perfObj.towerID]
                     );
-                    bellRows = rows;
+                    
+                    if (ringRows && ringRows.length > 0) {
+                        const primaryRingID = ringRows[0].RingID;
+                        log.debug(`Using primary RingID ${primaryRingID} for tower ${perfObj.towerID}`);
+                        const [rows] = await pool.query(
+                            `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                            [perfObj.towerID, primaryRingID]
+                        );
+                        bellRows = rows;
+                    } else {
+                        // last resort: any bells for tower
+                        const [rows] = await pool.query(
+                            `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                            [perfObj.towerID]
+                        );
+                        bellRows = rows;
+                    }
                 }
             } catch (err) {
                 log.error(`Failed to load bells for tower ${perfObj.towerID}: ${err.message}`);
@@ -283,10 +299,10 @@ export async function importBBData(userId) {
                 return;
             }
 
-            // exclude sharp or flat bells
+            // exclude sharp or flat bells and bells with "ex" prefix (extra bells not in full circle)
             const numericBellRows = bellRows.filter(b => {
-                const role = String(b.BellRole || '').trim();
-                return /^\d+$/.test(role);
+                const role = String(b.BellRole || '').trim().toLowerCase();
+                return /^[0-9]+$/.test(role);
             });
             const bellRowsForMapping = numericBellRows.length > 0 ? numericBellRows : bellRows;
             if (numericBellRows.length > 0 && numericBellRows.length !== bellRows.length) {
@@ -307,6 +323,11 @@ export async function importBBData(userId) {
             const perfBellCount = perfRingers.length;
 
             log.debug(`perf ${perfObj.performanceID}: perfBellCount=${perfBellCount}, towerBellCount=${towerBellCount}, userMinPercent=${userMinPercent}`);
+
+            if (perfBellCount > towerBellCount) {
+                log.debug(`Performance ${perfObj.performanceID} uses ${perfBellCount} bells but tower ${perfObj.towerID} only has ${towerBellCount} full-circle bells — skipping grab`);
+                return;
+            }
 
             const percentOfRing = (perfBellCount / towerBellCount) * 100;
 
