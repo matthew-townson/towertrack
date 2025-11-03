@@ -104,6 +104,9 @@ export async function importBBData(userId) {
     let insertedCount = 0;
     let updatedCount = 0;
 
+    // Track earliest performance date at each tower for smart grab date handling
+    const towerEarliestPerformance = new Map(); // Map<towerID_ringID, {date, day, month, year}>
+
     initProgress(userId);
     setProgress(userId, { stage: 'starting', message: 'Starting BellBoard import', total: 0, processed: 0 });
 
@@ -370,20 +373,26 @@ export async function importBBData(userId) {
                 }
             }
 
+            const towerKey = `${perfObj.towerID}_${ringIdToUse || 'null'}`;
+            if (year) {
+                const perfDate = new Date(year, (month || 1) - 1, day || 1);
+                const existing = towerEarliestPerformance.get(towerKey);
+                
+                if (!existing || perfDate < existing.date) {
+                    towerEarliestPerformance.set(towerKey, { date: perfDate, day, month, year });
+                    log.debug(`Updated earliest performance for tower ${perfObj.towerID} ring ${ringIdToUse}: ${year}-${month}-${day}`);
+                }
+            }
+
             try {
                 await pool.query(
-                    `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
-                     VALUES (?, ?, ?, ?, ?, ?)
-                     ON DUPLICATE KEY UPDATE
-                       dateGrabbed = VALUES(dateGrabbed),
-                       monthGrabbed = VALUES(monthGrabbed),
-                       yearGrabbed = VALUES(yearGrabbed),
-                       lastUpdated = CURRENT_TIMESTAMP`,
-                    [userId, perfObj.towerID, ringIdToUse, day, month, year]
+                    `INSERT IGNORE INTO Grab (userID, towerID, ringID)
+                     VALUES (?, ?, ?)`,
+                    [userId, perfObj.towerID, ringIdToUse]
                 );
-                log.debug(`Upserted Grab for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
+                log.debug(`Ensured Grab exists for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
             } catch (err) {
-                log.error(`Failed to upsert Grab for user ${userId} tower ${perfObj.towerID}: ${err.message}`);
+                log.error(`Failed to insert Grab placeholder for user ${userId} tower ${perfObj.towerID}: ${err.message}`);
                 return;
             }
 
@@ -634,6 +643,68 @@ export async function importBBData(userId) {
     
     try {
         await runLimited(tasks, CONCURRENCY);
+        
+        // update grab dates based on the earliest performances we found
+        setProgress(userId, { stage: 'finalizing', message: 'Updating grab dates...' });
+        log.info(`Updating grab dates for ${towerEarliestPerformance.size} towers`);
+        
+        for (const [towerKey, perfInfo] of towerEarliestPerformance.entries()) {
+            const [towerIDStr, ringIDStr] = towerKey.split('_');
+            const towerID = parseInt(towerIDStr);
+            const ringID = ringIDStr === 'null' ? null : parseInt(ringIDStr);
+            
+            try {
+                // check if grab already exists with a date
+                const [existingGrab] = await pool.query(
+                    `SELECT dateGrabbed, monthGrabbed, yearGrabbed FROM Grab 
+                     WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                    [userId, towerID, ringID, ringID]
+                );
+
+                if (existingGrab.length === 0) {
+                    await pool.query(
+                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
+                         VALUES (?, ?, ?, ?, ?, ?)`,
+                        [userId, towerID, ringID, perfInfo.day, perfInfo.month, perfInfo.year]
+                    );
+                    log.debug(`Created Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
+                } else {
+                    const existing = existingGrab[0];
+                    const existingDate = existing.yearGrabbed 
+                        ? new Date(existing.yearGrabbed, (existing.monthGrabbed || 1) - 1, existing.dateGrabbed || 1)
+                        : null;
+
+                    if (!existingDate) {
+                        // grab exists but has no date - update with earliest performance date
+                        await pool.query(
+                            `UPDATE Grab SET dateGrabbed = ?, monthGrabbed = ?, yearGrabbed = ?, lastUpdated = CURRENT_TIMESTAMP
+                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                            [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
+                        );
+                        log.debug(`Updated Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
+                    } else if (perfInfo.date < existingDate) {
+                        // earliest performance is before existing grab date - update to earliest performance
+                        await pool.query(
+                            `UPDATE Grab SET dateGrabbed = ?, monthGrabbed = ?, yearGrabbed = ?, lastUpdated = CURRENT_TIMESTAMP
+                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                            [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
+                        );
+                        log.info(`Updated Grab date to earlier performance: ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} (was ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed}) for tower ${towerID}`);
+                    } else {
+                        // existing grab date is earlier or equal - keep it
+                        log.debug(`Keeping existing earlier grab date ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed} for tower ${towerID}`);
+                        await pool.query(
+                            `UPDATE Grab SET lastUpdated = CURRENT_TIMESTAMP
+                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                            [userId, towerID, ringID, ringID]
+                        );
+                    }
+                }
+            } catch (err) {
+                log.error(`Failed to update Grab date for tower ${towerID}: ${err.message}`);
+            }
+        }
+        
         const finalTotal = getProgress(userId).total || processedCount;
         setProgress(userId, { stage: 'done', message: 'Import complete', processed: finalTotal, total: finalTotal });
         const elapsedMs = Date.now() - importStart;
