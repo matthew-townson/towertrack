@@ -32,7 +32,6 @@
 				<a class="navbar-item has-text-white" href="/map">Map</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/">Home</a>
-				<a class="navbar-item has-text-white" href="/tower/search">Towers</a>
 				<a class="navbar-item has-text-white" href="/about">About</a>
 			{/if}
 		</div>
