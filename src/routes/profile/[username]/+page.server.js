@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import pool from '$lib/server/db.js';
 import { getUserStats } from '$lib/server/userstats.js';
+import { getUserTowerData } from '$lib/server/mapData.js';
 
 export async function load({ params, depends }) {
 	depends('app:profile');
@@ -57,6 +58,9 @@ export async function load({ params, depends }) {
 		}
 
 		const userStats = await getUserStats(user.id);
+		
+		// Get user's tower data for map
+		const towerData = await getUserTowerData(user.id);
 
 		// public: return sanitized user data and settings
 		return {
@@ -68,7 +72,8 @@ export async function load({ params, depends }) {
 				isPrivate: false,
 			},
 			settings,
-			stats: userStats
+			stats: userStats,
+			towerData
 		};
 	} catch (err) {
 		if (err?.status) throw err;

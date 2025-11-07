@@ -2,6 +2,7 @@
     import { enhance } from '$app/forms';
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
+    import { convertToHundredweight } from '$lib/mapUtils.js';
     export let data;
     export let form;
     let loading = false;
@@ -26,12 +27,7 @@
 
     // Convert lbs to hundredweight format
     function lbsToHundredweight(lbs) {
-        if (!lbs) return '';
-        const cwt = Math.floor(lbs / 112);
-        const remaining = lbs % 112;
-        const qtr = Math.floor(remaining / 28);
-        const finalLbs = remaining % 28;
-        return `${cwt}-${qtr}-${finalLbs}`;
+        return convertToHundredweight(lbs);
     }
 
     // Helpers to display bell numbers when provided in the ringer object.

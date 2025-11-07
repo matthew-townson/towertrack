@@ -1,11 +1,13 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
+	import TowerMap from '$lib/components/TowerMap.svelte';
 	export let data;
 
 	const profile = data?.profile || {};
 	const settings = data?.settings || {};
 	const stats = data?.stats || null;
+	const towerData = data?.towerData || null;
 
 	let activeSection = 'quarters'; // 'quarters' or 'peals'
 	let hoveredSlice = null;
@@ -41,6 +43,13 @@
 
 <svelte:head>
 	<title>{profile.username ? `${profile.username}` : 'Profile'} | towertracker</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+		  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+		  crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+			crossorigin=""></script>
+    <link rel="stylesheet" href="/assets/css/map.css">
 </svelte:head>
 
 <Header user={data.user} />
@@ -251,6 +260,36 @@
 										</div>
 									{/if}
 								</div>
+								
+								<!-- Tower Map -->
+								{#if towerData && (towerData.grabbed?.length > 0 || towerData.quartered?.length > 0 || towerData.pealed?.length > 0)}
+									<div class="box mt-4">
+										<h4 class="subtitle is-6">Tower Map</h4>
+										<TowerMap 
+											towers={[
+												...towerData.grabbed.map(t => ({ ...t, grabbed: true, quartered: false, pealed: false })),
+												...towerData.quartered.map(t => ({ ...t, grabbed: false, quartered: true, pealed: false })),
+												...towerData.pealed.map(t => ({ ...t, grabbed: false, quartered: false, pealed: true }))
+											]}
+											bellsFilter={3}
+											isMinimumBells={true}
+											showUnringable={true}
+											practiceNightFilter=""
+											displayLimit={1000}
+											includeGrabbed={false}
+											excludeGrabbed={false}
+											includeQuartered={false}
+											excludeQuartered={false}
+											includePealed={false}
+											excludePealed={false}
+											showLocationTracking={false}
+											showClosestTower={false}
+											showTowerCount={true}
+											autoFitBounds={true}
+											mapHeight="400px"
+										/>
+									</div>
+								{/if}
 							{/if}
 						{/if}
 					</div>

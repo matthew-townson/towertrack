@@ -1,22 +1,11 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
+    import { convertToHundredweight } from '$lib/mapUtils.js';
     export let data;
     
     function lbsToHundredweight(lbs) {
-        if (!lbs) return '';
-        const cwt = Math.floor(lbs / 112);
-        const remaining = lbs % 112;
-        const qtr = Math.floor(remaining / 28);
-        const finalLbs = remaining % 28;
-        
-        if (cwt > 0) {
-            return `${cwt}-${qtr}-${finalLbs}`;
-        } else if (qtr > 0) {
-            return `${qtr}-${finalLbs}`;
-        } else {
-            return `${finalLbs}lb`;
-        }
+        return convertToHundredweight(lbs);
     }
     
     function formatDate(dateStr) {
