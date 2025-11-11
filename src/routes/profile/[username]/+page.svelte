@@ -242,7 +242,7 @@
 										<div class="content">
 											<p><strong>Total Peals:</strong> {totalPeals}</p>
 											{#if stats.leadingPealRingers && stats.leadingPealRingers.length > 0}
-												<p><strong>Leading Co-Ringers:</strong></p>
+												<p><strong>Leading Ringers:</strong></p>
 												<ol>
 													{#each stats.leadingPealRingers as ringer}
 														<li>{ringer.RingerName} ({ringer.count} performances)</li>
