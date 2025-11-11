@@ -215,7 +215,7 @@
 								</div>
 
 								<!-- Details Section -->
-								<div class="box mt-4">
+								<div id="user-details" class="box mt-4">
 									{#if activeSection === 'quarters'}
 										<h4 class="subtitle is-6">Quarter Peal Details</h4>
 										<div class="content">
@@ -263,7 +263,7 @@
 								
 								<!-- Tower Map -->
 								{#if towerData && (towerData.grabbed?.length > 0 || towerData.quartered?.length > 0 || towerData.pealed?.length > 0)}
-									<div class="box mt-4">
+									<div id="tower-map" class="box mt-4">
 										<h4 class="subtitle is-6">Tower Map</h4>
 										<TowerMap 
 											towers={[
