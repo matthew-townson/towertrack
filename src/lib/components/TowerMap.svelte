@@ -34,6 +34,21 @@
     export let initialZoom = 6;
     export let mapHeight = '100%';
     
+    // advanced filter options (exported so parent can bind)
+    export let counties = [];
+    export let countries = [];
+    export let dioceses = [];
+    export let minWtLbs = null;
+    export let maxWtLbs = null;
+
+    // selected advanced filters (exported for parent binding)
+    export let selectedCounty = '';
+    export let selectedCountry = '';
+    export let selectedDiocese = '';
+    // store weight inputs in hundredweight decimals for UX (1 cwt = 112 lbs)
+    export let minWeightCwt = '';
+    export let maxWeightCwt = '';
+    
     // state that parent can read
     export let currentlyDisplayed = 0;
     export let filteredTowerCount = 0;
@@ -49,6 +64,56 @@
     let isProgramMove = false;
     let lastTowerUpdate = 0;
     let queryLocationUsed = false;
+
+    function lbsToCwtDecimal(lbs) {
+        if (lbs === null || lbs === undefined) return null;
+        const n = parseFloat(lbs);
+        if (isNaN(n)) return null;
+        return +(n / 112).toFixed(2);
+    }
+
+    function cwtDecimalToLbs(cwt) {
+        if (cwt === null || cwt === undefined || cwt === '') return null;
+        const n = parseFloat(cwt);
+        if (isNaN(n)) return null;
+        return Math.round(n * 112);
+    }
+
+    // Advanced filters matching function (available to map filtering flow)
+    function matchesAdvancedFilters(tower) {
+        // County
+        if (selectedCounty && tower.County) {
+            if (String(tower.County).toLowerCase() !== String(selectedCounty).toLowerCase()) return false;
+        } else if (selectedCounty && !tower.County) {
+            return false;
+        }
+
+        // Country
+        if (selectedCountry && tower.Country) {
+            if (String(tower.Country).toLowerCase() !== String(selectedCountry).toLowerCase()) return false;
+        } else if (selectedCountry && !tower.Country) {
+            return false;
+        }
+
+        // Diocese
+        if (selectedDiocese && tower.Diocese) {
+            if (String(tower.Diocese).toLowerCase() !== String(selectedDiocese).toLowerCase()) return false;
+        } else if (selectedDiocese && !tower.Diocese) {
+            return false;
+        }
+
+        // Weight (tower.Wt is in lbs at this point)
+        const minLbs = cwtDecimalToLbs(minWeightCwt);
+        const maxLbs = cwtDecimalToLbs(maxWeightCwt);
+        if ((minLbs !== null && minLbs !== undefined) || (maxLbs !== null && maxLbs !== undefined)) {
+            const towerWt = tower.Wt !== null && tower.Wt !== undefined ? parseFloat(tower.Wt) : NaN;
+            if (isNaN(towerWt)) return false;
+            if (minLbs !== null && minLbs !== undefined && !isNaN(minLbs) && towerWt < minLbs) return false;
+            if (maxLbs !== null && maxLbs !== undefined && !isNaN(maxLbs) && towerWt > maxLbs) return false;
+        }
+
+        return true;
+    }
 
     function toggleLocationTracking() {
         if (!navigator.geolocation) {
@@ -122,6 +187,8 @@
             );
         }
     }
+
+    
 
     function getUserLocation() {
         if (!navigator.geolocation) {
@@ -199,6 +266,8 @@
         towersWithDistance = addDistanceToTowers(towersWithDistance, centre, window.L);
         towersWithDistance.sort((a, b) => a.distance - b.distance);
         
+        // advanced filters are applied later via matchesAdvancedFilters
+        
         if (userLocation) {
             let towersFromUserLocation = towers
                 .filter(tower => tower.Lat && tower.Long);
@@ -218,12 +287,15 @@
             towersFromUserLocation = addDistanceToTowers(towersFromUserLocation, userLocation, window.L);
             towersFromUserLocation.sort((a, b) => a.distance - b.distance);
             
+            // apply advanced filters for user-location-sorted list too
+            towersFromUserLocation = towersFromUserLocation.filter(tower => matchesAdvancedFilters(tower));
+
             closestTower = towersFromUserLocation.length > 0 ? towersFromUserLocation[0] : null;
         } else {
             closestTower = null;
         }
         
-        const towersToShow = towersWithDistance.slice(0, displayLimit);
+    const towersToShow = towersWithDistance.filter(tower => matchesAdvancedFilters(tower)).slice(0, displayLimit);
         
         towersToShow.forEach(tower => {
             const bellCount = parseInt(tower.Bells) || 8;
@@ -273,6 +345,7 @@
             includePealed,
             excludePealed
         }));
+        filteredTowers = filteredTowers.filter(tower => matchesAdvancedFilters(tower));
         filteredTowerCount = filteredTowers.length;
     }
 
@@ -352,7 +425,7 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed)) {
+    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed || selectedCounty || selectedCountry || selectedDiocese || minWeightCwt || maxWeightCwt)) {
         updateDisplayedTowers();
     }
 </script>
@@ -474,4 +547,6 @@
             font-size: 0.85rem;
         }
     }
+
+    /* advanced-filter styles removed; UI moved to parent sidebar */
 </style>
