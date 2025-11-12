@@ -4,7 +4,7 @@ import log from '$lib/server/log.js';
 export async function getTowersWithUserData(userId = null) {
     try {
         const [towers] = await db.execute(
-            'SELECT TowerID, RingID, Place, PlaceCL, Dedicn, County, Country, Lat, `Long`, Bells, UR, Wt, Note, Practice FROM Tower WHERE Lat IS NOT NULL AND `Long` IS NOT NULL ORDER BY Place'
+            'SELECT TowerID, RingID, Place, PlaceCL, Dedicn, County, Country, Diocese, Lat, `Long`, Bells, UR, Wt, Note, Practice FROM Tower WHERE Lat IS NOT NULL AND `Long` IS NOT NULL ORDER BY Place'
         );
         
         if (!userId) {
@@ -102,7 +102,7 @@ export async function getUserTowerData(userId) {
     try {
         const [grabbedTowers] = await db.query(`
             SELECT DISTINCT t.TowerID, t.RingID, t.Place, t.PlaceCL, t.Dedicn, 
-                   t.County, t.Country, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note
+                   t.County, t.Country, t.Diocese, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note
             FROM Tower t
             INNER JOIN Grab g ON t.TowerID = g.towerID
             WHERE g.userID = ? AND t.Lat IS NOT NULL AND t.\`Long\` IS NOT NULL
@@ -138,7 +138,7 @@ export async function getUserTowerData(userId) {
             const [perfRows] = await db.query(`
                 SELECT DISTINCT p.towerID, p.changes, p.Ringers,
                        t.RingID, t.Place, t.PlaceCL, t.Dedicn, 
-                       t.County, t.Country, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note
+                       t.County, t.Country, t.Diocese, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note
                 FROM Performance p
                 INNER JOIN Tower t ON p.towerID = t.TowerID
                 WHERE p.Ringers IS NOT NULL AND t.Lat IS NOT NULL AND t.\`Long\` IS NOT NULL

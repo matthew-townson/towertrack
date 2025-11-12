@@ -30,6 +30,20 @@
     // State from map component
     let currentlyDisplayed = 0;
     let filteredTowerCount = 0;
+    
+    // Advanced filters state and options
+    let counties = [];
+    let countries = [];
+    let dioceses = [];
+    let minWtLbs = null;
+    let maxWtLbs = null;
+
+    let selectedCounty = '';
+    let selectedCountry = '';
+    let selectedDiocese = '';
+    let minWeightCwt = '';
+    let maxWeightCwt = '';
+    let advancedOpen = false;
 
     // Extract unique practice nights (Mon-Sun) from tower.Practice, allow multiple per tower
     $: practiceNights = extractPracticeNights(data.towers);
@@ -80,10 +94,51 @@
             }
         }
     });
+
+    // fetch filter options for advanced filters
+    onMount(async () => {
+        try {
+            const res = await fetch('/api/map-filters');
+            if (res.ok) {
+                const data = await res.json();
+                counties = data.counties || [];
+                countries = data.countries || [];
+                dioceses = data.dioceses || [];
+                minWtLbs = data.minWt ?? null;
+                maxWtLbs = data.maxWt ?? null;
+
+                if (minWtLbs) minWeightCwt = lbsToCwtDecimal(minWtLbs);
+                if (maxWtLbs) maxWeightCwt = lbsToCwtDecimal(maxWtLbs);
+            } else {
+                console.warn('Failed to load map filters:', res.status);
+            }
+        } catch (err) {
+            console.warn('Error fetching map filters:', err);
+        }
+    });
     
     $: legendGrabbedSVG = generatePinSVG(8, { grabbed: true });
     $: legendQuarterSVG = generatePinSVG(8, { quartered: true });
     $: legendPealSVG = generatePinSVG(8, { pealed: true });
+
+    function lbsToCwtDecimal(lbs) {
+        if (lbs === null || lbs === undefined) return '';
+        const n = parseFloat(lbs);
+        if (isNaN(n)) return '';
+        return +(n / 112).toFixed(2);
+    }
+
+    function toggleAdvancedOpen() {
+        advancedOpen = !advancedOpen;
+    }
+
+    function clearAdvanced() {
+        selectedCounty = '';
+        selectedCountry = '';
+        selectedDiocese = '';
+        minWeightCwt = minWtLbs ? lbsToCwtDecimal(minWtLbs) : '';
+        maxWeightCwt = maxWtLbs ? lbsToCwtDecimal(maxWtLbs) : '';
+    }
 </script>
 
 <svelte:head>
@@ -123,6 +178,14 @@
                 bind:excludePealed
                 bind:currentlyDisplayed
                 bind:filteredTowerCount
+                bind:counties
+                bind:countries
+                bind:dioceses
+                bind:selectedCounty
+                bind:selectedCountry
+                bind:selectedDiocese
+                bind:minWeightCwt
+                bind:maxWeightCwt
                 showLocationTracking={true}
                 showClosestTower={true}
                 showTowerCount={true}
@@ -218,19 +281,7 @@
                         </div>
                     </div>
                     
-                    <div class="field mb-5">
-                        <label class="label" for="practiceNightFilter">Practice Night</label>
-                        <div class="control">
-                            <div class="select is-fullwidth">
-                                <select id="practiceNightFilter" bind:value={practiceNightFilter}>
-                                    <option value="">(Any)</option>
-                                    {#each practiceNights as night}
-                                        <option value={night}>{night}</option>
-                                    {/each}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Practice Night moved into Advanced Filters panel -->
                     
                     <div class="field mb-5">
                         <label class="label">Special Filters</label>
@@ -304,6 +355,91 @@
                         </div>
                     </div>
                     
+                    <div class="field mb-5">
+                        <span class="label">Advanced Filters</span>
+                        <div class="mt-2">
+                            <button class="button is-small" on:click={toggleAdvancedOpen} aria-expanded={advancedOpen} aria-controls="advanced-panel">{advancedOpen ? 'Hide' : 'Show'} Advanced filters</button>
+                        </div>
+
+                        {#if advancedOpen}
+                            <div id="advanced-panel" class="box mt-3">
+                                <div class="field">
+                                    <label class="label">County</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select bind:value={selectedCounty}>
+                                                <option value="">(Any)</option>
+                                                {#each counties as c}
+                                                    <option value={c}>{c}</option>
+                                                {/each}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label" for="practiceNightFilter">Practice Night</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select id="practiceNightFilter" bind:value={practiceNightFilter}>
+                                                <option value="">(Any)</option>
+                                                {#each practiceNights as night}
+                                                    <option value={night}>{night}</option>
+                                                {/each}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Country</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select bind:value={selectedCountry}>
+                                                <option value="">(Any)</option>
+                                                {#each countries as c}
+                                                    <option value={c}>{c}</option>
+                                                {/each}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Diocese</label>
+                                    <div class="control">
+                                        <div class="select is-fullwidth">
+                                            <select bind:value={selectedDiocese}>
+                                                <option value="">(Any)</option>
+                                                {#each dioceses as d}
+                                                    <option value={d}>{d}</option>
+                                                {/each}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label class="label">Weight (cwt)</label>
+                                    <div class="control is-flex">
+                                        <input class="input" type="number" step="0.25" min="0" placeholder="Min cwt" bind:value={minWeightCwt} />
+                                        <div style="width:8px"></div>
+                                        <input class="input" type="number" step="0.25" min="0" placeholder="Max cwt" bind:value={maxWeightCwt} />
+                                    </div>
+                                </div>
+
+                                <div class="field is-grouped is-grouped-right">
+                                    <p class="control">
+                                        <button class="button is-small" on:click={clearAdvanced}>Clear</button>
+                                    </p>
+                                    <p class="control">
+                                        <button class="button is-primary is-small" on:click={() => { advancedOpen = false; }}>Close</button>
+                                    </p>
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                        
                     <div class="field mb-5">
                         <span class="label">Legend</span>
                         <div class="is-flex is-align-items-center">
