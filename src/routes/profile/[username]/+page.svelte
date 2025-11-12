@@ -90,13 +90,13 @@
 									<p><strong>Other names / also goes by:</strong> {profile.otherNames}</p>
 								{/if}
 								<hr />
-								<h3 class="subtitle is-6">Visible Settings</h3>
+								<h3 class="subtitle is-6">[DEBUG] Settings</h3>
 								{#if settings}
 									<ul>
 										<li><strong>Profile visibility:</strong> {settings.profileVisibility ? 'Public' : 'Private'}</li>
 										<li><strong>Data visibility:</strong> {settings.dataVisibility ? 'Public' : 'Restricted'}</li>
-										<li><strong>Minimum bells percent for imports:</strong> {settings.bellsPercent ?? '100'}%</li>
-										<li><strong>Include vshort imports (exShort):</strong> {settings.exShort ? 'Yes' : 'No'}</li>
+										<li><strong>Minimum bells percent for grab:</strong> {settings.bellsPercent ?? '100'}%</li>
+										<li><strong>Exclude vshort imports:</strong> {settings.exShort ? 'Yes' : 'No'}</li>
 									</ul>
 								{:else}
 									<p>No settings available.</p>
