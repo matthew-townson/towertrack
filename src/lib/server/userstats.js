@@ -51,7 +51,7 @@ export async function getUserStats(userId) {
             const [pealResult] = await db.execute(`
                 SELECT COUNT(DISTINCT PerformanceID) as count
                 FROM Performance
-                WHERE (${nameConditions} AND Changes >= 5000)
+                WHERE (${nameConditions} AND CAST(Changes AS SIGNED) >= 5000)
             `, allNames);
             pealCount = pealResult[0].count;
         } catch (queryError) {
@@ -64,7 +64,7 @@ export async function getUserStats(userId) {
             const [quarterResult] = await db.execute(`
                 SELECT COUNT(DISTINCT PerformanceID) as count
                 FROM Performance
-                WHERE (${nameConditions} AND Changes >= 1200 AND Changes < 2500)
+                WHERE (${nameConditions} AND CAST(Changes AS SIGNED) >= 1200 AND CAST(Changes AS SIGNED) < 2500)
             `, allNames);
             quarterCount = quarterResult[0].count;
         } catch (queryError) {
@@ -77,7 +77,7 @@ export async function getUserStats(userId) {
             const [halfPealResult] = await db.execute(`
                 SELECT COUNT(DISTINCT PerformanceID) as count
                 FROM Performance
-                WHERE (${nameConditions} AND Changes >= 2500 AND Changes < 5000)
+                WHERE (${nameConditions} AND CAST(Changes AS SIGNED) >= 2500 AND CAST(Changes AS SIGNED) < 5000)
             `, allNames);
             halfPealCount = halfPealResult[0].count;
         } catch (queryError) {
@@ -90,7 +90,7 @@ export async function getUserStats(userId) {
             const [dateTouchResult] = await db.execute(`
                 SELECT COUNT(DISTINCT PerformanceID) as count
                 FROM Performance
-                WHERE (${nameConditions}) AND Changes = YEAR(Date)
+                WHERE (${nameConditions}) AND CAST(Changes AS SIGNED) = YEAR(Date)
             `, allNames);
             dateTouchCount = dateTouchResult[0].count;
         } catch (queryError) {
@@ -112,7 +112,7 @@ export async function getUserStats(userId) {
                     )
                 ) as ringer
                 WHERE (${nameConditions})
-                    AND p.Changes >= 1200 AND p.Changes < 2500
+                    AND CAST(p.Changes AS SIGNED) >= 1200 AND CAST(p.Changes AS SIGNED) < 2500
                     AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY RingerName
                 ORDER BY count DESC
@@ -138,7 +138,7 @@ export async function getUserStats(userId) {
                     )
                 ) as ringer
                 WHERE (${nameConditions})
-                    AND p.Changes >= 1200 AND p.Changes < 2500
+                    AND CAST(p.Changes AS SIGNED) >= 1200 AND CAST(p.Changes AS SIGNED) < 2500
                     AND JSON_EXTRACT(ringer.value, '$.conductor') = 1
                     AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY ConductorName
@@ -165,7 +165,7 @@ export async function getUserStats(userId) {
                     )
                 ) as ringer
                 WHERE (${nameConditions})
-                    AND p.Changes >= 5000
+                    AND CAST(p.Changes AS SIGNED) >= 5000
                     AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY RingerName
                 ORDER BY count DESC
@@ -191,7 +191,7 @@ export async function getUserStats(userId) {
                     )
                 ) as ringer
                 WHERE (${nameConditions})
-                    AND p.Changes >= 5000
+                    AND CAST(p.Changes AS SIGNED) >= 5000
                     AND JSON_EXTRACT(ringer.value, '$.conductor') = 1
                     AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY ConductorName
