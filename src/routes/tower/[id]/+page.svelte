@@ -60,6 +60,9 @@
             <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button has-text-white" target="_blank" rel="noopener noreferrer">
                 View on Dove
             </a>
+            <a href="https://bb.ringingworld.co.uk/search?dove_tower={data.tower.TowerID}" class="button bb-button has-text-white" target="_blank" rel="noopener noreferrer">
+                View on BellBoard
+            </a>
             {#if data.tower.Lat && data.tower.Long}
                 <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=18" class="button map-btn has-text-dark">
                     View on Map
