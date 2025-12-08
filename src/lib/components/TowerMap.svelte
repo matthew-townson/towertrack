@@ -353,7 +353,17 @@
         const L = await import('leaflet');
         window.L = L;
 
+        // wait for container to render properly first
+        await new Promise(resolve => setTimeout(resolve, 0));
+
         map = initializeMap(L, mapContainer, initialCenter, initialZoom);
+
+        // force map to recalculate size after init
+        setTimeout(() => {
+            if (map) {
+                map.invalidateSize();
+            }
+        }, 100);
 
         // URL parameters if on map page
         if (typeof window !== 'undefined') {
