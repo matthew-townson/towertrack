@@ -145,10 +145,6 @@ h2 {
     background-color: #3b82f6;
 }
 
-.bb-button {
-    background-color: #f59e0b;
-}
-
 .performances-list {
     display: flex;
     flex-direction: column;
