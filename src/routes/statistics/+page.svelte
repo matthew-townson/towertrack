@@ -114,7 +114,7 @@
 									{#if otherPercent > 0}
 										<path
 											d={getSlicePath(pealEndAngle, 360)}
-											fill="#ffe08a"
+											fill="#f59e0b"
 											class="pie-slice clickable"
 											class:hovered={hoveredSlice === 'other'}
 											on:click={() => setActiveSection('other')}
@@ -127,18 +127,18 @@
 										/>
 									{/if}
 								</svg>
-								<div class="mt-4">
+								<div class="mt-4 legend-container">
 									<div class="is-flex is-align-items-center mb-2">
 										<span class="legend-color mr-2" style="background: #48c78e;"></span>
-										<span class="is-size-7">Quarter Peals ({qpPercent.toFixed(1)}%)</span>
+										<span class="is-size-7 legend-text">Quarter Peals ({qpPercent.toFixed(1)}%)</span>
 									</div>
 									<div class="is-flex is-align-items-center mb-2">
 										<span class="legend-color mr-2" style="background: #3e8ed0;"></span>
-										<span class="is-size-7">Peals ({pealPercent.toFixed(1)}%)</span>
+										<span class="is-size-7 legend-text">Peals ({pealPercent.toFixed(1)}%)</span>
 									</div>
 									<div class="is-flex is-align-items-center">
-										<span class="legend-color mr-2" style="background: #ffe08a;"></span>
-										<span class="is-size-7">Other ({otherPercent.toFixed(1)}%)</span>
+										<span class="legend-color mr-2" style="background: #f59e0b;"></span>
+										<span class="is-size-7 legend-text">Other ({otherPercent.toFixed(1)}%)</span>
 									</div>
 								</div>
 							</div>
@@ -520,7 +520,7 @@
 	}
 
 	.pie-slice.clickable:focus {
-		outline: 3px solid #4a4a4a;
+		outline: 3px solid currentColor;
 		outline-offset: 3px;
 	}
 
@@ -529,6 +529,7 @@
 		height: 20px;
 		border-radius: 4px;
 		flex-shrink: 0;
+		border: 1px solid rgba(0, 0, 0, 0.1);
 	}
 	
 	.statistics-list {
@@ -538,7 +539,7 @@
 	
 	.statistics-list li {
 		padding: 0.75rem 0;
-		border-bottom: 1px solid #f5f5f5;
+		border-bottom: 1px solid rgba(128, 128, 128, 0.2);
 	}
 	
 	.statistics-list li:last-child {
@@ -553,21 +554,93 @@
 	}
 	
 	.stat-label {
-		font-weight: bold;
+		font-weight: 600;
 		flex-shrink: 0;
+		color: inherit;
 	}
 	
 	.stat-value {
 		text-align: right;
 		flex-grow: 1;
+		color: inherit;
 	}
 	
 	.statistics-list a {
-		color: #3273dc;
 		text-decoration: none;
+		font-weight: 500;
 	}
 	
 	.statistics-list a:hover {
 		text-decoration: underline;
+	}
+
+	.legend-container {
+		text-align: left;
+	}
+
+	.legend-text {
+		font-weight: 500;
+	}
+
+	/* Light mode styles */
+	@media (prefers-color-scheme: light) {
+		.legend-color {
+			border-color: rgba(0, 0, 0, 0.15);
+		}
+
+		.legend-text {
+			color: #4a4a4a;
+		}
+		
+		.statistics-list li {
+			border-bottom-color: rgba(0, 0, 0, 0.1);
+		}
+		
+		.statistics-list a {
+			color: #c33c54;
+		}
+		
+		.statistics-list a:hover {
+			color: #a02f44;
+		}
+		
+		.stat-label {
+			color: #363636;
+		}
+		
+		.stat-value {
+			color: #4a4a4a;
+		}
+	}
+
+	/* Dark mode styles */
+	@media (prefers-color-scheme: dark) {
+		.legend-color {
+			border-color: rgba(255, 255, 255, 0.2);
+		}
+
+		.legend-text {
+			color: #f5f5f5;
+		}
+		
+		.statistics-list li {
+			border-bottom-color: rgba(255, 255, 255, 0.1);
+		}
+		
+		.statistics-list a {
+			color: #8ee3ef;
+		}
+		
+		.statistics-list a:hover {
+			color: #aef3e7;
+		}
+		
+		.stat-label {
+			color: #f5f5f5;
+		}
+		
+		.stat-value {
+			color: #dbdbdb;
+		}
 	}
 </style>
