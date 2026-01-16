@@ -7,9 +7,6 @@
 }
 
 input, textarea, select {
-    /* background: #23262b; */
-    /* color: #f3f4f6; */
-    border: 1px solid #424751 !important;
     outline: none;
     padding: 0.5rem;
     border-radius: 4px;
@@ -86,12 +83,9 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .login-box {
-    border: 1px solid #424751;
     max-width: 400px;
     margin: 0 auto;
     text-align: left;
-    /* background: #23262b; */
-    /* color: #f3f4f6; */
     border-radius: 8px;
     padding: 2rem;
 }
@@ -968,14 +962,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .feature-text h3 {
     margin: 0;
-    color: #f3f4f6;
     font-size: 1.1rem;
     font-weight: 600;
 }
 
 .feature-text p {
     margin: 0.25rem 0 0 0;
-    color: #a1a1aa;
     font-size: 0.9rem;
 }
 
@@ -984,3 +976,123 @@ h1, h2, h3, h4, h5, h6 {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==================== Global Light Mode Styles ==================== */
+@media (prefers-color-scheme: light) {
+    html, body {
+        background: #ffffff;
+        color: #363636;
+    }
+
+    main {
+        background: #ffffff;
+        color: #363636;
+    }
+
+    footer, .footer {
+        background: #f5f5f5;
+        color: #4a4a4a;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #363636;
+    }
+
+    input, textarea, select {
+        background: #ffffff;
+        color: #363636;
+        border-color: rgba(0, 0, 0, 0.2) !important;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: #c33c54 !important;
+    }
+
+    .login-box {
+        background: #ffffff;
+        color: #363636;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .box {
+        background: #ffffff;
+        color: #363636;
+    }
+
+    .notification.is-info {
+        background: rgba(62, 142, 208, 0.1);
+        color: #296fa8;
+    }
+
+    .feature-text h3 {
+        color: #363636;
+    }
+
+    .feature-text p {
+        color: #6b6b6b;
+    }
+}
+
+/* ==================== Global Dark Mode Styles ==================== */
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background: #14161a;
+        color: #f3f4f6;
+    }
+
+    main {
+        background: #14161a;
+        color: #f3f4f6;
+    }
+
+    footer, .footer {
+        background: #23262b;
+        color: #f3f4f6;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        color: #f3f4f6;
+    }
+
+    input, textarea, select {
+        background: #23262b;
+        color: #f3f4f6;
+        border-color: #424751 !important;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: #8ee3ef !important;
+    }
+
+    .login-box {
+        background: #23262b;
+        color: #f3f4f6;
+        border-color: #424751;
+    }
+
+    .box {
+        background: #23262b;
+        color: #f3f4f6;
+    }
+
+    .notification.is-info {
+        background: rgba(142, 227, 239, 0.1);
+        color: #8ee3ef;
+    }
+
+    .feature-text h3 {
+        color: #f3f4f6;
+    }
+
+    .feature-text p {
+        color: #a1a1aa;
+    }
+}
+
+/* ==================== Shared Utility Styles ==================== */
+/* Updates and Roadmap page styles (minimal overrides) */
+.box > .media .icon.is-large { font-size: 1.6rem; }
+.title.is-6 { margin-bottom: 0.25rem; }
+
+/* Help text margin */
+.help { margin-top: 0.25rem; }

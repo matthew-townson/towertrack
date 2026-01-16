@@ -50,15 +50,3 @@
 		</div>
 	</div>
 </nav>
-
-<style>
-	.custom-banner-bg {
-		background: linear-gradient(160deg, #c33c54 56%, #8ee3ef 100%, #aef3e7 100%);
-	}
-	.navbar {
-		border-bottom: none;
-	}
-	.navbar-item h1 {
-		margin: 0;
-	}
-</style>

@@ -1,0 +1,152 @@
+/* Error page styles */
+
+.error-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+}
+
+.error-container {
+	border-radius: 16px;
+	padding: 3rem;
+	text-align: center;
+	max-width: 600px;
+	width: 100%;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.error-icon {
+	font-size: 4rem;
+	margin-bottom: 1rem;
+}
+
+.error-code {
+	font-size: 6rem;
+	font-weight: bold;
+	color: #e74c3c;
+	line-height: 1;
+	margin-bottom: 0.5rem;
+}
+
+.error-title {
+	font-size: 2rem;
+	margin-bottom: 1rem;
+	font-weight: 600;
+}
+
+.error-description {
+	font-size: 1.1rem;
+	margin-bottom: 1.5rem;
+	line-height: 1.5;
+}
+
+.error-details {
+	border-radius: 8px;
+	padding: 1rem;
+	margin: 1rem 0;
+	font-size: 0.9rem;
+}
+
+.error-actions {
+	display: flex;
+	gap: 1rem;
+	justify-content: center;
+	margin: 2rem 0;
+	flex-wrap: wrap;
+}
+
+.btn {
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 8px;
+	font-size: 1rem;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	transition: all 0.2s ease;
+}
+
+.btn-primary {
+	background: #3498db;
+	color: white;
+}
+
+.btn-primary:hover {
+	background: #2980b9;
+	transform: translateY(-2px);
+}
+
+.btn-secondary {
+	background: #95a5a6;
+	color: white;
+}
+
+.btn-secondary:hover {
+	background: #7f8c8d;
+	transform: translateY(-2px);
+}
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+	.error-container {
+		background: white;
+	}
+
+	.error-title {
+		color: #2c3e50;
+	}
+
+	.error-description {
+		color: #666;
+	}
+
+	.error-details {
+		background: #f8f9fa;
+		border: 1px solid #dee2e6;
+		color: #6c757d;
+	}
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+	.error-container {
+		background: #23262b;
+	}
+
+	.error-title {
+		color: #f3f4f6;
+	}
+
+	.error-description {
+		color: #cbd5e1;
+	}
+
+	.error-details {
+		background: #14161a;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: #94a3b8;
+	}
+}
+
+@media (max-width: 768px) {
+	.error-container {
+		padding: 2rem;
+		margin: 1rem;
+	}
+
+	.error-code {
+		font-size: 4rem;
+	}
+
+	.error-title {
+		font-size: 1.5rem;
+	}
+
+	.error-actions {
+		flex-direction: column;
+	}
+}

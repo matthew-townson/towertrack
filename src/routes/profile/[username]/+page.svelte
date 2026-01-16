@@ -50,6 +50,7 @@
 			integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
 			crossorigin=""></script>
     <link rel="stylesheet" href="/assets/css/map.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
 </svelte:head>
 
 <Header user={data.user} />
@@ -300,70 +301,3 @@
 </main>
 
 <Footer />
-
-<style>
-/* Profile avatar styles */
-.profile-avatar {
-	width: 96px;
-	height: 96px;
-	border-radius: 50%;
-	background: linear-gradient(135deg,#8ee3ef 0%,#6ac6c6 100%);
-	display:flex;
-	justify-content:center;
-	align-items:center;
-	color:#073642;
-	font-weight:700;
-	font-size:32px;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-	flex-shrink:0;
-}
-
-.avatar-initials { line-height:1; }
-
-/* Chart styles */
-.chart-container {
-	max-width: 250px;
-	margin: 1.5rem auto;
-}
-
-.pie-chart {
-	width: 100%;
-	height: auto;
-	display: block;
-}
-
-.pie-slice.clickable {
-	cursor: pointer;
-	transition: transform 0.2s, opacity 0.2s;
-	transform-origin: center;
-}
-
-.pie-slice.clickable:hover,
-.pie-slice.clickable.hovered {
-	opacity: 0.85;
-	transform: scale(1.05);
-}
-
-.pie-slice.clickable:focus {
-	outline: 3px solid #4a4a4a;
-	outline-offset: 3px;
-}
-
-.legend-color {
-	width: 20px;
-	height: 20px;
-	border-radius: 4px;
-	flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-	.profile-avatar {
-		width:72px;
-		height:72px;
-		font-size:24px;
-	}
-	.profile-top .column {
-		padding-left: 0.5rem;
-	}
-}
-</style>

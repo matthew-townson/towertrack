@@ -468,8 +468,3 @@
 </main>
 
 <Footer />
-
-<style>
-    :global(.legend-icon svg) { display: block; width: 100%; height: 100%; }
-    .legend-item { gap: 0.5rem; }
-</style>

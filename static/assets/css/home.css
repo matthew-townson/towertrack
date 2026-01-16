@@ -5,20 +5,17 @@
 }
 
 .dashboard-section {
-    /* background: #2d3139; */
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
 }
 
 .dashboard-section h2 {
-    /* color: #8ee3ef; */
     margin-top: 0;
     margin-bottom: 0.5rem;
 }
 
 .section-description {
-    /* color: #a1a1aa; */
     margin-bottom: 1.5rem;
 }
 
@@ -29,7 +26,6 @@
 }
 
 .stat-card {
-    /* background: #23262b; */
     padding: 1.5rem;
     border-radius: 8px;
     min-width: 150px;
@@ -39,13 +35,11 @@
 .stat-number {
     font-size: 2.5rem;
     font-weight: 700;
-    /* color: #8ee3ef; */
     margin-bottom: 0.5rem;
 }
 
 .stat-label {
     font-size: 1rem;
-    /* color: #f3f4f6; */
 }
 
 .feature-links {
@@ -63,12 +57,10 @@
     border-radius: 8px;
     text-decoration: none;
     transition: transform 0.2s, background-color 0.2s;
-    /* background: #23262b; */
 }
 
 .feature-card:hover {
     transform: translateY(-2px);
-    /* background: #3b3f45; */
 }
 
 .feature-icon {
@@ -77,8 +69,8 @@
     justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
-    /* background: #c33c54; */
-    /* color: white; */
+    background: #c33c54;
+    color: white;
     border-radius: 8px;
     font-size: 1.25rem;
     flex-shrink: 0;
@@ -90,19 +82,106 @@
 
 .feature-text h3 {
     margin: 0;
-    /* color: #f3f4f6; */
     font-size: 1.1rem;
     font-weight: 600;
 }
 
 .feature-text p {
     margin: 0.25rem 0 0 0;
-    /* color: #a1a1aa; */
     font-size: 0.9rem;
 }
 
 @media (max-width: 768px) {
     .feature-links {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== Light Mode Styles ==================== */
+@media (prefers-color-scheme: light) {
+    .dashboard-section {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-section h2 {
+        color: #c33c54;
+    }
+
+    .section-description {
+        color: #6b6b6b;
+    }
+
+    .stat-card {
+        background: #f5f5f5;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-number {
+        color: #c33c54;
+    }
+
+    .stat-label {
+        color: #363636;
+    }
+
+    .feature-card {
+        background: #f5f5f5;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card:hover {
+        background: #ebebeb;
+    }
+
+    .feature-text h3 {
+        color: #363636;
+    }
+
+    .feature-text p {
+        color: #6b6b6b;
+    }
+}
+
+/* ==================== Dark Mode Styles ==================== */
+@media (prefers-color-scheme: dark) {
+    .dashboard-section {
+        background: #2d3139;
+    }
+
+    .dashboard-section h2 {
+        color: #8ee3ef;
+    }
+
+    .section-description {
+        color: #a1a1aa;
+    }
+
+    .stat-card {
+        background: #23262b;
+    }
+
+    .stat-number {
+        color: #8ee3ef;
+    }
+
+    .stat-label {
+        color: #f3f4f6;
+    }
+
+    .feature-card {
+        background: #23262b;
+    }
+
+    .feature-card:hover {
+        background: #3b3f45;
+    }
+
+    .feature-text h3 {
+        color: #f3f4f6;
+    }
+
+    .feature-text p {
+        color: #a1a1aa;
     }
 }

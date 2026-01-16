@@ -162,8 +162,3 @@
 </main>
 
 <Footer />
-
-<style>
-	/* minimal page-local tweaks */
-	:global(.help) { margin-top:0.25rem; }
-</style>

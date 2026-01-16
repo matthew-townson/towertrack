@@ -123,7 +123,7 @@ async function initialiseDatabase() {
                     \`Affiliations\` TEXT,
                     \`Postcode\` VARCHAR(20),
                     \`Practice\` VARCHAR(255),
-                    \`LGrade\` VARCHAR(10),
+                    \`LGrade\` VARCHAR(50),
                     PRIMARY KEY (\`TowerID\`, \`RingID\`)
                 )
             `);

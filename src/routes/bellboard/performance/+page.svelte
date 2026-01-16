@@ -149,7 +149,3 @@
 </main>
 
 <Footer />
-
-<style>
-
-</style>

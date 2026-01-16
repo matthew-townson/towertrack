@@ -16,13 +16,3 @@
         </p>
     </div>
 </footer>
-
-<style>
-    .custom-footer-bg {
-        background: #c33c54 !important;
-    }
-    .custom-footer-compact {
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
-    }
-</style>

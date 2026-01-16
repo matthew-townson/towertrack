@@ -3,7 +3,6 @@
 }
 
 .breadcrumb-nav a {
-    color: #8ee3ef;
     text-decoration: none;
     font-size: 0.9rem;
 }
@@ -13,7 +12,6 @@
 }
 
 .performance-detail-container {
-    border: 1px solid #3b3f45;
     border-radius: 8px;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -41,15 +39,30 @@
     margin: 0;
 }
 
+.location a {
+    text-decoration: none;
+}
+
+.location a:hover {
+    text-decoration: underline;
+}
+
 .dedication {
     font-size: 1rem;
     margin: 0;
     font-weight: normal;
 }
 
+.dedication a {
+    text-decoration: none;
+}
+
+.dedication a:hover {
+    text-decoration: underline;
+}
+
 .date-details {
     font-size: 1rem;
-    color: #a1a1aa;
     margin: 0;
     font-weight: normal;
 }
@@ -113,13 +126,57 @@
     margin-top: 0.5rem;
 }
 
+/* Light mode styles */
 @media (prefers-color-scheme: light) {
+    .breadcrumb-nav a {
+        color: #c33c54;
+    }
+
+    .breadcrumb-nav a:hover {
+        color: #a02f44;
+    }
+
+    .performance-detail-container {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background: #ffffff;
+    }
+
+    .association,
+    .location,
+    .dedication,
+    .method-changes,
+    .ringer-name {
+        color: #363636;
+    }
+
+    .location a,
+    .dedication a {
+        color: #c33c54;
+    }
+
+    .location a:hover,
+    .dedication a:hover {
+        color: #a02f44;
+    }
+
+    .date-details {
+        color: #6b6b6b;
+    }
+
+    .bell-number {
+        color: #363636;
+    }
+
+    .footnote-item {
+        color: #4a4a4a;
+    }
+
     .external-heading {
         color: #c33c54;
         font-size: 1rem;
         font-weight: 600;
         margin: 0 0 0.5rem 0;
-}
+    }
 
     .external-link a {
         color: #c33c54;
@@ -129,10 +186,55 @@
 
     .external-link a:hover {
         text-decoration: underline;
+        color: #a02f44;
     }
 }
 
+/* Dark mode styles */
 @media (prefers-color-scheme: dark) {
+    .breadcrumb-nav a {
+        color: #8ee3ef;
+    }
+
+    .breadcrumb-nav a:hover {
+        color: #aef3e7;
+    }
+
+    .performance-detail-container {
+        border: 1px solid #3b3f45;
+        background: #23262b;
+    }
+
+    .association,
+    .location,
+    .dedication,
+    .method-changes,
+    .ringer-name {
+        color: #f3f4f6;
+    }
+
+    .location a,
+    .dedication a {
+        color: #8ee3ef;
+    }
+
+    .location a:hover,
+    .dedication a:hover {
+        color: #aef3e7;
+    }
+
+    .date-details {
+        color: #a1a1aa;
+    }
+
+    .bell-number {
+        color: #f3f4f6;
+    }
+
+    .footnote-item {
+        color: #dbdbdb;
+    }
+
     .external-heading {
         color: #8ee3ef;
         font-size: 1rem;
@@ -148,6 +250,7 @@
 
     .external-link a:hover {
         text-decoration: underline;
+        color: #aef3e7;
     }
 }
 

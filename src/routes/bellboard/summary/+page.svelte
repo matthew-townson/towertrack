@@ -79,6 +79,7 @@
 
 <svelte:head>
     <title>BellBoard Summary | towertracker</title>
+    <link rel="stylesheet" href="/assets/css/bellboard-summary.css">
 </svelte:head>
 
 <Header user={data.user} />
@@ -119,8 +120,8 @@
                     <strong>Importing:</strong> {progressStage} — {progressPercent}%<br>
                     <small>{progressMessage}</small>
                 </div>
-                <div style="height:8px;background:#e6e6e6;border-radius:4px;margin-top:6px;">
-                    <div style="height:8px;background:#8ee3ef;border-radius:4px;width:{progressPercent}%;transition:width 200ms;"></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width:{progressPercent}%;"></div>
                 </div>
             {/if}
 
@@ -201,105 +202,3 @@
 </main>
 
 <Footer />
-
-<style>
-    .performances-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .performance-card {
-        background: #23262b;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: none;
-    }
-
-    .performance-content {
-        padding: 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
-    .performance-main {
-        flex: 1;
-        text-align: left;
-    }
-
-    .performance-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #f3f4f6;
-        margin: 0 0 0.25rem 0;
-    }
-
-    .performance-date {
-        font-size: 0.9rem;
-        color: #8ee3ef;
-        margin: 0 0 0.75rem 0;
-    }
-
-    .performance-details {
-        color: #f3f4f6;
-    }
-
-    .performance-details p {
-        margin: 0.25rem 0;
-        line-height: 1.4;
-        font-weight: normal;
-    }
-
-    .footnotes-list {
-        margin-top: 0.25rem;
-    }
-
-    .footnote-item {
-        margin: 0.125rem 0;
-        padding-left: 0;
-        color: #f3f4f6;
-        font-weight: normal;
-        font-size: 0.85rem;
-        font-style: italic;
-    }
-
-    .performance-link {
-        flex-shrink: 0;
-        align-self: flex-start;
-    }
-
-    .performance-link a {
-        color: #8ee3ef;
-        text-decoration: none;
-        font-size: 0.9rem;
-        white-space: nowrap;
-    }
-
-    .performance-link a:hover {
-        text-decoration: underline;
-    }
-
-    .notification-close {
-        float: right;
-        background: transparent;
-        border: none;
-        color: #ffffff;
-        font-size: 1.1rem;
-        cursor: pointer;
-        line-height: 1;
-        padding: 0 0.25rem;
-    }
-
-    @media (max-width: 768px) {
-        .performance-content {
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .performance-link {
-            align-self: flex-end;
-        }
-    }
-</style>

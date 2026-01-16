@@ -28,8 +28,3 @@
 </main>
 
 <Footer />
-
-<style>
-	.box > .media .icon.is-large { font-size: 1.6rem; }
-	.title.is-6 { margin-bottom: 0.25rem; }
-</style>
