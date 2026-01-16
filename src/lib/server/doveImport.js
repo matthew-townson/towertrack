@@ -137,11 +137,15 @@ export async function importDoveData() {
         // Disable foreign key checks first (before any operations)
         await connection.query('SET FOREIGN_KEY_CHECKS = 0');
 
-        // Clear existing data using TRUNCATE (outside transaction - TRUNCATE causes implicit commit)
+        // Clear dependent tables first (GrabBell references Bell)
+        log.info('Clearing GrabBell data (references Bell)...');
+        await connection.query('DELETE FROM GrabBell');
+        
+        // Clear existing data using DELETE (TRUNCATE can still fail with FK references in some MySQL configs)
         log.info('Clearing existing bells data...');
-        await connection.query('TRUNCATE TABLE Bell');
+        await connection.query('DELETE FROM Bell');
         log.info('Cleared bells. Clearing towers data...');
-        await connection.query('TRUNCATE TABLE Tower');
+        await connection.query('DELETE FROM Tower');
         log.info('Cleared towers.');
         
         // Now start transaction for inserts
