@@ -1,16 +1,22 @@
 import { redirect } from '@sveltejs/kit';
-import { importDoveData } from '$lib/server/doveImport.js';
-import { getLastImportTime, getSchedulerState, enableScheduler, disableScheduler } from '$lib/server/scheduler.js';
+import { importDoveData, getDoveImportProgress } from '$lib/server/doveImport.js';
+import { getLastImportTime, getLastImportStatus, getSchedulerState, enableScheduler, disableScheduler } from '$lib/server/scheduler.js';
 
-export function load({ locals }) {
+export async function load({ locals }) {
     // Check if user is logged in and has admin permission (0)
     if (!locals.user || locals.user.permission !== 0) {
         throw redirect(303, '/');
     }
     
+    const [lastImportTime, lastImportStatus] = await Promise.all([
+        getLastImportTime(),
+        getLastImportStatus()
+    ]);
+    
     return {
         user: locals.user,
-        lastImportTime: getLastImportTime(),
+        lastImportTime,
+        lastImportStatus,
         schedulerEnabled: getSchedulerState()
     };
 }
