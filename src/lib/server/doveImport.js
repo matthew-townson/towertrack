@@ -46,8 +46,8 @@ export async function importDoveData() {
     try {
         // Fetch CSVs
         log.info('Fetching towers.csv and bells.csv from Dove website');
-        const towers = await fetch('https://mtownson.com/dovedata/towers.csv'); // Amend to real dove link when out of frequent testing
-        const bells = await fetch('https://mtownson.com/dovedata/bells.csv');   // Amend to real dove link when out of frequent testing
+        const towers = await fetch('https://dove.cccbr.org.uk/towers.csv'); // Amend to real dove link when out of frequent testing
+        const bells = await fetch('https://dove.cccbr.org.uk/bells.csv');   // Amend to real dove link when out of frequent testing
 
         if (!towers.ok) {
             const error = `HTTP error fetching towers.csv! status: ${towers.status}`;
