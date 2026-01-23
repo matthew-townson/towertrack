@@ -709,6 +709,7 @@ export async function importBBData(userId) {
         setProgress(userId, { stage: 'done', message: 'Import complete', processed: finalTotal, total: finalTotal });
         const elapsedMs = Date.now() - importStart;
         await cleanExistingPerformancesForUser(userId, normalisedNames);
+        
         log.success(`${user.username} imported ${processedCount} performances (${insertedCount} new, ${updatedCount} updated) from BellBoard in ${(elapsedMs/1000).toFixed(2)}s`);
     } catch (err) {
         setProgress(userId, { stage: 'error', message: `Import failed: ${err.message}` });
