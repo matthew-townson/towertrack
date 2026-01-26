@@ -28,7 +28,7 @@
 				<a class="navbar-item has-text-white" href="/tower/search">Towers</a>
 				<a class="navbar-item has-text-white" href="/statistics">Statistics</a>
 				<a class="navbar-item has-text-white" href="/grab">Grabs</a>
-				<a class="navbar-item has-text-white" href="/bellboard/summary">BellBoard Data</a>
+				<a class="navbar-item has-text-white" href="/u/{userSlug}/performance-data">Performance Data</a>
 				<a class="navbar-item has-text-white" href="/u/{userSlug}">Profile</a>
 				<a class="navbar-item has-text-white" href="/map">Map</a>
 			{:else}

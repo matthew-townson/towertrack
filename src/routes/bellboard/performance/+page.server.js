@@ -9,7 +9,8 @@ export async function load({ locals, url }) {
 
     const performanceId = url.searchParams.get('id');
     if (!performanceId) {
-        throw redirect(303, '/bellboard/summary');
+        const userSlug = locals.user.username.replace(/ /g, '-');
+        throw redirect(303, `/u/${userSlug}/performance-data`);
     }
 
     // Fetch performance data

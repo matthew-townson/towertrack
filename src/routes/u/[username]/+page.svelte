@@ -108,6 +108,14 @@
 								<hr />
 								<h3 class="subtitle is-5">Statistics</h3>
 								
+								{#if settings.dataVisibility}
+									<p class="mb-4">
+										<a href="/u/{profile.username?.replace(/ /g, '-')}/performance-data" class="button is-link is-small">
+											View Full Performance Data →
+										</a>
+									</p>
+								{/if}
+								
 								<!-- General Stats -->
 								<div class="columns is-mobile is-multiline mb-5">
 									<div class="column is-half-mobile is-one-quarter-tablet">

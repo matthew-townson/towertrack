@@ -89,7 +89,7 @@
             <p class="section-description">Connect with BellBoard to import your performances.</p>
 	        
 	        <div class="feature-links">
-		        <a href="/bellboard/summary" class="feature-card">
+		        <a href="/u/{data.user?.username?.replace(/ /g, '-')}/performance-data" class="feature-card">
 		            <span class="feature-icon">📊</span>
 		            <div class="feature-text">
 		                <h3>BellBoard Summary</h3>

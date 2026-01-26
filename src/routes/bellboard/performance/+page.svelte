@@ -43,7 +43,7 @@
 
 <main>
     <div class="breadcrumb-nav">
-        <a href="/bellboard/summary">← Back to Summary</a>
+        <a href="/u/{data.user?.username?.replace(/ /g, '-')}/performance-data">← Back to Summary</a>
     </div>
     
     <h1>Performance Details</h1>
