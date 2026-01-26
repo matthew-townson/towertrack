@@ -13,19 +13,234 @@
     let progressMessage = '';
 
     let pollHandle = null;
+    
+    // Filter state
+    let filters = {
+        type: 'all', // all, peal, half, quarter, short
+        minChanges: '',
+        maxChanges: '',
+        association: '',
+        place: '',
+        county: '',
+        method: '',
+        dateFrom: '',
+        dateTo: '',
+        year: '',
+        month: '',
+        dayOfMonth: '',
+        dayOfWeek: '',
+        hasDuration: false,
+        conductorName: '', // text search for conductor name
+        otherRinger: ''
+    };
+    
+    let showFilters = false;
+    let viewType = 'compact';
+    let expandedItems = new Set();
+    
+    function toggleExpanded(id) {
+        if (expandedItems.has(id)) {
+            expandedItems.delete(id);
+        } else {
+            expandedItems.add(id);
+        }
+        expandedItems = expandedItems; // trigger reactivity
+    }
+    
+    function formatDateLong(dateStr) {
+        if (!dateStr) return 'N/A';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-GB', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+    
+    $: associations = [...new Set(data?.performances?.map(p => p.Association).filter(Boolean))].sort();
+    
+    $: counties = [...new Set(data?.performances?.map(p => p.County).filter(Boolean))].sort();
+    
+    $: years = [...new Set(data?.performances?.map(p => p.Date ? new Date(p.Date).getFullYear() : null).filter(Boolean))].sort((a, b) => b - a);
+    
+    function wasUserConductor(perf) {
+        if (!perf.ringers || !data.user?.username) return false;
+        const username = data.user.username.toLowerCase();
+        return perf.ringers.some(r => {
+            const name = r?.name?.toLowerCase() || '';
+            return r?.conductor && (name === username || name.startsWith(username + ' ('));
+        });
+    }
+
+    function nameMatches(fullName, searchTerm) {
+        const nameWords = fullName.toLowerCase().split(/\s+/);
+        const searchWords = searchTerm.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+        if (searchWords.length === 0) return false;
+        
+        let nameIndex = 0;
+        for (const searchWord of searchWords) {
+            let found = false;
+            while (nameIndex < nameWords.length) {
+                // name must start with the search word (e.g. "Matt" matches "Matthew", but not in any random order)
+                if (nameWords[nameIndex].startsWith(searchWord)) {
+                    found = true;
+                    nameIndex++;
+                    break;
+                }
+                nameIndex++;
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+    
+    function hasConductor(perf, conductorName) {
+        if (!perf.ringers || !conductorName) return false;
+        return perf.ringers.some(r => {
+            const name = r?.name || '';
+            return r?.conductor && nameMatches(name, conductorName);
+        });
+    }
+    
+    function hasRinger(perf, ringerName) {
+        if (!perf.ringers || !ringerName) return false;
+        return perf.ringers.some(r => {
+            const name = r?.name || '';
+            return nameMatches(name, ringerName);
+        });
+    }
+    
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    // apply filters to performances
+    $: filteredPerformances = (data?.performances || []).filter(perf => {
+        // type filter
+        if (filters.type !== 'all') {
+            const changes = perf.Changes || 0;
+            if (filters.type === 'peal' && changes < 5000) return false;
+            if (filters.type === 'half' && (changes < 2500 || changes >= 5000)) return false;
+            if (filters.type === 'quarter' && (changes < 1250 || changes >= 2500)) return false;
+            if (filters.type === 'short' && changes >= 1250) return false;
+        }
+        
+        // min/max changes
+        if (filters.minChanges && perf.Changes < parseInt(filters.minChanges)) return false;
+        if (filters.maxChanges && perf.Changes > parseInt(filters.maxChanges)) return false;
+        
+        // association filter
+        if (filters.association && perf.Association !== filters.association) return false;
+        
+        // place filter (partial match)
+        if (filters.place && !perf.Place?.toLowerCase().includes(filters.place.toLowerCase())) return false;
+        
+        // county filter
+        if (filters.county && perf.County !== filters.county) return false;
+        
+        // method filter (partial match)
+        if (filters.method && !perf.Method?.toLowerCase().includes(filters.method.toLowerCase())) return false;
+        
+        // date range
+        if (filters.dateFrom && perf.Date) {
+            const perfDate = new Date(perf.Date);
+            const fromDate = new Date(filters.dateFrom);
+            if (perfDate < fromDate) return false;
+        }
+        if (filters.dateTo && perf.Date) {
+            const perfDate = new Date(perf.Date);
+            const toDate = new Date(filters.dateTo);
+            if (perfDate > toDate) return false;
+        }
+        
+        // year filter
+        if (filters.year && perf.Date) {
+            const perfYear = new Date(perf.Date).getFullYear();
+            if (perfYear !== parseInt(filters.year)) return false;
+        }
+        
+        // month filter
+        if (filters.month && perf.Date) {
+            const perfMonth = new Date(perf.Date).getMonth();
+            if (perfMonth !== parseInt(filters.month)) return false;
+        }
+        
+        // date in month filter
+        if (filters.dayOfMonth && perf.Date) {
+            const perfDay = new Date(perf.Date).getDate();
+            if (perfDay !== parseInt(filters.dayOfMonth)) return false;
+        }
+        
+        // day of week filter
+        if (filters.dayOfWeek && perf.Date) {
+            const perfDayOfWeek = new Date(perf.Date).getDay();
+            if (perfDayOfWeek !== parseInt(filters.dayOfWeek)) return false;
+        }
+        
+        // has duration filter
+        if (filters.hasDuration && !perf.Duration) return false;
+        
+        // conductor name filter (text search)
+        if (filters.conductorName && !hasConductor(perf, filters.conductorName)) return false;
+        
+        // other ringer filter
+        if (filters.otherRinger && !hasRinger(perf, filters.otherRinger)) return false;
+        
+        return true;
+    });
+    
+    function resetFilters() {
+        filters = {
+            type: 'all',
+            minChanges: '',
+            maxChanges: '',
+            association: '',
+            place: '',
+            county: '',
+            method: '',
+            dateFrom: '',
+            dateTo: '',
+            year: '',
+            month: '',
+            dayOfMonth: '',
+            dayOfWeek: '',
+            hasDuration: false,
+            conductorName: '',
+            otherRinger: ''
+        };
+    }
+    
+    // check filter is active
+    $: hasActiveFilters = filters.type !== 'all' || filters.association || filters.place || 
+        filters.county || filters.method || filters.dateFrom || filters.dateTo || 
+        filters.year || filters.month || filters.dayOfMonth || filters.dayOfWeek ||
+        filters.hasDuration || filters.conductorName || filters.otherRinger ||
+        filters.minChanges || filters.maxChanges;
+    
+    function setTypeFilter(type) {
+        filters.type = type;
+        if (type === 'peal') {
+            filters.minChanges = '5000';
+            filters.maxChanges = '';
+        } else if (type === 'half') {
+            filters.minChanges = '2500';
+            filters.maxChanges = '4999';
+        } else if (type === 'quarter') {
+            filters.minChanges = '1250';
+            filters.maxChanges = '2499';
+        } else if (type === 'short') {
+            filters.minChanges = '';
+            filters.maxChanges = '1249';
+        } else {
+            filters.minChanges = '';
+            filters.maxChanges = '';
+        }
+    }
 
     // show notification when form result arrives
     $: if (form?.success || form?.error) showNotification = true;
 
-    // Client-side classification function to match server logic
-    function classifyChanges(changes, bell_count) {
-        if (changes >= 5000) return 'peal';
-        if (changes >= 2500 && changes < 5000) return 'half-peal';
-        if (changes >= 1250 && changes < 2500) return 'quarter';
-        return 'performance';
-    }
-
-    // Convert lbs to hundredweight format
+    // convert lbs to hundredweight format
     function lbsToHundredweight(lbs) {
         return convertToHundredweight(lbs);
     }
@@ -142,62 +357,294 @@
 
     <!-- Print performances -->
     <h2>Your Performances</h2>
-    {#if data?.performances?.length > 0}
-        <div class="performances-container">
-            {#each data.performances as perf}
-                <div class="performance-card">
-                    <div class="performance-content">
-                        <div class="performance-main">
-                            <p class="performance-title">
-                                {perf.Changes || 'N/A'} {perf.Method || ''}
-                            </p>
-                            <p class="performance-date">
-                                {perf.Date ? new Date(perf.Date).toLocaleDateString() : 'N/A'}{perf.Duration ? ` in ${perf.Duration}` : ''}
-                            </p>
-                            
-                            <div class="performance-details">
-                                <p>{perf.Association || ''}</p>
-
-                                <p>
-                                    {perf.Place ? `${perf.Place}` : ''}{perf.Dedication ? `, ${perf.Dedication}` : ''}{perf.County ? `, ${perf.County}` : ''}{perf.TenorWeightLbs ? ` (${lbsToHundredweight(perf.TenorWeightLbs)}` : ''}{perf.TenorKey && perf.TenorWeightLbs ? ` in ${perf.TenorKey})` : ''}
+    
+    <!-- Filter Section -->
+    <section class="filter-section">
+        <button class="filter-toggle" on:click={() => showFilters = !showFilters}>
+            {showFilters ? '▼' : '▶'} Filters
+            {#if hasActiveFilters}
+                <span class="filter-active-badge">Active</span>
+            {/if}
+        </button>
+        
+        {#if showFilters}
+            <div class="filter-panel">
+                <!-- Quick type filters -->
+                <div class="filter-group">
+                    <label>Performance Type:</label>
+                    <div class="filter-buttons">
+                        <button class:active={filters.type === 'all'} on:click={() => setTypeFilter('all')}>All</button>
+                        <button class:active={filters.type === 'peal'} on:click={() => setTypeFilter('peal')}>Peals (5000+)</button>
+                        <button class:active={filters.type === 'half'} on:click={() => setTypeFilter('half')}>Half Peals (2500-4999)</button>
+                        <button class:active={filters.type === 'quarter'} on:click={() => setTypeFilter('quarter')}>Quarters (1250-2499)</button>
+                        <button class:active={filters.type === 'short'} on:click={() => setTypeFilter('short')}>Short Touches (&lt;1250)</button>
+                    </div>
+                </div>
+                
+                <!-- Custom changes range -->
+                <div class="filter-group filter-row">
+                    <div class="filter-field">
+                        <label for="minChanges">Min Changes:</label>
+                        <input type="number" id="minChanges" bind:value={filters.minChanges} placeholder="e.g. 1250" min="0">
+                    </div>
+                    <div class="filter-field">
+                        <label for="maxChanges">Max Changes:</label>
+                        <input type="number" id="maxChanges" bind:value={filters.maxChanges} placeholder="e.g. 5000" min="0">
+                    </div>
+                </div>
+                
+                <!-- Conductor and Ringer search -->
+                <div class="filter-group filter-row">
+                    <div class="filter-field">
+                        <label for="conductorName">Conductor:</label>
+                        <input type="text" id="conductorName" bind:value={filters.conductorName} placeholder="Search by conductor...">
+                    </div>
+                    <div class="filter-field">
+                        <label for="otherRinger">Ringer:</label>
+                        <input type="text" id="otherRinger" bind:value={filters.otherRinger} placeholder="Search by ringer...">
+                    </div>
+                </div>
+                
+                <!-- Association filter -->
+                <div class="filter-group">
+                    <label for="association">Association:</label>
+                    <select id="association" bind:value={filters.association}>
+                        <option value="">All Associations</option>
+                        {#each associations as assoc}
+                            <option value={assoc}>{assoc}</option>
+                        {/each}
+                    </select>
+                </div>
+                
+                <!-- Place and Method filters -->
+                <div class="filter-group filter-row">
+                    <div class="filter-field">
+                        <label for="place">Place:</label>
+                        <input type="text" id="place" bind:value={filters.place} placeholder="Search place...">
+                    </div>
+                    <div class="filter-field">
+                        <label for="method">Method:</label>
+                        <input type="text" id="method" bind:value={filters.method} placeholder="Search method...">
+                    </div>
+                </div>
+                
+                <!-- County filter -->
+                <div class="filter-group">
+                    <label for="county">County:</label>
+                    <select id="county" bind:value={filters.county}>
+                        <option value="">All Counties</option>
+                        {#each counties as county}
+                            <option value={county}>{county}</option>
+                        {/each}
+                    </select>
+                </div>
+                
+                <!-- Date range -->
+                <div class="filter-group filter-row">
+                    <div class="filter-field">
+                        <label for="dateFrom">Date From:</label>
+                        <input type="date" id="dateFrom" bind:value={filters.dateFrom}>
+                    </div>
+                    <div class="filter-field">
+                        <label for="dateTo">Date To:</label>
+                        <input type="date" id="dateTo" bind:value={filters.dateTo}>
+                    </div>
+                </div>
+                
+                <!-- Year, Month, Day filters -->
+                <div class="filter-group filter-row">
+                    <div class="filter-field">
+                        <label for="year">Year:</label>
+                        <select id="year" bind:value={filters.year}>
+                            <option value="">All Years</option>
+                            {#each years as year}
+                                <option value={year}>{year}</option>
+                            {/each}
+                        </select>
+                    </div>
+                    <div class="filter-field">
+                        <label for="month">Month:</label>
+                        <select id="month" bind:value={filters.month}>
+                            <option value="">All Months</option>
+                            {#each months as m, i}
+                                <option value={i}>{m}</option>
+                            {/each}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-group filter-row">
+                    <div class="filter-field">
+                        <label for="dayOfMonth">Day of Month:</label>
+                        <select id="dayOfMonth" bind:value={filters.dayOfMonth}>
+                            <option value="">Any Day</option>
+                            {#each Array.from({length: 31}, (_, i) => i + 1) as day}
+                                <option value={day}>{day}</option>
+                            {/each}
+                        </select>
+                    </div>
+                    <div class="filter-field">
+                        <label for="dayOfWeek">Day of Week:</label>
+                        <select id="dayOfWeek" bind:value={filters.dayOfWeek}>
+                            <option value="">Any Day</option>
+                            {#each daysOfWeek as dow, i}
+                                <option value={i}>{dow}</option>
+                            {/each}
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Duration filter -->
+                <div class="filter-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" bind:checked={filters.hasDuration}>
+                        Only show performances with recorded duration
+                    </label>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="reset-btn" on:click={resetFilters}>Reset Filters</button>
+                </div>
+            </div>
+        {/if}
+        
+        <p class="filter-results">
+            Showing {filteredPerformances.length} of {data?.performances?.length || 0} performances
+        </p>
+    </section>
+    
+    <!-- View toggle -->
+    <div class="view-toggle">
+        <button class:active={viewType === 'compact'} on:click={() => viewType = 'compact'}>
+            List
+        </button>
+        <button class:active={viewType === 'detailed'} on:click={() => viewType = 'detailed'}>
+            [Old] Detailed
+        </button>
+    </div>
+    
+    {#if filteredPerformances.length > 0}
+        {#if viewType === 'detailed'}
+            <div class="performances-container">
+                {#each filteredPerformances as perf}
+                    <div class="performance-card">
+                        <div class="performance-content">
+                            <div class="performance-main">
+                                <p class="performance-title">
+                                    {perf.Changes || 'N/A'} {perf.Method || ''}
+                                </p>
+                                <p class="performance-date">
+                                    {perf.Date ? new Date(perf.Date).toLocaleDateString() : 'N/A'}{perf.Duration ? ` in ${perf.Duration}` : ''}
                                 </p>
                                 
-                                {#if perf.ringers && perf.ringers.length > 0}
-                                    <div class="footnotes-list">
-                                        {#each perf.ringers as ringer, index}
-                                            <div class="footnote-item">
-                                                {#if getBellLabel(perf.ringers, ringer, index)}
-                                                    <strong class="bell-number">{getBellLabel(perf.ringers, ringer, index)}.</strong>&nbsp;
-                                                {/if}
-                                                {ringer.name}{ringer.conductor ? ' (C)' : ''}
-                                            </div>
-                                        {/each}
-                                    </div>
-                                {/if}
-                                
-                                {#if perf.footnotes && perf.footnotes.length > 0}
-                                    <div class="footnotes-list">
-                                        {#each perf.footnotes as footnote}
-                                            <div class="footnote-item">{footnote}</div>
-                                        {/each}
-                                    </div>
-                                {/if}
+                                <div class="performance-details">
+                                    <p>{perf.Association || ''}</p>
+
+                                    <p>
+                                        {perf.Place ? `${perf.Place}` : ''}{perf.Dedication ? `, ${perf.Dedication}` : ''}{perf.County ? `, ${perf.County}` : ''}{perf.TenorWeightLbs ? ` (${lbsToHundredweight(perf.TenorWeightLbs)}` : ''}{perf.TenorKey && perf.TenorWeightLbs ? ` in ${perf.TenorKey})` : ''}
+                                    </p>
+                                    
+                                    {#if perf.ringers && perf.ringers.length > 0}
+                                        <div class="footnotes-list">
+                                            {#each perf.ringers as ringer, index}
+                                                <div class="footnote-item">
+                                                    {#if getBellLabel(perf.ringers, ringer, index)}
+                                                        <strong class="bell-number">{getBellLabel(perf.ringers, ringer, index)}.</strong>&nbsp;
+                                                    {/if}
+                                                    {ringer.name}{ringer.conductor ? ' (C)' : ''}
+                                                </div>
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                    
+                                    {#if perf.footnotes && perf.footnotes.length > 0}
+                                        <div class="footnotes-list">
+                                            {#each perf.footnotes as footnote}
+                                                <div class="footnote-item">{footnote}</div>
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                </div>
                             </div>
+                            
+                            {#if perf.PerformanceID}
+                                <div class="performance-link">
+                                    <a href="/bellboard/performance?id={perf.PerformanceID}">View Details</a>
+                                    <br>
+                                    <a href={`https://bb.ringingworld.co.uk/view.php?id=P${perf.PerformanceID}`} target="_blank" rel="noopener noreferrer">View on BellBoard</a>
+                                </div>
+                            {/if}
                         </div>
+                    </div>
+                {/each}
+            </div>
+        {:else}
+            <!-- Compact list view (BellBoard style) -->
+            <div class="compact-list">
+                {#each filteredPerformances as perf}
+                    <div class="compact-item" class:expanded={expandedItems.has(perf.PerformanceID)}>
+                        <button class="compact-row" on:click={() => toggleExpanded(perf.PerformanceID)}>
+                            <span class="compact-date">{formatDateLong(perf.Date)}</span>
+                            <span class="compact-place">{perf.Place || ''}{perf.Dedication ? `, ${perf.Dedication}` : ''}{perf.County ? `, ${perf.County}` : ''}</span>
+                            <span class="compact-method">{perf.Changes || 'N/A'} {perf.Method || ''}</span>
+                            <span class="compact-expand-icon">{expandedItems.has(perf.PerformanceID) ? '▼' : '▶'}</span>
+                        </button>
                         
-                        {#if perf.PerformanceID}
-                            <div class="performance-link">
-                                <a href="/bellboard/performance?id={perf.PerformanceID}">View Details</a>
-                                <br>
-                                <a href={`https://bb.ringingworld.co.uk/view.php?id=P${perf.PerformanceID}`} target="_blank" rel="noopener noreferrer">View on BellBoard</a>
+                        {#if expandedItems.has(perf.PerformanceID)}
+                            <div class="compact-details">
+                                <div class="compact-details-content">
+                                    {#if perf.Duration}
+                                        <p><strong>Duration:</strong> {perf.Duration}</p>
+                                    {/if}
+                                    {#if perf.Association}
+                                        <p><strong>Association:</strong> {perf.Association}</p>
+                                    {/if}
+                                    {#if perf.TenorWeightLbs}
+                                        <p><strong>Tenor:</strong> {lbsToHundredweight(perf.TenorWeightLbs)}{perf.TenorKey ? ` in ${perf.TenorKey}` : ''}</p>
+                                    {/if}
+                                    
+                                    {#if perf.ringers && perf.ringers.length > 0}
+                                        <div class="compact-ringers">
+                                            <strong>Ringers:</strong>
+                                            <div class="footnotes-list">
+                                                {#each perf.ringers as ringer, index}
+                                                    <div class="footnote-item">
+                                                        {#if getBellLabel(perf.ringers, ringer, index)}
+                                                            <strong class="bell-number">{getBellLabel(perf.ringers, ringer, index)}.</strong>&nbsp;
+                                                        {/if}
+                                                        {ringer.name}{ringer.conductor ? ' (C)' : ''}
+                                                    </div>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                    {/if}
+                                    
+                                    {#if perf.footnotes && perf.footnotes.length > 0}
+                                        <div class="compact-footnotes">
+                                            <strong>Footnotes:</strong>
+                                            <div class="footnotes-list">
+                                                {#each perf.footnotes as footnote}
+                                                    <div class="footnote-item">{footnote}</div>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                    {/if}
+                                    
+                                    {#if perf.PerformanceID}
+                                        <div class="compact-links">
+                                            <a href="/bellboard/performance?id={perf.PerformanceID}">View Details</a>
+                                            <a href={`https://bb.ringingworld.co.uk/view.php?id=P${perf.PerformanceID}`} target="_blank" rel="noopener noreferrer">View on BellBoard</a>
+                                        </div>
+                                    {/if}
+                                </div>
                             </div>
                         {/if}
                     </div>
-                </div>
-            {/each}
-        </div>
+                {/each}
+            </div>
+        {/if}
     {:else}
-        <p>No performances found.</p>
+        <p class="no-results">No performances match your filters.</p>
     {/if}
 </main>
 
