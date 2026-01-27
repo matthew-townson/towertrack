@@ -339,12 +339,13 @@
 
 <svelte:head>
     <title>Add a Grab | towertracker</title>
+    <link rel="stylesheet" href="/assets/css/grab.css">
 </svelte:head>
 
 <Header user={data.user} />
 
-<main>    
-    <div class="settings-section">
+<main>
+    <div class="add-grab-container settings-section">
         <h2>Add a Grab</h2>
 
         <div class="breadcrumb-nav">
@@ -394,55 +395,50 @@
             </div>
         {/if}
         
-        <div class="search-container">
-            <div class="field">
-                <label for="searchQuery" class="label">Search for a Tower</label>
-                <div class={"dropdown " + (searchResults.length > 0 ? 'is-active' : '')} style="width:100%;">
-                    <div class="dropdown-trigger" style="width:100%;">
-                        <div class="control has-icons-right" style="width:100%;">
-                            <input
-                                type="text"
-                                id="searchQuery"
-                                name="searchQuery"
-                                class="input"
-                                placeholder="Start typing to search towers..."
-                                bind:value={searchQuery}
-                                on:keydown={handleKeydown}
-                                autocomplete="off"
-                                aria-autocomplete="list"
-                                aria-expanded={searchResults.length > 0}
-                                style="width:100%;"
-                            />
-                            {#if loading}
-                                <span class="icon is-small is-right search-loading-indicator">⏳</span>
-                            {/if}
-                        </div>
-                    </div>
+        <div class="add-grab-container">
+            <div class="settings-section">
+                <div class="search-section">
+                    <label for="searchQuery" class="label">Search for a Tower</label>
+                    <div class="search-field">
+                        <input
+                            type="text"
+                            id="searchQuery"
+                            name="searchQuery"
+                            class="search-input"
+                            placeholder="Start typing to search towers..."
+                            bind:value={searchQuery}
+                            on:keydown={handleKeydown}
+                            autocomplete="off"
+                            aria-autocomplete="list"
+                            aria-expanded={searchResults.length > 0}
+                        />
+                        {#if loading}
+                            <span class="icon is-small is-right search-loading-indicator">⏳</span>
+                        {/if}
 
-                    <div class="dropdown-menu" role="menu">
-                        <div class="dropdown-content search-results-dropdown" style="max-height:300px; overflow:auto;">
-                            {#if searchResults.length > 0}
+                        {#if searchResults.length > 0}
+                            <div class="search-results-dropdown">
                                 {#each searchResults as tower}
                                     <a href="#" class="dropdown-item" on:click|preventDefault={() => selectTower(tower)}>
-                                        <strong style="display:block; color:var(--accent,#8ee3ef);">{tower.Place}</strong>
-                                        <div style="color:var(--muted,#a1a1aa); font-size:0.9rem;">
+                                        <strong>{tower.Place}</strong>
+                                        <div class="tower-meta">
                                             {tower.Dedicn ? `${tower.Dedicn}, ` : ''}{tower.County ? `${tower.County}` : ''}{tower.Country && tower.Country !== tower.County ? `, ${tower.Country}` : ''}
-                                            <div style="font-size:0.85rem; margin-top:0.25rem;">
+                                            <div class="tower-place">
                                                 {tower.Bells} bells {tower.UR === '1' || tower.UR === 1 ? ' • Unringable' : ''}
                                             </div>
                                         </div>
                                     </a>
                                 {/each}
-                            {:else if searchQuery.length >= 2 && !loading}
-                                <div class="dropdown-item" style="color:var(--muted,#a1a1aa);">
+                            </div>
+                        {:else if searchQuery.length >= 2 && !loading}
+                            <div class="search-results-dropdown">
+                                <div class="dropdown-item">
                                     No towers found matching your search
                                 </div>
-                            {/if}
-                        </div>
+                            </div>
+                        {/if}
                     </div>
-                </div>
-            </div>
-        </div>            
+                </div>            
             {#if selectedTower}
                 <div class="selected-tower-container">
                     <h3>Selected Tower</h3>
@@ -556,41 +552,40 @@
                                         </label>
                                     </div>
                                     
-                                    <div class="columns is-multiline bells-grid">
+                                    <div class="bells-grid-add">
                                         {#each towerBells as bell}
-                                            <div class="column is-one-quarter-desktop is-half-tablet is-full-mobile">
+                                                        <div class="bell-item-add">
                                                 <div
-                                                    class="box bell-box {selectedBells.has(bell.BellID) ? 'is-selected' : ''}"
+                                                    class="bell-box-add {selectedBells.has(bell.BellID) ? 'is-selected' : ''}"
                                                     on:click={() => toggleBell(bell.BellID)}
                                                     role="checkbox"
                                                     aria-checked={selectedBells.has(bell.BellID)}
                                                     tabindex="0"
                                                     on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBell(bell.BellID); } }}
                                                 >
-                                                    <label class="checkbox" style="display:flex; align-items:flex-start; gap:0.5rem; width:100%;">
+                                                    <label class="checkbox">
                                                         <input
                                                             type="checkbox"
                                                             name={"bell_" + bell.BellID}
                                                             checked={selectedBells.has(bell.BellID)}
                                                             on:change={() => toggleBell(bell.BellID)}
-                                                            on:click|stopPropagation
                                                         />
-                                                        <div class="bell-info" style="margin-left:0.5rem; flex:1;">
-                                                            <div class="bell-number" style="font-weight:600; color:var(--accent, #8ee3ef);">
+                                                        <div class="bell-info-add">
+                                                            <div class="bell-number-add">
                                                                 {bell.BellRole || 'Bell'}
                                                             </div>
                                                             {#if bell.WeightLbs}
-                                                                <div class="bell-weight" style="color:var(--muted,#a1a1aa); font-size:0.9rem;">
+                                                                <div class="bell-weight-add">
                                                                     {lbsToHundredweight(bell.WeightLbs)}
                                                                 </div>
                                                             {/if}
                                                             {#if bell.Note}
-                                                                <div class="bell-note" style="color:var(--muted,#a1a1aa); font-size:0.9rem;">
+                                                                <div class="bell-note-add">
                                                                     {bell.Note}
                                                                 </div>
                                                             {/if}
                                                             {#if bell.BellName}
-                                                                <div class="bell-name" style="font-style:italic; color:var(--muted,#d1d5db); font-size:0.9rem;">
+                                                                <div class="bell-name-add">
                                                                     {bell.BellName}
                                                                 </div>
                                                             {/if}

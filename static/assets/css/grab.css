@@ -1432,3 +1432,494 @@ input:checked + .toggle-slider:before {
         color: #a1a1aa;
     }
 }
+
+/* ==================== Classic Grab Add Styles ==================== */
+.add-grab-container .settings-section {
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.add-grab-container .search-section {
+    margin-bottom: 1.5rem;
+}
+
+.add-grab-container .search-field {
+    position: relative;
+}
+
+.add-grab-container .search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+}
+
+.add-grab-container .search-results-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #eee;
+    border-top: none;
+    border-radius: 0 0 0.25rem 0.25rem;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: block !important;
+}
+
+.add-grab-container .dropdown-item {
+    padding: 0.75rem;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.add-grab-container .dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
+.add-grab-container .dropdown-item strong {
+    color: #c33c54;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.add-grab-container .tower-meta {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.add-grab-container .tower-place {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.add-grab-container .unringable {
+    color: #c33c54;
+    font-weight: 500;
+}
+
+.add-grab-container .selected-tower {
+    background: #f5f5f5;
+    border: 1px solid #eee;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.add-grab-container .selected-tower-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.add-grab-container .selected-tower-place {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+}
+
+.add-grab-container .select-all-container {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.add-grab-container .select-all-container label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.add-grab-container .bells-grid-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.add-grab-container .bell-item-add {
+    flex: 1;
+    min-width: 250px;
+}
+
+.add-grab-container .bell-box-add {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: block;
+    text-align: left;
+}
+
+.add-grab-container .bell-box-add:hover {
+    border-color: #c33c54;
+    background-color: #fafafa;
+}
+
+.add-grab-container .bell-box-add.is-selected {
+    border-color: #c33c54;
+    background-color: #fff5f7;
+}
+
+.add-grab-container .bell-box-add input[type="checkbox"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.add-grab-container .bell-info-add {
+    flex: 1;
+}
+
+.add-grab-container .bell-number-add {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.add-grab-container .bell-weight-add {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.add-grab-container .bell-note-add {
+    font-size: 0.8rem;
+    color: #999;
+    font-style: italic;
+    margin-bottom: 0.25rem;
+}
+
+.add-grab-container .bell-name-add {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.add-grab-container .date-toggle-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.add-grab-container .date-toggle-section label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+}
+
+.add-grab-container .date-field {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.add-grab-container .date-input {
+    flex: 1;
+    min-width: 150px;
+}
+
+.add-grab-container .date-input input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #eee;
+    border-radius: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.add-grab-container .date-input label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.add-grab-container .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.add-grab-container .submit-btn {
+    padding: 0.75rem 1.5rem;
+    background: #c33c54;
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.add-grab-container .submit-btn:hover:not(:disabled) {
+    background: #a03247;
+}
+
+.add-grab-container .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Light Mode */
+@media (prefers-color-scheme: light) {
+    .add-grab-container .settings-section {
+        background: #fafafa;
+        border-color: #eee;
+    }
+
+    .add-grab-container .search-input {
+        background: white;
+        color: #333;
+        border-color: #eee;
+    }
+
+    .add-grab-container .search-input::placeholder {
+        color: #999;
+    }
+
+    .add-grab-container .search-results-dropdown {
+        background: white;
+        border-color: #eee;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .add-grab-container .dropdown-item {
+        color: #333;
+        border-bottom-color: #eee;
+    }
+
+    .add-grab-container .dropdown-item:hover {
+        background-color: #f5f5f5;
+    }
+
+    .add-grab-container .selected-tower {
+        background: #f5f5f5;
+        border-color: #eee;
+    }
+
+    .add-grab-container .selected-tower-name {
+        color: #333;
+    }
+
+    .add-grab-container .selected-tower-place {
+        color: #666;
+    }
+
+    .add-grab-container .select-all-container {
+        border-bottom-color: #eee;
+    }
+
+    .add-grab-container .bell-box-add {
+        background: white;
+        border-color: #eee;
+        color: #333;
+    }
+
+    .add-grab-container .bell-box-add:hover {
+        border-color: #c33c54;
+        background-color: #fafafa;
+    }
+
+    .add-grab-container .bell-box-add.is-selected {
+        border-color: #c33c54;
+        background-color: #fff5f7;
+    }
+
+    .add-grab-container .bell-number-add {
+        color: #333;
+    }
+
+    .add-grab-container .bell-weight-add {
+        color: #666;
+    }
+
+    .add-grab-container .bell-note-add {
+        color: #999;
+    }
+
+    .add-grab-container .bell-name-add {
+        color: #666;
+    }
+
+    .add-grab-container .date-toggle-section {
+        border-bottom-color: #eee;
+    }
+
+    .add-grab-container .date-input input {
+        background: white;
+        color: #333;
+        border-color: #eee;
+    }
+
+    .add-grab-container .date-input label {
+        color: #666;
+    }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .add-grab-container .settings-section {
+        background: #23262b;
+        border-color: #3b3f45;
+    }
+
+    .add-grab-container .search-input {
+        background: #2d3139;
+        color: #f3f4f6;
+        border-color: #3b3f45;
+    }
+
+    .add-grab-container .search-input::placeholder {
+        color: #8a8d93;
+    }
+
+    .add-grab-container .search-results-dropdown {
+        background: #2d3139;
+        border-color: #3b3f45;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+
+    .add-grab-container .dropdown-item {
+        color: #f3f4f6;
+        border-bottom-color: rgba(255,255,255,0.02);
+    }
+
+    .add-grab-container .dropdown-item:hover {
+        background-color: #353a42;
+    }
+
+    .add-grab-container .dropdown-item strong {
+        color: #8ee3ef;
+    }
+
+    .add-grab-container .tower-meta {
+        color: #a1a1aa;
+    }
+
+    .add-grab-container .tower-place {
+        color: #a1a1aa;
+    }
+
+    .add-grab-container .selected-tower {
+        background: #2d3139;
+        border-color: #3b3f45;
+    }
+
+    .add-grab-container .selected-tower-name {
+        color: #f3f4f6;
+    }
+
+    .add-grab-container .selected-tower-place {
+        color: #a1a1aa;
+    }
+
+    .add-grab-container .select-all-container {
+        border-bottom-color: #3b3f45;
+    }
+
+    .add-grab-container .select-all-container label {
+        color: #f3f4f6;
+    }
+
+    .add-grab-container .bell-box-add {
+        background: #2d3139;
+        border-color: #3b3f45;
+        color: #f3f4f6;
+    }
+
+    .add-grab-container .bell-box-add:hover {
+        border-color: #8ee3ef;
+        background-color: #353a42;
+    }
+
+    .add-grab-container .bell-box-add.is-selected {
+        border-color: #8ee3ef;
+        background-color: #304a4e;
+    }
+
+    .add-grab-container .bell-number-add {
+        color: #f3f4f6;
+    }
+
+    .add-grab-container .bell-weight-add {
+        color: #a1a1aa;
+    }
+
+    .add-grab-container .bell-note-add {
+        color: #8a8d93;
+    }
+
+    .add-grab-container .bell-name-add {
+        color: #a1a1aa;
+    }
+
+    .add-grab-container .date-toggle-section {
+        border-bottom-color: #3b3f45;
+    }
+
+    .add-grab-container .date-toggle-section label {
+        color: #f3f4f6;
+    }
+
+    .add-grab-container .date-input input {
+        background: #2d3139;
+        color: #f3f4f6;
+        border-color: #3b3f45;
+    }
+
+    .add-grab-container .date-input label {
+        color: #a1a1aa;
+    }
+
+    .add-grab-container .submit-btn {
+        background: #8ee3ef;
+        color: #23262b;
+    }
+
+    .add-grab-container .submit-btn:hover:not(:disabled) {
+        background: #6fd5df;
+    }
+}
+
+/* ==================== Grabs List Compact View ==================== */
+.compact-link {
+    font-size: 0.85rem;
+    color: #c33c54;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    transition: background 0.2s;
+}
+
+.compact-link:hover {
+    text-decoration: underline;
+    background: rgba(195, 60, 84, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    .compact-link {
+        color: #8ee3ef;
+    }
+
+    .compact-link:hover {
+        background: rgba(142, 227, 239, 0.1);
+    }
+}
+}

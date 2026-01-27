@@ -60,7 +60,6 @@ export const actions = {
         }
 
         let addedCount = 0;
-        let updatedCount = 0;
         let errors = [];
 
         for (const grab of grabs) {
@@ -93,6 +92,11 @@ export const actions = {
 
                 const alreadyGrabbed = existingGrab.length > 0;
 
+                if (alreadyGrabbed) {
+                    errors.push(`Tower ${tower.Place} already grabbed`);
+                    continue;
+                }
+
                 // Parse date
                 let day = null, month = null, year = null;
                 if (dateGrabbed) {
@@ -104,35 +108,14 @@ export const actions = {
                     }
                 }
 
-                if (alreadyGrabbed) {
-                    // Update existing grab
-                    await db.query(
-                        `UPDATE Grab SET 
-                         dateGrabbed = ?, 
-                         monthGrabbed = ?, 
-                         yearGrabbed = ?,
-                         lastUpdated = CURRENT_TIMESTAMP 
-                         WHERE userID = ? AND towerID = ?`,
-                        [day, month, year, locals.user.id, towerId]
-                    );
+                // Insert new grab
+                await db.query(
+                    `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed) 
+                     VALUES (?, ?, ?, ?, ?, ?)`,
+                    [locals.user.id, towerId, ringId || 1, day, month, year]
+                );
 
-                    // Delete existing bell grabs
-                    await db.query(
-                        `DELETE FROM GrabBell WHERE userID = ? AND towerID = ?`,
-                        [locals.user.id, towerId]
-                    );
-
-                    updatedCount++;
-                } else {
-                    // Insert new grab
-                    await db.query(
-                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed) 
-                         VALUES (?, ?, ?, ?, ?, ?)`,
-                        [locals.user.id, towerId, ringId || 1, day, month, year]
-                    );
-
-                    addedCount++;
-                }
+                addedCount++;
 
                 // Insert bell grabs
                 if (selectedBells && selectedBells.length > 0) {
@@ -161,13 +144,12 @@ export const actions = {
             }
         }
 
-        log.info(`User ${locals.user.username} (ID: ${locals.user.id}) bulk added ${addedCount} grabs, updated ${updatedCount} grabs`);
+        log.info(`User ${locals.user.username} (ID: ${locals.user.id}) bulk added ${addedCount} grabs`);
 
         return {
             success: true,
-            message: `Added ${addedCount} new grab${addedCount !== 1 ? 's' : ''}, updated ${updatedCount} existing grab${updatedCount !== 1 ? 's' : ''}${errors.length > 0 ? `. Errors: ${errors.join(', ')}` : ''}`,
+            message: `Added ${addedCount} new grab${addedCount !== 1 ? 's' : ''}${errors.length > 0 ? `. Errors: ${errors.join(', ')}` : ''}`,
             addedCount,
-            updatedCount,
             errors
         };
     }

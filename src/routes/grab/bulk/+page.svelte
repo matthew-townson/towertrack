@@ -11,6 +11,7 @@
     let submitting = false;
     let successMessage = '';
     let typingTimeouts = {};
+    let lastTowerSelectedEntryId = null;
 
     function createEmptyEntry() {
         return {
@@ -23,7 +24,8 @@
             searchResults: [],
             loading: false,
             expanded: true,
-            allBells: false
+            allBells: false,
+            manuallyOpened: false
         };
     }
 
@@ -117,6 +119,18 @@
         // Add a new empty entry if this was the last one
         const lastEntry = grabEntries[grabEntries.length - 1];
         if (lastEntry.id === entry.id) {
+            // Check if there was a previous entry that had a tower and is no longer being focused
+            if (lastTowerSelectedEntryId && lastTowerSelectedEntryId !== entry.id) {
+                const previousEntry = grabEntries.find(e => e.id === lastTowerSelectedEntryId);
+                if (previousEntry && !previousEntry.manuallyOpened) {
+                    previousEntry.expanded = false;
+                }
+            }
+            
+            // Update the last selected entry
+            lastTowerSelectedEntryId = entry.id;
+            
+            // Add a new empty entry
             grabEntries = [...grabEntries, createEmptyEntry()];
         }
     }
@@ -145,6 +159,7 @@
         grabEntries = grabEntries.filter(e => e.id !== entryId);
         if (grabEntries.length === 0) {
             grabEntries = [createEmptyEntry()];
+            lastTowerSelectedEntryId = null;
         }
     }
 
@@ -161,6 +176,10 @@
 
     function toggleExpanded(entry) {
         entry.expanded = !entry.expanded;
+        // Track that the user manually opened this entry
+        if (entry.expanded) {
+            entry.manuallyOpened = true;
+        }
         grabEntries = grabEntries;
     }
 
