@@ -43,7 +43,7 @@
 
 <main>
     <div class="breadcrumb-nav">
-        <a href="/u/{data.user?.username?.replace(/ /g, '-')}/performance-data">← Back to Summary</a>
+        <button type="button" class="btn btn-link" on:click={() => history.back()}>← Back to previous page</button>
     </div>
     
     <h1>Performance Details</h1>
