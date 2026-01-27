@@ -100,6 +100,11 @@
                 <span class="icon">+</span>
                 Add a New Grab
             </a>
+
+            <a href="/grab/bulk" class="button bulk-grab-btn has-text-white">
+                <span class="icon">📋</span>
+                Bulk Add Grabs
+            </a>
             
             <a href="/map?grabbed=true" class="button map-btn has-text-dark">
                 <span class="icon">🗺️</span>

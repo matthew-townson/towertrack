@@ -22,6 +22,14 @@
     let successMessage = '';
     let suppressSearch = false;
     
+    // Location-based suggestion state
+    let locationLoading = false;
+    let locationError = '';
+    let suggestedTower = null;
+    let suggestedDistance = null;
+    let locationWatchId = null;
+    let userLocation = null;
+    
     function debounce(func, wait) {
         return function(...args) {
             clearTimeout(typingTimeout);
@@ -122,7 +130,106 @@
             dateGrabbed = form.dateGrabbed;
             isDateRequired = true;
         }
+        
+        // Start location detection if no tower was pre-selected
+        if (!$page.url.searchParams.get('towerId') && !form?.selectedTower) {
+            startLocationDetection();
+        }
+        
+        // Cleanup on unmount
+        return () => {
+            if (locationWatchId !== null) {
+                navigator.geolocation.clearWatch(locationWatchId);
+            }
+        };
     });
+    
+    async function startLocationDetection() {
+        if (!navigator.geolocation) {
+            locationError = 'Geolocation is not supported by your browser';
+            return;
+        }
+        
+        locationLoading = true;
+        locationError = '';
+        
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                userLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                await findNearestTower();
+            },
+            (error) => {
+                locationLoading = false;
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        locationError = 'Location access denied. You can search for towers manually below.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        locationError = 'Location information unavailable.';
+                        break;
+                    case error.TIMEOUT:
+                        locationError = 'Location request timed out.';
+                        break;
+                    default:
+                        locationError = 'Unable to get your location.';
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    }
+    
+    async function findNearestTower() {
+        if (!userLocation) return;
+        
+        locationLoading = true;
+        try {
+            const response = await fetch(
+                `/api/nearest-tower?lat=${userLocation.lat}&lng=${userLocation.lng}&maxDistance=1`
+            );
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.found) {
+                    suggestedTower = result.tower;
+                    suggestedDistance = result.distanceMeters;
+                } else {
+                    suggestedTower = null;
+                    suggestedDistance = null;
+                }
+            }
+        } catch (error) {
+            console.error('Error finding nearest tower:', error);
+        } finally {
+            locationLoading = false;
+        }
+    }
+    
+    function formatDistance(meters) {
+        if (meters < 1000) {
+            return `${meters}m`;
+        }
+        return `${(meters / 1000).toFixed(1)}km`;
+    }
+    
+    async function useSuggestedTower() {
+        if (suggestedTower) {
+            await selectTower(suggestedTower);
+            suggestedTower = null;
+            suggestedDistance = null;
+        }
+    }
+    
+    function dismissSuggestion() {
+        suggestedTower = null;
+        suggestedDistance = null;
+    }
 
     async function selectTower(tower) {
         selectedTower = tower;
@@ -238,13 +345,58 @@
 
 <main>    
     <div class="settings-section">
-        <h2>Search for a Tower</h2>
+        <h2>Add a Grab</h2>
 
-        <a href="/grab" class="button is-light mb-4">← Back to Grabs</a>
+        <div class="breadcrumb-nav">
+            <button type="button" class="btn btn-link" on:click={() => history.back()}>← Back to previous page</button>
+        </div>
+
+        <!-- Location-based suggestion -->
+        {#if locationLoading}
+            <div class="notification is-info location-suggestion">
+                <span class="icon">📍</span>
+                <span>Detecting your location...</span>
+            </div>
+        {:else if locationError}
+            <div class="notification is-warning location-suggestion">
+                <span class="icon">⚠️</span>
+                <span>{locationError}</span>
+                <button type="button" class="button is-small is-light ml-2" on:click={startLocationDetection}>
+                    Retry
+                </button>
+            </div>
+        {:else if suggestedTower && !selectedTower}
+            <div class="notification is-success location-suggestion suggested-tower-card">
+                <div class="suggestion-header">
+                    <span class="icon">📍</span>
+                    <strong>Nearest ungrabbed tower ({formatDistance(suggestedDistance)} away)</strong>
+                </div>
+                <div class="suggestion-content">
+                    <p class="tower-name">
+                        <strong>{suggestedTower.Place}</strong>{#if suggestedTower.Dedicn}, {suggestedTower.Dedicn}{/if}
+                    </p>
+                    <p class="tower-details">
+                        {suggestedTower.County || ''}{#if suggestedTower.Country && suggestedTower.Country !== suggestedTower.County}, {suggestedTower.Country}{/if}
+                        • {suggestedTower.Bells} bells
+                        {#if suggestedTower.UR === '1' || suggestedTower.UR === 1}
+                            <span class="tag is-warning is-light ml-2">Unringable</span>
+                        {/if}
+                    </p>
+                </div>
+                <div class="suggestion-actions">
+                    <button type="button" class="button is-primary" on:click={useSuggestedTower}>
+                        Grab this tower
+                    </button>
+                    <button type="button" class="button is-light" on:click={dismissSuggestion}>
+                        Search for another
+                    </button>
+                </div>
+            </div>
+        {/if}
         
         <div class="search-container">
             <div class="field">
-                <label for="searchQuery" class="label">Tower Name</label>
+                <label for="searchQuery" class="label">Search for a Tower</label>
                 <div class={"dropdown " + (searchResults.length > 0 ? 'is-active' : '')} style="width:100%;">
                     <div class="dropdown-trigger" style="width:100%;">
                         <div class="control has-icons-right" style="width:100%;">

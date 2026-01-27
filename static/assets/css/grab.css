@@ -73,6 +73,14 @@
     background-color: #2563eb;
 }
 
+.bulk-grab-btn {
+    background-color: #6366f1;
+}
+
+.bulk-grab-btn:hover {
+    background-color: #4f46e5;
+}
+
 .icon {
     font-size: 1.25rem;
 }
@@ -268,6 +276,48 @@
     .grab-actions {
         align-self: flex-end;
     }
+}
+
+/* Location suggestion styles */
+.location-suggestion {
+    max-width: 700px;
+    margin: 0 auto 1.5rem auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.location-suggestion.suggested-tower-card {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.suggestion-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.suggestion-content {
+    margin-bottom: 1rem;
+}
+
+.suggestion-content .tower-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.suggestion-content .tower-details {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.suggestion-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .search-container {
@@ -472,7 +522,6 @@ input:checked + .toggle-slider:before {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s;
-}
 }
 
 .bell-checkbox input {
@@ -1094,5 +1143,292 @@ input:checked + .toggle-slider:before {
 
     .search-results-dropdown .dropdown-item:hover {
         background: #2d3139;
+    }
+}
+
+/* ==================== Bulk Grabs Styles ==================== */
+.bulk-grab-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.bulk-grab-container h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.help-text {
+    text-align: center;
+}
+
+.bulk-grab-list {
+    margin-bottom: 2rem;
+    overflow: visible !important;
+}
+
+.bulk-grab-item {
+    overflow: visible !important;
+}
+
+/* Override compact-row from bellboard-summary for bulk grabs */
+.bulk-grab-item .compact-row {
+    min-width: 0; /* override the 700px min-width */
+    padding: 0.6rem 0.75rem;
+}
+
+.bulk-grab-item .compact-index {
+    flex: 0 0 30px;
+    font-weight: bold;
+}
+
+.bulk-grab-item .compact-bells-count {
+    flex: 0 0 70px;
+    font-size: 0.85rem;
+}
+
+.bulk-grab-item .compact-date-preview {
+    flex: 0 0 90px;
+    font-size: 0.85rem;
+}
+
+.bulk-grab-item .compact-selected-count {
+    flex: 0 0 90px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.bulk-grab-item .compact-selected-count.has-selection {
+    color: #c33c54;
+}
+
+.bulk-grab-item .compact-details-content {
+    max-width: none;
+}
+
+.bulk-entry-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.bulk-date-field {
+    margin-bottom: 1rem;
+}
+
+.bulk-date-field .control {
+    max-width: 200px;
+}
+
+.bulk-bells-selection {
+    margin-top: 1rem;
+}
+
+.bulk-bells-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.bulk-bells-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.bulk-bell-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.bulk-bell-checkbox.selected {
+    background: #c33c54;
+    color: white;
+}
+
+.bulk-bell-checkbox input {
+    margin-right: 0.25rem;
+}
+
+.bulk-bell-role {
+    font-weight: 500;
+}
+
+.bulk-bell-weight {
+    color: inherit;
+    opacity: 0.8;
+    font-size: 0.8rem;
+}
+
+.bulk-search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    overflow: visible;
+}
+
+.bulk-search-input-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: visible;
+}
+
+.bulk-search-input-wrapper .dropdown-trigger {
+    width: 100%;
+}
+
+.bulk-search-dropdown {
+    display: block !important;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    min-width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.bulk-search-dropdown .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    text-align: left;
+    white-space: normal;
+    cursor: pointer;
+}
+
+.bulk-search-dropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.bulk-search-dropdown .tower-meta {
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.bulk-search-dropdown .unringable {
+    color: #c33c54;
+    font-weight: 500;
+}
+
+.bulk-submit-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    bottom: 1rem;
+}
+
+.bulk-submit-section .button {
+    min-width: 150px;
+}
+
+.bulk-submit-info p {
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .bulk-grab-item .compact-row {
+        flex-wrap: wrap;
+    }
+
+    .bulk-grab-item .compact-row .compact-place {
+        flex: 1 1 100%;
+        order: 1;
+    }
+
+    .bulk-grab-item .compact-index {
+        order: 0;
+    }
+
+    .bulk-grab-item .compact-bells-count,
+    .bulk-grab-item .compact-date-preview,
+    .bulk-grab-item .compact-selected-count {
+        flex: 0 0 auto;
+        order: 2;
+    }
+
+    .bulk-submit-section {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .bulk-submit-section .button {
+        width: 100%;
+    }
+}
+
+/* ==================== Bulk Grabs Light Mode ==================== */
+@media (prefers-color-scheme: light) {
+    .help-text {
+        color: #666;
+    }
+
+    .bulk-grab-item .compact-index,
+    .bulk-grab-item .compact-bells-count,
+    .bulk-grab-item .compact-date-preview {
+        color: #666;
+    }
+
+    .bulk-grab-item .compact-selected-count {
+        color: #888;
+    }
+
+    .bulk-grab-item .compact-selected-count.has-selection {
+        color: #c33c54;
+    }
+
+    .bulk-bell-checkbox {
+        background: #f5f5f5;
+    }
+
+    .bulk-search-dropdown .tower-meta {
+        color: #888;
+    }
+}
+
+/* ==================== Bulk Grabs Dark Mode ==================== */
+@media (prefers-color-scheme: dark) {
+    .help-text {
+        color: #a1a1aa;
+    }
+
+    .bulk-grab-item .compact-index,
+    .bulk-grab-item .compact-bells-count,
+    .bulk-grab-item .compact-date-preview {
+        color: #a1a1aa;
+    }
+
+    .bulk-grab-item .compact-selected-count {
+        color: #666;
+    }
+
+    .bulk-grab-item .compact-selected-count.has-selection {
+        color: #c33c54;
+    }
+
+    .bulk-bell-checkbox {
+        background: #23262b;
+    }
+
+    .bulk-bell-checkbox:hover {
+        background: #2d3139;
+    }
+
+    .bulk-search-dropdown .dropdown-item strong {
+        color: #8ee3ef;
+    }
+
+    .bulk-search-dropdown .tower-meta {
+        color: #a1a1aa;
     }
 }
