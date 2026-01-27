@@ -165,6 +165,13 @@
                                                 <button type="submit" class="detail-btn">Update Password</button>
                                             </form>
                                             
+                                            <form method="POST" action="?/refreshBellBoardData" use:enhance class="detail-form">
+                                                <input type="hidden" name="userId" value={user.id} />
+                                                <span class="form-label">BellBoard Data:</span>
+                                                <p class="info-text">Refresh this user's BellBoard performance data.</p>
+                                                <button type="submit" class="detail-btn">Refresh BellBoard Data</button>
+                                            </form>
+                                            
                                             <form method="POST" action="?/deleteUser" use:enhance class="detail-form delete-form">
                                                 <input type="hidden" name="userId" value={user.id} />
                                                 <label for="delete">Delete User:</label>

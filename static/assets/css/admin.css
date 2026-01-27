@@ -158,6 +158,12 @@ main.admin-main {
   font-size: 0.88rem;
 }
 
+.info-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #666;
+}
+
 /* Success and error messages */
 .success {
   border-radius: 0.5rem;

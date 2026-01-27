@@ -2,6 +2,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import argon2 from 'argon2';
 import log from '$lib/server/log.js';
+import { importBBData } from '$lib/server/bbImport.js';
 
 export async function load({ locals }) {
     if (!locals.user || locals.user.permission !== 0) {
@@ -274,6 +275,41 @@ export const actions = {
         } catch (error) {
             console.error('Failed to delete user:', error);
             return fail(500, { error: true, message: 'Failed to delete user' });
+        }
+    },
+
+    refreshBellBoardData: async ({ request, locals }) => {
+        if (!locals.user || locals.user.permission !== 0) {
+            return fail(403, { error: true, message: 'Access denied' });
+        }
+
+        const data = await request.formData();
+        const userId = parseInt(data.get('userId'));
+
+        if (!userId || isNaN(userId)) {
+            log.error(`Admin "${locals.user.username}" (ID: ${locals.user.id}) attempted to refresh BellBoard data with invalid user ID: ${userId}`);
+            return fail(400, { error: true, message: 'Invalid user ID' });
+        }
+
+        try {
+            // Get the user's username for logging
+            const [userRows] = await db.execute('SELECT username FROM User WHERE id = ?', [userId]);
+            if (!userRows || userRows.length === 0) {
+                return fail(404, { error: true, message: 'User not found' });
+            }
+
+            const targetUsername = userRows[0].username;
+
+            // Start the import in the background
+            importBBData(userId).catch(err => {
+                log.error(`Background importBBData failed for user "${targetUsername}" (ID: ${userId}): ${err.message}`);
+            });
+
+            log.success(`Admin "${locals.user.username}" (ID: ${locals.user.id}) triggered BellBoard data refresh for user "${targetUsername}" (ID: ${userId})`);
+            return { success: true, message: `BellBoard data refresh started for "${targetUsername}". This may take a few moments.` };
+        } catch (error) {
+            log.error(`Admin "${locals.user.username}" (ID: ${locals.user.id}) failed to refresh BellBoard data for user ID ${userId}: ${error.message}`);
+            return fail(500, { error: true, message: 'Failed to start BellBoard refresh' });
         }
     }
 };
