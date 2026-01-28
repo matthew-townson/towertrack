@@ -662,9 +662,11 @@ export async function importBBData(userId) {
                 );
 
                 if (existingGrab.length === 0) {
+                    // Use INSERT ... ON DUPLICATE KEY UPDATE to handle concurrent inserts atomically
                     await pool.query(
-                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
-                         VALUES (?, ?, ?, ?, ?, ?)`,
+                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed, lastUpdated)
+                         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                         ON DUPLICATE KEY UPDATE lastUpdated = CURRENT_TIMESTAMP`,
                         [userId, towerID, ringID, perfInfo.day, perfInfo.month, perfInfo.year]
                     );
                     log.debug(`Created Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
