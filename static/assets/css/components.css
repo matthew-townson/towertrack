@@ -9,6 +9,55 @@
 	margin: 0;
 }
 
+/* Force navbar item hover to always look dark */
+.custom-banner-bg .navbar-item {
+	color: white !important;
+}
+
+.custom-banner-bg .navbar-item:hover,
+.custom-banner-bg .navbar-item:focus,
+.custom-banner-bg a.navbar-item:hover,
+.custom-banner-bg a.navbar-item:focus {
+	background-color: rgba(0, 0, 0, 0.25) !important;
+	color: white !important;
+}
+
+/* Ensure header respects light mode on mobile */
+@media (prefers-color-scheme: light) {
+	.custom-banner-bg {
+		background: linear-gradient(160deg, #c33c54 56%, #8ee3ef 100%, #aef3e7 100%) !important;
+	}
+
+	.custom-banner-bg .navbar-item {
+		color: white !important;
+	}
+
+	.custom-banner-bg .navbar-item:hover,
+	.custom-banner-bg .navbar-item:focus,
+	.custom-banner-bg a.navbar-item:hover,
+	.custom-banner-bg a.navbar-item:focus {
+		background-color: rgba(0, 0, 0, 0.25) !important;
+		color: white !important;
+	}
+
+	.custom-banner-bg .navbar-burger {
+		color: white !important;
+	}
+
+	.custom-banner-bg .navbar-dropdown {
+		background-color: #f8f9fa !important;
+	}
+
+	.custom-banner-bg .navbar-dropdown a.navbar-item {
+		color: #3a3a3a !important;
+	}
+
+	.custom-banner-bg .navbar-dropdown a.navbar-item:hover {
+		background-color: #e8e8e8 !important;
+		color: #3a3a3a !important;
+	}
+}
+
 /* Footer component styles */
 .custom-footer-bg {
 	background: #c33c54 !important;

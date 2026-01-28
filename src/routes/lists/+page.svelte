@@ -194,94 +194,92 @@
 	<title>User Lists | towertracker</title>
 	<meta name="description" content="Manage your user lists" />
 	<style>
-		:global(main.lists-page) {
+		main.lists-page {
 			min-height: calc(100vh - 200px);
 			padding: 2rem 0;
 		}
 
-		:global(.list-card) {
-			border-radius: 8px;
-			transition: all 0.3s ease;
+		.list-members {
+			display: flex;
+			flex-direction: column;
+			max-height: 400px;
+			overflow-y: auto;
+			border: 1px solid #ddd;
+			border-radius: 4px;
 		}
 
 		@media (prefers-color-scheme: dark) {
-			:global(.list-card) {
-				background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
-				border: 1px solid rgba(255, 255, 255, 0.1);
-			}
-
-			:global(.list-card:hover) {
-				border-color: rgba(255, 255, 255, 0.2);
-				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+			.list-members {
+				border-color: #3b3f45;
 			}
 		}
 
 		@media (prefers-color-scheme: light) {
-			:global(.list-card) {
-				background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
-				border: 1px solid rgba(0, 0, 0, 0.08);
-			}
-
-			:global(.list-card:hover) {
-				border-color: rgba(0, 0, 0, 0.15);
-				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+			.list-members {
+				border-color: #ddd;
 			}
 		}
 
-		:global(.user-badge) {
-			display: inline-flex;
+		.list-row {
+			display: flex;
 			align-items: center;
-			padding: 0.5rem 0.75rem;
-			border-radius: 6px;
-			gap: 0.5rem;
-			transition: all 0.2s ease;
+			gap: 0.75rem;
+			padding: 0.75rem;
+			border-bottom: 1px solid #eee;
+			transition: background-color 0.2s;
+		}
+
+		.list-row:last-child {
+			border-bottom: none;
+		}
+
+		.list-row:hover {
+			background-color: rgba(195, 60, 84, 0.05);
 		}
 
 		@media (prefers-color-scheme: dark) {
-			:global(.user-badge) {
-				background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-				border: 1px solid rgba(255, 255, 255, 0.08);
+			.list-row {
+				border-bottom-color: #3b3f45;
 			}
 
-			:global(.user-badge:hover) {
-				background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-				border-color: rgba(255, 255, 255, 0.15);
+			.list-row:hover {
+				background-color: rgba(142, 227, 239, 0.05);
 			}
 		}
 
-		@media (prefers-color-scheme: light) {
-			:global(.user-badge) {
-				background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, rgba(0, 0, 0, 0.01) 100%);
-				border: 1px solid rgba(0, 0, 0, 0.08);
-			}
-
-			:global(.user-badge:hover) {
-				background: linear-gradient(135deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.02) 100%);
-				border-color: rgba(0, 0, 0, 0.12);
-			}
+		.list-row-avatar {
+			flex-shrink: 0;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			object-fit: cover;
 		}
 
-		:global(.create-section) {
-			border-radius: 8px;
-			padding: 2rem;
-			margin-bottom: 2rem;
+		.list-row-avatar-placeholder {
+			flex-shrink: 0;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-weight: 700;
+			font-size: 0.875rem;
 		}
 
-		@media (prefers-color-scheme: dark) {
-			:global(.create-section) {
-				background: linear-gradient(135deg, rgba(46, 213, 115, 0.08) 0%, rgba(46, 213, 115, 0.02) 100%);
-				border: 1px solid rgba(46, 213, 115, 0.2);
-			}
+		.list-row-name {
+			flex: 1;
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
 		}
 
-		@media (prefers-color-scheme: light) {
-			:global(.create-section) {
-				background: linear-gradient(135deg, rgba(46, 213, 115, 0.06) 0%, rgba(46, 213, 115, 0.01) 100%);
-				border: 1px solid rgba(46, 213, 115, 0.3);
-			}
+		.list-row-action {
+			flex-shrink: 0;
 		}
 
-		:global(.member-grid) {
+		.member-grid {
 			display: grid;
 			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 			gap: 1rem;
@@ -289,41 +287,8 @@
 		}
 
 		@media (max-width: 768px) {
-			:global(.member-grid) {
+			.member-grid {
 				grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-			}
-		}
-
-		:global(.search-results-container) {
-			margin-top: 1.5rem;
-			padding-top: 1.5rem;
-		}
-
-		@media (prefers-color-scheme: dark) {
-			:global(.search-results-container) {
-				border-top: 1px solid rgba(255, 255, 255, 0.1);
-			}
-		}
-
-		@media (prefers-color-scheme: light) {
-			:global(.search-results-container) {
-				border-top: 1px solid rgba(0, 0, 0, 0.08);
-			}
-		}
-
-		:global(.members-section-divider) {
-			border-radius: 0;
-		}
-
-		@media (prefers-color-scheme: dark) {
-			:global(.members-section-divider) {
-				border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-			}
-		}
-
-		@media (prefers-color-scheme: light) {
-			:global(.members-section-divider) {
-				border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 			}
 		}
 	</style>
@@ -356,7 +321,7 @@
 				{/if}
 
 				<!-- Create List Section -->
-				<div class="create-section">
+				<div class="box mb-5">
 					<h2 class="subtitle is-4 mb-4">Create New List</h2>
 					<div class="field">
 						<label class="label" for="newListName">List Name</label>
@@ -385,9 +350,6 @@
 						on:click={createList}
 						disabled={creatingList || !newListName.trim()}
 					>
-						<span class="icon">
-							<i class="fas fa-plus"></i>
-						</span>
 						<span>Create List</span>
 					</button>
 				</div>
@@ -400,7 +362,7 @@
 					<div class="columns is-multiline">
 						{#each lists as list (list.id)}
 							<div class="column is-full-tablet is-half-desktop">
-								<div class="list-card p-5">
+								<div class="box">
 									<!-- List Header -->
 									<div class="mb-4">
 										<div class="is-flex is-justify-content-space-between is-align-items-start mb-2">
@@ -412,14 +374,14 @@
 											</div>
 										</div>
 										<div class="tags">
-											<span class="tag is-light">{list.memberCount} {list.memberCount === 1 ? 'member' : 'members'}</span>
+										<span class="tag is-info">{list.memberCount} {list.memberCount === 1 ? 'member' : 'members'}</span>
 										</div>
 									</div>
 
 									<!-- List Actions -->
 									<div class="is-flex is-gap-2 mb-4">
 										<button 
-											class="button is-info is-light is-small is-flex-grow-1"
+											class="button is-info is-small is-flex-grow-1"
 											on:click={() => toggleListDetails(list.id)}
 										>
 											<span class="icon is-small">
@@ -428,13 +390,13 @@
 											<span>{expandedListId === list.id ? 'Hide' : 'Show'} Members</span>
 										</button>
 										<button 
-											class="button is-danger is-light is-small"
+											class="button is-danger is-small"
 											on:click={() => deleteList(list.id)}
 											aria-label="Delete this list"
 											title="Delete this list"
 										>
 											<span class="icon is-small">
-												<i class="fas fa-trash"></i>
+												<p>x</p>
 											</span>
 										</button>
 									</div>
@@ -450,37 +412,39 @@
 													<p class="help has-text-grey mt-2">Loading members...</p>
 												</div>
 											{:else if listMembers[list.id] && listMembers[list.id].length > 0}
-												<div class="mb-4 pb-4" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+												<div class="mb-4 pb-4">
 													<h4 class="subtitle is-6 mb-3">Members ({listMembers[list.id].length})</h4>
-													<div class="member-grid">
+													<div class="list-members">
 														{#each listMembers[list.id] as member (member.id)}
-															<div class="user-badge" style="flex-direction: column; align-items: flex-start;">
-																<div class="is-flex is-align-items-center is-fullwidth mb-2">
-																	{#if member.profileImage}
-																		<img 
-																			src="/uploads/profiles/{member.profileImage}" 
-																			alt="{member.username}"
-																			style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
-																		/>
-																	{:else}
-																		<div 
-																			style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8ee3ef 0%, #6ac6c6 100%); display: flex; align-items: center; justify-content: center; color: #073642; font-weight: 700; font-size: 0.75rem;"
-																		>
-																			{member.username.charAt(0).toUpperCase()}
-																		</div>
-																	{/if}
-																	<div class="ml-2" style="flex: 1; min-width: 0;">
-																		<a href="/u/{member.username.replace(/ /g, '-')}" class="has-text-link is-size-7" style="word-break: break-word;">
-																			<strong>{member.username}</strong>
-																		</a>
+															<div class="list-row">
+																{#if member.profileImage}
+																	<img 
+																		src="/uploads/profiles/{member.profileImage}" 
+																		alt="{member.username}"
+																		class="list-row-avatar"
+																	/>
+																{:else}
+																	<div 
+																		class="list-row-avatar-placeholder"
+																		style="background: linear-gradient(135deg, #8ee3ef 0%, #6ac6c6 100%); color: #073642;"
+																	>
+																		{member.username.charAt(0).toUpperCase()}
 																	</div>
+																{/if}
+																<div class="list-row-name">
+																	<a href="/u/{member.username.replace(/ /g, '-')}" class="has-text-link">
+																		<strong>{member.username}</strong>
+																	</a>
 																</div>
-																<button 
-																	class="button is-danger is-light is-small is-fullwidth"
-																	on:click={() => removeMember(list.id, member.id)}
-																>
-																	Remove
-																</button>
+																<div class="list-row-action">
+																	<button 
+																		class="button is-danger is-small"
+																		on:click={() => removeMember(list.id, member.id)}
+																		title="Remove from list"
+																	>
+																		Remove
+																	</button>
+																</div>
 															</div>
 														{/each}
 													</div>
@@ -514,36 +478,37 @@
 												</div>
 
 												{#if searchResults.length > 0}
-													<div class="member-grid mt-3">
+													<div class="list-members mt-3">
 														{#each searchResults as user (user.id)}
-															<div class="user-badge" style="flex-direction: column; align-items: flex-start; background: linear-gradient(135deg, rgba(26, 213, 115, 0.1) 0%, rgba(26, 213, 115, 0.02) 100%); border-color: rgba(26, 213, 115, 0.3);">
-																<div class="is-flex is-align-items-center is-fullwidth mb-2">
-																	{#if user.profileImage}
-																		<img 
-																			src="/uploads/profiles/{user.profileImage}" 
-																			alt="{user.username}"
-																			style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;"
-																		/>
-																	{:else}
-																		<div 
-																			style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #a1e9f5 0%, #6ac6c6 100%); display: flex; align-items: center; justify-content: center; color: #073642; font-weight: 700; font-size: 0.75rem;"
-																		>
-																			{user.username.charAt(0).toUpperCase()}
-																		</div>
-																	{/if}
-																	<div class="ml-2" style="flex: 1; min-width: 0;">
-																		<a href="/u/{user.username.replace(/ /g, '-')}" class="has-text-link is-size-7" style="word-break: break-word;">
-																			<strong>{user.username}</strong>
-																		</a>
+															<div class="list-row">
+																{#if user.profileImage}
+																	<img 
+																		src="/uploads/profiles/{user.profileImage}" 
+																		alt="{user.username}"
+																		class="list-row-avatar"
+																	/>
+																{:else}
+																	<div 
+																		class="list-row-avatar-placeholder"
+																		style="background: linear-gradient(135deg, #a1e9f5 0%, #6ac6c6 100%); color: #073642;"
+																	>
+																		{user.username.charAt(0).toUpperCase()}
 																	</div>
+																{/if}
+																<div class="list-row-name">
+																	<a href="/u/{user.username.replace(/ /g, '-')}" class="has-text-link">
+																		<strong>{user.username}</strong>
+																	</a>
 																</div>
-																<button 
-																	class="button is-success is-light is-small is-fullwidth {addingUserToList === user.id ? 'is-loading' : ''}"
-																	on:click={() => addUserToList(list.id, user.id, user.username)}
-																	disabled={addingUserToList !== null}
-																>
-																	Add
-																</button>
+																<div class="list-row-action">
+																	<button 
+																		class="button is-success is-small {addingUserToList === user.id ? 'is-loading' : ''}"
+																		on:click={() => addUserToList(list.id, user.id, user.username)}
+																		disabled={addingUserToList !== null}
+																	>
+																		Add
+																	</button>
+																</div>
 															</div>
 														{/each}
 													</div>
