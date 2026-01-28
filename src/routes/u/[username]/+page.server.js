@@ -14,7 +14,7 @@ export async function load({ params, depends }) {
 	try {
 		// try an exact first
 		let [userRows] = await pool.execute(
-			'SELECT `id`, `username`, `email`, `permission`, `otherNames` FROM `User` WHERE `username` = ? LIMIT 1',
+			'SELECT `id`, `username`, `email`, `permission`, `otherNames`, `profileImage` FROM `User` WHERE `username` = ? LIMIT 1',
 			[username]
 		);
 
@@ -22,7 +22,7 @@ export async function load({ params, depends }) {
 		if ((!userRows || userRows.length === 0) && username.includes('-')) {
 			const alt = username.replace(/-/g, ' ');
 			[userRows] = await pool.execute(
-				'SELECT `id`, `username`, `email`, `permission`, `otherNames` FROM `User` WHERE `username` = ? LIMIT 1',
+				'SELECT `id`, `username`, `email`, `permission`, `otherNames`, `profileImage` FROM `User` WHERE `username` = ? LIMIT 1',
 				[alt]
 			);
 		}
@@ -69,6 +69,7 @@ export async function load({ params, depends }) {
 				email: user.email,
 				permission: user.permission,
 				otherNames: user.otherNames || null,
+				profileImage: user.profileImage || null,
 				isPrivate: false,
 			},
 			settings,

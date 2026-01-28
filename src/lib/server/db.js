@@ -1,5 +1,7 @@
 import mysql from 'mysql2/promise';
 import { building } from '$app/environment';
+import { applyHotfix as hotfix001 } from './hotfix-add-profileImage.js';
+
 const DB_HOST = process.env.DB_HOST;
 const DB_PORT = process.env.DB_PORT;
 const DB_USER = process.env.DB_USER;
@@ -16,6 +18,12 @@ const connectionConfig = {
     connectionLimit: 10,
     queueLimit: 0
 };
+
+// apply hotfix
+async function applyHotfixes(connection) {
+    console.log('[ INFO ] Applying database hotfixes');
+    await hotfix001(connection);
+}
 
 // init db
 async function initialiseDatabase() {
@@ -45,6 +53,7 @@ async function initialiseDatabase() {
                     \`email\` VARCHAR(255) NOT NULL,
                     \`permission\` INTEGER NOT NULL DEFAULT 3,
                     \`otherNames\` TINYINT NOT NULL DEFAULT 0,
+                    \`profileImage\` VARCHAR(255),
                     PRIMARY KEY (\`id\`),
                     UNIQUE KEY \`username\` (\`username\`),
                     UNIQUE KEY \`email\` (\`email\`),
@@ -278,6 +287,9 @@ async function initialiseDatabase() {
         } catch (error) {
             console.error('[ ERROR ] Failed to create CSVImportLog table:', error.message);
         }
+
+        // Apply database hotfixes
+        await applyHotfixes(connection);
 
         // optimise all tables
         try {

@@ -8,8 +8,8 @@ export async function load({ locals }) {
         throw redirect(303, '/account/login');
     }
     
-    // Query database to get complete user info including email
-    const [rows] = await db.execute('SELECT id, username, email, permission FROM User WHERE id = ?', [locals.user.id]);
+    // Query database to get complete user info including email and profile image
+    const [rows] = await db.execute('SELECT id, username, email, permission, profileImage FROM User WHERE id = ?', [locals.user.id]);
     
     if (rows.length === 0) {
         throw redirect(303, '/account/login');
