@@ -31,7 +31,7 @@
 				<a class="navbar-item has-text-white" href="/u/{userSlug}/performance-data">Performance Data</a>
 				<a class="navbar-item has-text-white" href="/users">Users</a>
 				<a class="navbar-item has-text-white" href="/u/{userSlug}">Profile</a>
-				<a class="navbar-item has-text-white" href="/lists">Lists</a>
+				<a class="navbar-item has-text-white" href="/lists"><b>[Alpha]</b>Lists</a>
 				<a class="navbar-item has-text-white" href="/map">Map</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/">Home</a>
