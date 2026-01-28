@@ -40,7 +40,7 @@
 			<input 
 				class="input" 
 				type="text" 
-				placeholder="Search by username or alias..."
+				placeholder="Search by username..."
 				bind:value={searchQuery}
 				on:input={(e) => searchUsers(e.target.value)}
 			/>

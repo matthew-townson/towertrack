@@ -25,7 +25,7 @@
 				<!-- Header -->
 				<div class="mb-6">
 					<h1 class="title is-2 mb-2">Find Users</h1>
-					<p class="subtitle is-5 has-text-grey">Search for users by username or alias</p>
+					<p class="subtitle is-5 has-text-grey">Search for users by username</p>
 				</div>
 
 				<!-- User Search Component -->
