@@ -2,7 +2,6 @@
  * Hotfix 002: Add user lists and list members tables
  * 
  * Allows users to create and manage custom lists of other users
- * (e.g., "Strong ringers", "Friends", etc.)
  */
 
 export async function applyHotfix(connection) {

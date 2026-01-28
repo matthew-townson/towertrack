@@ -329,7 +329,7 @@
 							id="newListName"
 							class="input" 
 							type="text" 
-							placeholder="e.g., Strong Ringers, Friends, Band Members"
+							placeholder="e.g., Quarter and Curry Ringers, Local Quarter Peal Band"
 							bind:value={newListName}
 							disabled={creatingList}
 						/>
