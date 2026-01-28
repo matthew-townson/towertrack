@@ -4,7 +4,7 @@ import db from '$lib/server/db.js';
 export async function GET({ url, locals }) {
     const query = url.searchParams.get('q');
     
-    if (!query || query.trim().length < 2) {
+    if (!query || query.trim().length === 0) {
         return json([]);
     }
 

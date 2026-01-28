@@ -8,7 +8,7 @@
 	let searching = false;
 
 	async function searchUsers(query) {
-		if (!query || query.trim().length < 2) {
+		if (!query || query.trim().length === 0) {
 			searchResults = [];
 			return;
 		}
