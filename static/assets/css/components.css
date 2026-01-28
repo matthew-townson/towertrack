@@ -1,0 +1,80 @@
+/* Header component styles */
+.custom-banner-bg {
+	background: linear-gradient(160deg, #c33c54 56%, #8ee3ef 100%, #aef3e7 100%);
+}
+.navbar {
+	border-bottom: none;
+}
+.navbar-item h1 {
+	margin: 0;
+}
+
+/* Footer component styles */
+.custom-footer-bg {
+	background: #c33c54 !important;
+}
+.custom-footer-compact {
+	padding-top: 0.5rem !important;
+	padding-bottom: 0.5rem !important;
+}
+
+/* TowerMap component styles */
+.tower-map-wrapper .map {
+	position: relative;
+	z-index: 0;
+}
+
+.tower-count-display {
+	position: absolute;
+	top: 10px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1000;
+	font-size: 0.9rem;
+	padding: 0;
+	box-shadow: none;
+}
+
+.closest-tower-display {
+	position: absolute;
+	bottom: 20px;
+	left: 20px;
+	max-width: 300px;
+	z-index: 1000;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+}
+
+.floating-location-btn {
+	position: absolute;
+	bottom: 30px;
+	right: 10px;
+	z-index: 1000;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	border: 2px solid currentColor;
+}
+
+.floating-location-btn.tracking {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.7; }
+}
+
+.legend-icon svg { display: block; width: 100%; height: 100%; }
+.legend-item { gap: 0.5rem; }
+
+@media (max-width: 768px) {
+	.closest-tower-display {
+		max-width: 90%;
+		right: 5%;
+		left: 5%;
+	}
+	
+	.tower-count-display {
+		font-size: 0.85rem;
+	}
+}

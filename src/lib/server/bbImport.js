@@ -3,6 +3,87 @@ import pool from '$lib/server/db.js';
 import fetch from 'node-fetch';
 import xml2js from 'xml2js';
 
+export const importProgress = new Map();
+
+function initProgress(userId) {
+    importProgress.set(userId, {
+        stage: 'starting',
+        message: 'Initializing import',
+        total: 0,
+        processed: 0,
+        percent: 0,
+        lastUpdated: Date.now()
+    });
+}
+
+function setProgress(userId, update) {
+    const cur = importProgress.get(userId) || {
+        stage: 'starting',
+        message: '',
+        total: 0,
+        processed: 0,
+        percent: 0,
+        lastUpdated: Date.now()
+    };
+    const merged = { ...cur, ...update, lastUpdated: Date.now() };
+    if (typeof merged.total === 'number' && typeof merged.processed === 'number') {
+        merged.percent = merged.total > 0 ? Math.round((merged.processed / merged.total) * 100) : (merged.stage === 'done' ? 100 : merged.percent || 0);
+    }
+    importProgress.set(userId, merged);
+}
+
+function getProgress(userId) {
+    return importProgress.get(userId) || { stage: 'idle', message: '', total: 0, processed: 0, percent: 0 };
+}
+
+async function getPerfHTTPStatus(performanceID) {
+    if (!performanceID) return null;
+    const url = `https://bb.ringingworld.co.uk/view.php?id=${performanceID}`;
+    try {
+        const res = await fetch(url, { method: 'HEAD', redirect: 'manual' });
+        if (res.status === 302 && res.headers.get('location')) {
+            const location = res.headers.get('location');
+            const match = location.match(/id=(\d+)/);
+            if (match) {
+                return match[1];
+            }
+        }
+        if (res.status === 200) {
+            return performanceID;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+async function cleanExistingPerformancesForUser(userId, normalisedNames) {
+    log.info(`Cleaning existing performances for user ID ${userId}`);
+    const [rows] = await pool.query(`SELECT PerformanceID, Ringers FROM Performance`);
+    for (const row of rows) {
+        let ringers;
+        try {
+            ringers = typeof row.Ringers === 'string' ? JSON.parse(row.Ringers) : row.Ringers;
+        } catch {
+            ringers = row.Ringers;
+        }
+        const perfRingers = Array.isArray(ringers?.ringers) ? ringers.ringers : [];
+        const hasUser = perfRingers.some(r =>
+            normalisedNames.includes(
+                String(r.name ?? '').trim().toLowerCase().replace(/\s+/g, ' ')
+            )
+        );
+        if (!hasUser) continue;
+        const perfId = row.PerformanceID;
+        const finalId = await getPerfHTTPStatus(perfId);
+        if (!finalId) {
+            await pool.query(`DELETE FROM Performance WHERE PerformanceID = ?`, [perfId]);
+        } else if (String(finalId) !== String(perfId)) {
+            await pool.query(`DELETE FROM Performance WHERE PerformanceID = ?`, [perfId]);
+        }
+    }
+}
+
 export async function importBBData(userId) {
     const [[user]] = await pool.query('SELECT username FROM User WHERE id = ?', [userId]);
     const [aliases] = await pool.query('SELECT Name FROM OtherNames WHERE userId = ?', [userId]);
@@ -10,17 +91,25 @@ export async function importBBData(userId) {
     const names = [user.username, ...aliases.map(a => a.Name)];
     const exShort = !!settings?.exShort;
 
+    function normName(n) {
+        if (!n) return '';
+        return String(n).trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    const normalisedNames = names.map(normName);
+
     log.info(`Importing BellBoard data for ${user.username}`);
     const importStart = Date.now();
     let processedCount = 0;
     let insertedCount = 0;
     let updatedCount = 0;
 
-    function normName(n) {
-        if (!n) return '';
-        return String(n).trim().toLowerCase().replace(/\s+/g, ' ');
-    }
-    const normalizedNames = names.map(normName);
+    // Track earliest performance date at each tower for smart grab date handling
+    const towerEarliestPerformance = new Map(); // Map<towerID_ringID, {date, day, month, year}>
+
+    initProgress(userId);
+    setProgress(userId, { stage: 'starting', message: 'Starting BellBoard import', total: 0, processed: 0 });
+
     const userMinPercent = typeof settings?.bellsPercent === 'number' ? Number(settings.bellsPercent) : (settings?.bellsPercent ? Number(settings.bellsPercent) : 100);
 
     function buildUrl(name, length) {
@@ -164,7 +253,7 @@ export async function importBBData(userId) {
 
             const matchedRingers = perfRingers.filter(r => {
                 const candidate = normName(typeof r.name === 'string' ? r.name.replace(/\s*\(.*?\)\s*$/, '') : r.name);
-                return normalizedNames.includes(candidate);
+                return normalisedNames.includes(candidate);
             });
             log.debug(`addGrab: matchedRingers for perf ${perfObj.performanceID}: ${matchedRingers.length}`);
             if (matchedRingers.length === 0) return;
@@ -179,12 +268,28 @@ export async function importBBData(userId) {
                     bellRows = rows;
                 }
                 if (!bellRows || bellRows.length === 0) {
-                    // fallback: any bells for tower
-                    const [rows] = await pool.query(
-                        `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                    // fallback: get bells for the tower, prioritizing the most common ringID
+                    const [ringRows] = await pool.query(
+                        `SELECT RingID, COUNT(*) as cnt FROM Bell WHERE TowerID = ? AND RingID IS NOT NULL GROUP BY RingID ORDER BY cnt DESC LIMIT 1`,
                         [perfObj.towerID]
                     );
-                    bellRows = rows;
+                    
+                    if (ringRows && ringRows.length > 0) {
+                        const primaryRingID = ringRows[0].RingID;
+                        log.debug(`Using primary RingID ${primaryRingID} for tower ${perfObj.towerID}`);
+                        const [rows] = await pool.query(
+                            `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                            [perfObj.towerID, primaryRingID]
+                        );
+                        bellRows = rows;
+                    } else {
+                        // last resort: any bells for tower
+                        const [rows] = await pool.query(
+                            `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
+                            [perfObj.towerID]
+                        );
+                        bellRows = rows;
+                    }
                 }
             } catch (err) {
                 log.error(`Failed to load bells for tower ${perfObj.towerID}: ${err.message}`);
@@ -197,10 +302,10 @@ export async function importBBData(userId) {
                 return;
             }
 
-            // exclude sharp or flat bells
+            // exclude sharp or flat bells and bells with "ex" prefix (extra bells not in full circle)
             const numericBellRows = bellRows.filter(b => {
-                const role = String(b.BellRole || '').trim();
-                return /^\d+$/.test(role);
+                const role = String(b.BellRole || '').trim().toLowerCase();
+                return /^[0-9]+$/.test(role);
             });
             const bellRowsForMapping = numericBellRows.length > 0 ? numericBellRows : bellRows;
             if (numericBellRows.length > 0 && numericBellRows.length !== bellRows.length) {
@@ -221,6 +326,11 @@ export async function importBBData(userId) {
             const perfBellCount = perfRingers.length;
 
             log.debug(`perf ${perfObj.performanceID}: perfBellCount=${perfBellCount}, towerBellCount=${towerBellCount}, userMinPercent=${userMinPercent}`);
+
+            if (perfBellCount > towerBellCount) {
+                log.debug(`Performance ${perfObj.performanceID} uses ${perfBellCount} bells but tower ${perfObj.towerID} only has ${towerBellCount} full-circle bells — skipping grab`);
+                return;
+            }
 
             const percentOfRing = (perfBellCount / towerBellCount) * 100;
 
@@ -263,20 +373,26 @@ export async function importBBData(userId) {
                 }
             }
 
+            const towerKey = `${perfObj.towerID}_${ringIdToUse || 'null'}`;
+            if (year) {
+                const perfDate = new Date(year, (month || 1) - 1, day || 1);
+                const existing = towerEarliestPerformance.get(towerKey);
+                
+                if (!existing || perfDate < existing.date) {
+                    towerEarliestPerformance.set(towerKey, { date: perfDate, day, month, year });
+                    log.debug(`Updated earliest performance for tower ${perfObj.towerID} ring ${ringIdToUse}: ${year}-${month}-${day}`);
+                }
+            }
+
             try {
                 await pool.query(
-                    `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
-                     VALUES (?, ?, ?, ?, ?, ?)
-                     ON DUPLICATE KEY UPDATE
-                       dateGrabbed = VALUES(dateGrabbed),
-                       monthGrabbed = VALUES(monthGrabbed),
-                       yearGrabbed = VALUES(yearGrabbed),
-                       lastUpdated = CURRENT_TIMESTAMP`,
-                    [userId, perfObj.towerID, ringIdToUse, day, month, year]
+                    `INSERT IGNORE INTO Grab (userID, towerID, ringID)
+                     VALUES (?, ?, ?)`,
+                    [userId, perfObj.towerID, ringIdToUse]
                 );
-                log.debug(`Upserted Grab for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
+                log.debug(`Ensured Grab exists for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
             } catch (err) {
-                log.error(`Failed to upsert Grab for user ${userId} tower ${perfObj.towerID}: ${err.message}`);
+                log.error(`Failed to insert Grab placeholder for user ${userId} tower ${perfObj.towerID}: ${err.message}`);
                 return;
             }
 
@@ -337,11 +453,23 @@ export async function importBBData(userId) {
     async function fetchAndInsert(name, length, filterChanges = false) {
         const url = buildUrl(name, length);
         log.info(`fetchAndInsert: fetching ${url} for name="${name}" length="${length}"`);
-        const res = await fetch(url);
-        if (!res.ok) {
-            log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}, Status: ${res.status})`);
+        setProgress(userId, { stage: 'downloading', message: `Downloading performances for ${name}...` });
+
+        let res;
+        try {
+            res = await fetch(url);
+        } catch (err) {
+            log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}): ${err.message}`);
+            setProgress(userId, { stage: 'error', message: `Download failed for ${name}: ${err.message}` });
             return;
         }
+
+        if (!res.ok) {
+            log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}, Status: ${res.status})`);
+            setProgress(userId, { stage: 'error', message: `Failed to download for ${name}: ${res.status}` });
+            return;
+        }
+
         const xml = await res.text();
         const data = await xml2js.parseStringPromise(xml, { explicitArray: true });
         const performances = data.performances?.performance || [];
@@ -355,10 +483,17 @@ export async function importBBData(userId) {
             perfObjs.push(buildPerformanceObject(perf, perfId));
         }
 
-        log.debug(`fetchAndInsert: built ${perfObjs.length} perfObjs for name="${name}"`);
+        if (perfObjs.length > 0) {
+            const prev = getProgress(userId);
+            setProgress(userId, {
+                stage: 'processing',
+                message: `Processing performances for ${name}`,
+                total: (prev.total || 0) + perfObjs.length,
+                processed: prev.processed || 0
+            });
+        }
 
         if (perfObjs.length === 0) return;
-
         const ids = perfObjs.map(p => p.performanceID).filter(Boolean);
         log.debug(`fetchAndInsert: checking existing DB for ${ids.length} perf IDs`);
         const existingMap = new Map();
@@ -384,19 +519,23 @@ export async function importBBData(userId) {
         // For each perfObj, skip DB write and addGrab if timestamp matches existing DB timestamp.
         for (const perfObj of perfObjs) {
             try {
-                const existingTs = perfObj.performanceID ? existingMap.get(perfObj.performanceID) : undefined;
-                const incomingTs = perfObj.timestamp ? new Date(perfObj.timestamp).getTime() : null;
-
-                if (typeof existingTs !== 'undefined' && existingTs !== null && incomingTs !== null && existingTs === incomingTs) {
-                    log.debug(`Skipping perf ${perfObj.performanceID} because timestamps match (ts=${incomingTs})`);
+                // if performance exists, still attempt addGrab, but count as processed
+                if (perfObj.performanceID && existingMap.has(perfObj.performanceID)) {
+                    log.debug(`Performance ${perfObj.performanceID} already exists in DB; skipping Performance upsert and running addGrab`);
+                    try {
+                        await addGrab(perfObj);
+                    } catch (err) {
+                        log.error(`addGrab failed for existing performance ${perfObj.performanceID}: ${err.message}`);
+                    }
+                    const cur = getProgress(userId);
+                    setProgress(userId, { processed: (cur.processed || 0) + 1, stage: 'processing', message: `Processed ${cur.processed + 1} / ${cur.total || '?'}` });
                     continue;
                 }
 
                 log.debug(`Upserting performance ${perfObj.performanceID}: tower=${perfObj.towerID}, ring=${perfObj.ringID}, ts=${perfObj.timestamp}`);
-
-                // determine whether this perf is new (no existing DB row) or an update
-                const isNew = perfObj.performanceID ? !existingMap.has(perfObj.performanceID) : true;
                 
+                const isNew = perfObj.performanceID ? !existingMap.has(perfObj.performanceID) : true;
+
                 // if there is a ringID discrepancy, null ringID and use towerID only
                 if (perfObj.towerID) {
                     if (perfObj.ringID != null) {
@@ -466,13 +605,19 @@ export async function importBBData(userId) {
                 } catch (err) {
                     log.error(`addGrab failed for performance ${perfObj.performanceID}: ${err.message}`);
                 }
+
+                const cur2 = getProgress(userId);
+                setProgress(userId, { processed: (cur2.processed || 0) + 1, stage: 'processing', message: `Processed ${cur2.processed + 1} / ${cur2.total || '?'}` });
+
             } catch (err) {
                 log.error(`DB error inserting/updating performance ID: ${perfObj.performanceID} - ${err.message}`);
+                const cur3 = getProgress(userId);
+                setProgress(userId, { processed: (cur3.processed || 0) + 1, stage: 'processing', message: `Processed ${cur3.processed + 1} / ${cur3.total || '?'}` });
             }
         }
     }
 
-    const CONCURRENCY = 3;
+    const CONCURRENCY = 6;
     const tasks = [];
     for (const name of names) {
         tasks.push(() => fetchAndInsert(name, 'e-plus'));
@@ -496,8 +641,79 @@ export async function importBBData(userId) {
         return results;
     }
     
-    await runLimited(tasks, CONCURRENCY);
+    try {
+        await runLimited(tasks, CONCURRENCY);
+        
+        // update grab dates based on the earliest performances we found
+        setProgress(userId, { stage: 'finalizing', message: 'Updating grab dates...' });
+        log.info(`Updating grab dates for ${towerEarliestPerformance.size} towers`);
+        
+        for (const [towerKey, perfInfo] of towerEarliestPerformance.entries()) {
+            const [towerIDStr, ringIDStr] = towerKey.split('_');
+            const towerID = parseInt(towerIDStr);
+            const ringID = ringIDStr === 'null' ? null : parseInt(ringIDStr);
+            
+            try {
+                // check if grab already exists with a date
+                const [existingGrab] = await pool.query(
+                    `SELECT dateGrabbed, monthGrabbed, yearGrabbed FROM Grab 
+                     WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                    [userId, towerID, ringID, ringID]
+                );
 
-    const elapsedMs = Date.now() - importStart;
-    log.success(`${user.username} imported ${processedCount} performances (${insertedCount} new, ${updatedCount} updated) from BellBoard in ${(elapsedMs/1000).toFixed(2)}s`);
+                if (existingGrab.length === 0) {
+                    await pool.query(
+                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
+                         VALUES (?, ?, ?, ?, ?, ?)`,
+                        [userId, towerID, ringID, perfInfo.day, perfInfo.month, perfInfo.year]
+                    );
+                    log.debug(`Created Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
+                } else {
+                    const existing = existingGrab[0];
+                    const existingDate = existing.yearGrabbed 
+                        ? new Date(existing.yearGrabbed, (existing.monthGrabbed || 1) - 1, existing.dateGrabbed || 1)
+                        : null;
+
+                    if (!existingDate) {
+                        // grab exists but has no date - update with earliest performance date
+                        await pool.query(
+                            `UPDATE Grab SET dateGrabbed = ?, monthGrabbed = ?, yearGrabbed = ?, lastUpdated = CURRENT_TIMESTAMP
+                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                            [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
+                        );
+                        log.debug(`Updated Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
+                    } else if (perfInfo.date < existingDate) {
+                        // earliest performance is before existing grab date - update to earliest performance
+                        await pool.query(
+                            `UPDATE Grab SET dateGrabbed = ?, monthGrabbed = ?, yearGrabbed = ?, lastUpdated = CURRENT_TIMESTAMP
+                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                            [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
+                        );
+                        log.info(`Updated Grab date to earlier performance: ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} (was ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed}) for tower ${towerID}`);
+                    } else {
+                        // existing grab date is earlier or equal - keep it
+                        log.debug(`Keeping existing earlier grab date ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed} for tower ${towerID}`);
+                        await pool.query(
+                            `UPDATE Grab SET lastUpdated = CURRENT_TIMESTAMP
+                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
+                            [userId, towerID, ringID, ringID]
+                        );
+                    }
+                }
+            } catch (err) {
+                log.error(`Failed to update Grab date for tower ${towerID}: ${err.message}`);
+            }
+        }
+        
+        const finalTotal = getProgress(userId).total || processedCount;
+        setProgress(userId, { stage: 'done', message: 'Import complete', processed: finalTotal, total: finalTotal });
+        const elapsedMs = Date.now() - importStart;
+        await cleanExistingPerformancesForUser(userId, normalisedNames);
+        
+        log.success(`${user.username} imported ${processedCount} performances (${insertedCount} new, ${updatedCount} updated) from BellBoard in ${(elapsedMs/1000).toFixed(2)}s`);
+    } catch (err) {
+        setProgress(userId, { stage: 'error', message: `Import failed: ${err.message}` });
+        log.error(`Import failed for ${user.username}: ${err.message}`);
+        throw err;
+    }
 }

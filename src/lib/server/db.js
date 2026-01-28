@@ -123,7 +123,7 @@ async function initialiseDatabase() {
                     \`Affiliations\` TEXT,
                     \`Postcode\` VARCHAR(20),
                     \`Practice\` VARCHAR(255),
-                    \`LGrade\` VARCHAR(10),
+                    \`LGrade\` VARCHAR(50),
                     PRIMARY KEY (\`TowerID\`, \`RingID\`)
                 )
             `);
@@ -235,10 +235,10 @@ async function initialiseDatabase() {
                     PRIMARY KEY (\`userId\`, \`bellID\`),
                     FOREIGN KEY (\`userId\`, \`towerID\`) 
                         REFERENCES \`Grab\`(\`userId\`, \`towerID\`) 
-                        ON DELETE NO ACTION,
+                        ON DELETE CASCADE,
                     FOREIGN KEY (\`bellID\`)
                         REFERENCES \`Bell\`(\`BellID\`)
-                        ON DELETE NO ACTION,
+                        ON DELETE CASCADE,
                     INDEX \`idx_bell_role\` (\`bellRole\`)
                 )
             `);

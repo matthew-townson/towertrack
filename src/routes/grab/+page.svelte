@@ -79,6 +79,7 @@
 <svelte:head>
     <title>Tower Grabs | towertracker</title>
     <link rel="stylesheet" href="/assets/css/grab.css">
+    <link rel="stylesheet" href="/assets/css/bellboard-summary.css">
 </svelte:head>
 
 <Header user={data.user} />
@@ -90,23 +91,28 @@
         <div class="stat-card">
             <div class="stat-number">{data.grabCount}</div>
             <div class="stat-label">Total Grabs</div>
-            <a href="#" class="view-all-link" on:click|preventDefault={() => showSummary = false}>View all grabs</a>
+            <button type="button" class="view-all-link" on:click={() => showSummary = false}>View all grabs</button>
         </div>
     </div>
     
     <div class="settings-section">
         <div class="action-buttons">
-            <a href="/grab/add" class="button add-grab-btn">
+            <a href="/grab/add" class="button add-grab-btn has-text-white">
                 <span class="icon">+</span>
                 Add a New Grab
             </a>
+
+            <a href="/grab/bulk" class="button bulk-grab-btn has-text-white">
+                <span class="icon">📋</span>
+                Bulk Add Grabs
+            </a>
             
-            <a href="/map" class="button map-btn">
+            <a href="/map?grabbed=true" class="button map-btn has-text-dark">
                 <span class="icon">🗺️</span>
                 View on Map
             </a>
 
-            <button class="button toggle-summary-btn" on:click={toggleSummary}>
+            <button class="button toggle-summary-btn has-text-white" on:click={toggleSummary}>
                 <span class="icon">{showSummary ? '📋' : 'ℹ️'}</span>
                 {showSummary ? 'Show List' : 'Show Summary'}
             </button>
@@ -139,7 +145,7 @@
         {/if}
         
         {#if showSummary}
-            <div class="grab-stats">                
+            <div class="grab-stats">
                 <h3>Grab Statistics</h3>
                 <p>Total Towers Grabbed: {data.grabCount || 0}</p>
             </div>
@@ -188,33 +194,32 @@
                 </div>
                 
                 {#if filteredGrabs.length > 0}
-                    <div class="grabs-list">
+                    <div class="compact-list">
                         {#each filteredGrabs as grab}
-                            <div class="grab-item">
-                                <div class="grab-details">
-                                    <div class="grab-tower">
+                            <div class="compact-item">
+                                <div class="compact-row">
+                                    <div class="compact-date">
+                                        {grab.dateGrabbed ? formatDate(grab.dateGrabbed) : 'Not dated'}
+                                    </div>
+                                    <div class="compact-place">
                                         <a href="/tower/{grab.towerID}">
                                             {grab.Place}{grab.Dedicn ? `, ${grab.Dedicn}` : ''}
                                         </a>
                                     </div>
-                                    <div class="grab-info">
+                                    <div class="compact-method">
                                         {grab.County} • {grab.Bells} bells
                                         {#if grab.Wt}
                                             • Tenor: {formatWeight(grab.Wt)}
                                         {/if}
-                                        {#if grab.dateGrabbed}
-                                            • Grabbed on {formatDate(grab.dateGrabbed)}
+                                    </div>
+                                    <div style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; color: #666;">
+                                        {#if grab.bells && grab.bells.length > 0}
+                                            Bells: {grab.bells.map(b => b.BellRole || 'Bell').join(', ')}
                                         {/if}
                                     </div>
-                                    {#if grab.bells && grab.bells.length > 0}
-                                        <div class="grab-bells">
-                                            <span class="bells-title">Bells grabbed:</span> 
-                                            {grab.bells.map(b => b.BellRole || 'Bell').join(', ')}
-                                        </div>
-                                    {/if}
-                                </div>
-                                <div class="grab-actions">
-                                    <a href="/grab/add?towerId={grab.towerID}" class="edit-button">Edit</a>
+                                    <div style="flex: 0 0 auto;">
+                                        <a href="/grab/add?towerId={grab.towerID}" class="compact-link">Edit</a>
+                                    </div>
                                 </div>
                             </div>
                         {/each}

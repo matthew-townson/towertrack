@@ -1,4 +1,4 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { error, redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import { importBBData } from '$lib/server/bbImport.js';
 import log from '$lib/server/log';
@@ -7,21 +7,65 @@ import log from '$lib/server/log';
 function classifyChanges(changes, bell_count) {
 	if (changes >= 5000) return 'peal';
 	if (changes >= 2500 && changes < 5000) return 'half-peal';
-	if (changes >= 1250 && changes < 2500) return 'quarter'; // TODO: need to consider date touches and maybe eighth peals
+	if (changes >= 1250 && changes < 2500) return 'quarter';
 	return 'performance';
 }
 
-export async function load({ locals }) {
-    if (!locals.user) {
-        throw redirect(303, '/account/login');
-    }
+export async function load({ params, locals }) {
+	const { username } = params;
+	if (!username) {
+		throw error(400, 'Missing username');
+	}
 
-    const sql = `
+	// find the target user
+	let [userRows] = await db.execute(
+		'SELECT `id`, `username` FROM `User` WHERE `username` = ? LIMIT 1',
+		[username]
+	);
+
+	// fallback: try with hyphens replaced by spaces
+	if ((!userRows || userRows.length === 0) && username.includes('-')) {
+		const alt = username.replace(/-/g, ' ');
+		[userRows] = await db.execute(
+			'SELECT `id`, `username` FROM `User` WHERE `username` = ? LIMIT 1',
+			[alt]
+		);
+	}
+
+	if (!userRows || userRows.length === 0) {
+		throw error(404, 'User not found');
+	}
+
+	const targetUser = userRows[0];
+	const isOwnProfile = locals.user?.id === targetUser.id;
+
+	// get the target user's data visibility setting
+	const [settingsRows] = await db.execute(
+		'SELECT `dataVisibility` FROM `UserSettings` WHERE `userId` = ? LIMIT 1',
+		[targetUser.id]
+	);
+
+	const dataVisibility = settingsRows?.[0]?.dataVisibility ?? 1; // default to visible
+
+	// check if viewer can see the data
+	const canViewData = isOwnProfile || !!dataVisibility;
+
+	if (!canViewData) {
+		return {
+			targetUser: { username: targetUser.username },
+			isOwnProfile,
+			dataHidden: true,
+			stats: null,
+			performances: []
+		};
+	}
+
+	// fetch stats and performances for the target user
+	const sql = `
     WITH matched_perfs AS (
       SELECT DISTINCT p.PerformanceID
       FROM Performance p
       LEFT JOIN (
-        -- Use JSON_TABLE to extract names from JSON structure
         SELECT p2.PerformanceID, jt.name
         FROM Performance p2
         JOIN JSON_TABLE(
@@ -39,7 +83,6 @@ export async function load({ locals }) {
       
       UNION
       
-      -- Also include performances where name is found in the Ringers JSON as a substring (fallback)
       SELECT DISTINCT p.PerformanceID
       FROM Performance p
       JOIN \`User\` u ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(u.username)), '%')
@@ -68,18 +111,17 @@ export async function load({ locals }) {
       (SELECT COUNT(*) FROM matched_perfs) AS performance_count
     `;
 
-    const [rows] = await db.query(sql, [locals.user.id, locals.user.id, locals.user.id]);
-    const stats = rows?.[0] || { peal_count: 0, half_peal_count: 0, quarter_count: 0, performance_count: 0 };
+	const [rows] = await db.query(sql, [targetUser.id, targetUser.id, targetUser.id]);
+	const stats = rows?.[0] || { peal_count: 0, half_peal_count: 0, quarter_count: 0, performance_count: 0 };
 
-    // fetch the actual matched performances to print/classify
-    const perfSql = `
+	// fetch the actual matched performances
+	const perfSql = `
     WITH matched_perfs AS (
       SELECT DISTINCT p.PerformanceID, p.Changes,
         COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
         p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
       FROM Performance p
       LEFT JOIN (
-        -- Use JSON_TABLE to extract names from JSON structure
         SELECT p2.PerformanceID, jt.name
         FROM Performance p2
         JOIN JSON_TABLE(
@@ -97,7 +139,6 @@ export async function load({ locals }) {
       
       UNION
       
-      -- Also include performances where name is found in the Ringers JSON as a substring (fallback)
       SELECT DISTINCT p.PerformanceID, p.Changes,
         COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
         p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
@@ -119,77 +160,105 @@ export async function load({ locals }) {
     ORDER BY Date DESC, PerformanceID DESC;
     `;
 
-    const [perfRows] = await db.query(perfSql, [locals.user.id, locals.user.id, locals.user.id]);
-    const performances = (perfRows || []).map(r => {
-        let ringers = [];
-        let footnotes = [];
-        try {
-            if (r.Ringers) {
-                if (typeof r.Ringers === 'string') {
-                    const parsed = JSON.parse(r.Ringers);
-                    ringers = parsed.ringers || [];
-                } else if (typeof r.Ringers === 'object' && r.Ringers.ringers) {
-                    ringers = r.Ringers.ringers || [];
-                } else if (Array.isArray(r.Ringers)) {
-                    ringers = r.Ringers;
-                }
-            }
-        } catch (err) {
-            log.error(`Failed to parse ringers JSON for performance ${r.PerformanceID}:`, r.Ringers);
-            ringers = [];
-        }
+	const [perfRows] = await db.query(perfSql, [targetUser.id, targetUser.id, targetUser.id]);
+	const performances = (perfRows || []).map(r => {
+		let ringers = [];
+		let footnotes = [];
+		try {
+			if (r.Ringers) {
+				if (typeof r.Ringers === 'string') {
+					const parsed = JSON.parse(r.Ringers);
+					ringers = parsed.ringers || [];
+				} else if (typeof r.Ringers === 'object' && r.Ringers.ringers) {
+					ringers = r.Ringers.ringers || [];
+				} else if (Array.isArray(r.Ringers)) {
+					ringers = r.Ringers;
+				}
+			}
+		} catch (err) {
+			log.error(`Failed to parse ringers JSON for performance ${r.PerformanceID}:`, r.Ringers);
+			ringers = [];
+		}
 
-        try {
-            if (r.Footnotes) {
-                if (typeof r.Footnotes === 'string') {
-                    const parsed = JSON.parse(r.Footnotes);
-                    footnotes = Array.isArray(parsed) ? parsed : [];
-                } else if (Array.isArray(r.Footnotes)) {
-                    footnotes = r.Footnotes;
-                }
-            }
-        } catch (err) {
-            log.error(`Failed to parse footnotes JSON for performance ${r.PerformanceID}:`, r.Footnotes);
-            footnotes = [];
-        }
+		try {
+			if (r.Footnotes) {
+				if (typeof r.Footnotes === 'string') {
+					const parsed = JSON.parse(r.Footnotes);
+					footnotes = Array.isArray(parsed) ? parsed : [];
+				} else if (Array.isArray(r.Footnotes)) {
+					footnotes = r.Footnotes;
+				}
+			}
+		} catch (err) {
+			log.error(`Failed to parse footnotes JSON for performance ${r.PerformanceID}:`, r.Footnotes);
+			footnotes = [];
+		}
 
-        return {
-            PerformanceID: r.PerformanceID,
-            Changes: r.Changes,
-            bell_count: r.bell_count,
-            Date: r.Date,
-            Method: r.Method,
-            Place: r.Place,
-            Dedication: r.Dedication,
-            County: r.County,
-            Duration: r.Duration,
-            Association: r.Association,
-            TenorWeightLbs: r.TenorWeightLbs,
-            TenorKey: r.TenorKey,
-            ringers: ringers,
-            footnotes: footnotes,
-            classification: classifyChanges(Number(r.Changes || 0), Number(r.bell_count || 0))
-        };
-    });
+		return {
+			PerformanceID: r.PerformanceID,
+			Changes: r.Changes,
+			bell_count: r.bell_count,
+			Date: r.Date,
+			Method: r.Method,
+			Place: r.Place,
+			Dedication: r.Dedication,
+			County: r.County,
+			Duration: r.Duration,
+			Association: r.Association,
+			TenorWeightLbs: r.TenorWeightLbs,
+			TenorKey: r.TenorKey,
+			ringers: ringers,
+			footnotes: footnotes,
+			classification: classifyChanges(Number(r.Changes || 0), Number(r.bell_count || 0))
+		};
+	});
 
-    return {
-        user: locals.user,
-        stats: stats,
-        performances
-    };
+	return {
+		targetUser: { username: targetUser.username },
+		isOwnProfile,
+		dataHidden: false,
+		stats,
+		performances
+	};
 }
 
 export const actions = {
-    importBBData: async ({ locals }) => {
-        if (!locals.user) {
-            throw redirect(303, '/account/login');
-        }
-        try {
-            await importBBData(locals.user.id);
-            return { success: true, message: 'BellBoard performances updated.' };
-        } catch (error) {
-            return fail(500, { error: true, message: 'Failed to update performances: ' + error.message });
-        }
-    }
-};
+	importBBData: async ({ locals, params }) => {
+		if (!locals.user) {
+			throw redirect(303, '/account/login');
+		}
 
+		// only allow importing own data
+		const { username } = params;
+		let [userRows] = await db.execute(
+			'SELECT `id`, `username` FROM `User` WHERE `username` = ? LIMIT 1',
+			[username]
+		);
+
+		if ((!userRows || userRows.length === 0) && username.includes('-')) {
+			const alt = username.replace(/-/g, ' ');
+			[userRows] = await db.execute(
+				'SELECT `id`, `username` FROM `User` WHERE `username` = ? LIMIT 1',
+				[alt]
+			);
+		}
+
+		if (!userRows || userRows.length === 0) {
+			return fail(404, { error: true, message: 'User not found' });
+		}
+
+		const targetUser = userRows[0];
+		if (locals.user.id !== targetUser.id) {
+			return fail(403, { error: true, message: 'You can only update your own performances' });
+		}
+
+		try {
+			importBBData(locals.user.id).catch(err => {
+				try { console.error('Background importBBData failed:', err); } catch (e) {}
+			});
+			return { success: true, message: 'BellBoard performances updated.' };
+		} catch (error) {
+			return fail(500, { error: true, message: 'Failed to update performances: ' + error.message });
+		}
+	}
+};

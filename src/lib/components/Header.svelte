@@ -1,19 +1,15 @@
 <script>
 	export let user = null;
 	let menuOpen = false;
+
+	$: userSlug = user ? user.username.replace(/ /g, '-') : '';
 </script>
 
 <nav class="navbar has-shadow is-spaced custom-banner-bg" aria-label="main navigation">
 	<div class="navbar-brand">
-		{#if user}
-			<a class="navbar-item" href="/home">
-				<h1 class="title is-4 has-text-white">towertracker</h1>
-			</a>
-		{:else}
-			<a class="navbar-item" href="/">
-				<h1 class="title is-4 has-text-white">towertracker</h1>
-			</a>
-		{/if}
+		<a class="navbar-item" href="/">
+			<h1 class="title is-4 has-text-white">towertracker</h1>
+		</a>
 		<button type="button"
 			class="navbar-burger has-text-white"
 			aria-label="menu"
@@ -29,9 +25,11 @@
 		<div class="navbar-start">
 			{#if user}
 				<a class="navbar-item has-text-white" href="/home">Home</a>
+				<a class="navbar-item has-text-white" href="/tower/search">Towers</a>
+				<a class="navbar-item has-text-white" href="/statistics">Statistics</a>
 				<a class="navbar-item has-text-white" href="/grab">Grabs</a>
-				<a class="navbar-item has-text-white" href="/bellboard">BellBoard Data</a>
-				<a class="navbar-item has-text-white" href="/profile">Profile</a>
+				<a class="navbar-item has-text-white" href="/u/{userSlug}/performance-data">Performance Data</a>
+				<a class="navbar-item has-text-white" href="/u/{userSlug}">Profile</a>
 				<a class="navbar-item has-text-white" href="/map">Map</a>
 			{:else}
 				<a class="navbar-item has-text-white" href="/">Home</a>
@@ -52,15 +50,3 @@
 		</div>
 	</div>
 </nav>
-
-<style>
-	.custom-banner-bg {
-		background: linear-gradient(160deg, #c33c54 56%, #8ee3ef 100%, #aef3e7 100%);
-	}
-	.navbar {
-		border-bottom: none;
-	}
-	.navbar-item h1 {
-		margin: 0;
-	}
-</style>

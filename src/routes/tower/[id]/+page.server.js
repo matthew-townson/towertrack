@@ -24,7 +24,7 @@ export async function load({ params, locals }) {
         const tower = towerRows[0];
 
         const [bellRows] = await db.query(
-            `SELECT * FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY BellRole`,
+            `SELECT * FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY CAST(BellRole AS UNSIGNED)`,
             [tower.TowerID, tower.RingID || 0]
         );
 

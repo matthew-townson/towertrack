@@ -1,22 +1,11 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
+    import { convertToHundredweight } from '$lib/mapUtils.js';
     export let data;
     
     function lbsToHundredweight(lbs) {
-        if (!lbs) return '';
-        const cwt = Math.floor(lbs / 112);
-        const remaining = lbs % 112;
-        const qtr = Math.floor(remaining / 28);
-        const finalLbs = remaining % 28;
-        
-        if (cwt > 0) {
-            return `${cwt}-${qtr}-${finalLbs}`;
-        } else if (qtr > 0) {
-            return `${qtr}-${finalLbs}`;
-        } else {
-            return `${finalLbs}lb`;
-        }
+        return convertToHundredweight(lbs);
     }
     
     function formatDate(dateStr) {
@@ -65,14 +54,17 @@
         </div>
         
         <div class="tower-actions">
-            <a href="/grab/add?towerId={data.tower.TowerID}" class="button action-button">
+            <a href="/grab/add?towerId={data.tower.TowerID}" class="button action-button edit-grab-button has-text-white">
                 {data.userGrab ? 'Edit Grab' : 'Add Grab'}
             </a>
-            <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button" target="_blank" rel="noopener noreferrer">
+            <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button has-text-white" target="_blank" rel="noopener noreferrer">
                 View on Dove
             </a>
+            <a href="https://bb.ringingworld.co.uk/search?dove_tower={data.tower.TowerID}" class="button bb-button has-text-white" target="_blank" rel="noopener noreferrer">
+                View on BellBoard
+            </a>
             {#if data.tower.Lat && data.tower.Long}
-                <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=18" class="button map-button">
+                <a href="/map?lat={data.tower.Lat}&lng={data.tower.Long}&zoom=18" class="button map-btn has-text-dark">
                     View on Map
                 </a>
             {/if}
@@ -194,7 +186,7 @@
                             </div>
                         {/if}
                         <div class="grab-actions">
-                            <a href="/grab/add?towerId={data.tower.TowerID}" class="button edit-grab-button">
+                            <a href="/grab/add?towerId={data.tower.TowerID}" class="button edit-grab-button has-text-white">
                                 Edit Grab
                             </a>
                         </div>

@@ -1,7 +1,9 @@
 main {
+    width: 75%;
     max-width: 1200px;
     margin: 0 auto;
     padding: 1rem;
+    box-sizing: border-box;
 }
 
 .tower-header {
@@ -16,11 +18,9 @@ main {
 .tower-title h1 {
     font-size: 2rem;
     margin-bottom: 0.25rem;
-    color: #8ee3ef;
 }
 
 .tower-location {
-    color: #a1a1aa;
     font-size: 1.1rem;
 }
 
@@ -28,21 +28,6 @@ main {
     display: flex;
     gap: 0.5rem;
     flex-wrap: wrap;
-}
-
-.action-button {
-    background-color: #c33c54;
-    color: white;
-}
-
-.dove-button {
-    background-color: #3b82f6;
-    color: white;
-}
-
-.map-button {
-    background-color: #10b981;
-    color: white;
 }
 
 .button {
@@ -73,7 +58,6 @@ main {
 }
 
 .details-card, .bells-card, .grab-card, .performances-card {
-    background: #2d3139;
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: none;
@@ -82,7 +66,6 @@ main {
 h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: #8ee3ef;
     border-bottom: 1px solid #3b3f45;
     padding-bottom: 0.5rem;
 }
@@ -97,11 +80,6 @@ h2 {
 .detail-label {
     font-weight: 600;
     min-width: 130px;
-    color: #f3f4f6;
-}
-
-.detail-value {
-    color: #d1d5db;
 }
 
 .detail-value a {
@@ -130,15 +108,10 @@ h2 {
 
 .bells-list th {
     font-weight: 600;
-    color: #f3f4f6;
-}
-
-.bells-list td {
-    color: #d1d5db;
 }
 
 .bell-grabbed {
-    background-color: rgba(16, 185, 129, 0.1);
+    background-color: rgba(16, 185, 129, 0.257);
 }
 
 .bell-name {
@@ -161,8 +134,19 @@ h2 {
 }
 
 .edit-grab-button {
+    background-color: #c33c54;
+}
+
+.map-btn {
     background-color: #8ee3ef;
-    color: #14161a;
+}
+
+.dove-button {
+    background-color: #3b82f6;
+}
+
+.bb-button {
+    background-color: #f59e0b;
 }
 
 .performances-list {
@@ -172,7 +156,7 @@ h2 {
 }
 
 .performance-item {
-    background: #23262b;
+    border: 1px solid #3b3f45;
     border-radius: 6px;
     padding: 1rem;
 }
@@ -189,7 +173,6 @@ h2 {
 .performance-header h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #f3f4f6;
     margin: 0;
 }
 
@@ -212,14 +195,9 @@ h2 {
 }
 
 .ringer-position {
-    color: #8ee3ef;
     font-weight: 600;
     min-width: 1.5rem;
     text-align: right;
-}
-
-.ringer-name {
-    color: #d1d5db;
 }
 
 .conductor-badge {
@@ -237,13 +215,59 @@ h2 {
 }
 
 .view-link {
-    color: #8ee3ef;
     text-decoration: none;
     font-size: 0.9rem;
 }
 
 .view-link:hover {
     text-decoration: underline;
+}
+
+/* Ensure Bulma .box uses all available width inside its container/column */
+.box {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    /* keep existing visual feel, but allow CSS below to tune spacing */
+}
+
+/* Slightly reduce padding and radius on small screens for better fit */
+@media (max-width: 768px) {
+    .box {
+        padding: 0.85rem;
+        border-radius: 6px;
+    }
+}
+
+/* Increase padding a touch on larger screens for comfortable spacing */
+@media (min-width: 769px) {
+    .box {
+        padding: 1.25rem;
+    }
+}
+
+/* Optional: utility class for full-bleed boxes that span the viewport.
+   Use by adding `class="box full-bleed-box"` when you want the box to escape
+   the normal container and extend edge-to-edge on larger screens. */
+.full-bleed-box {
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    box-sizing: border-box;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Ensure the full-bleed utility remains mobile-friendly */
+@media (max-width: 480px) {
+    .full-bleed-box {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        border-radius: 6px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -264,5 +288,19 @@ h2 {
     
     .ringers-list {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Replace main sizing: use 75% on larger viewports, fallback to full-width on smaller screens */
+@media (max-width: 900px) {
+    main {
+        width: 100%;
+        padding: 0.75rem;
+    }
+
+    /* make sure columns that assumed a two-thirds layout don't remain constrained on mobile */
+    .column.is-two-thirds {
+        width: 100%;
+        flex: none;
     }
 }

@@ -37,4 +37,4 @@ This will be shown in the shell on first run and you are strongly recommended to
 
 ## Using towertracker
 
-I'll be hosting an instance of towertracker at [coming soon](#), but you are more than welcome to run it yourself.  
+I'll be hosting an instance of towertracker at [test.mtownson.com](https://test.mtownson.com/), but you are more than welcome to run it yourself.  

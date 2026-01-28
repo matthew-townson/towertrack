@@ -1,6 +1,6 @@
 import { initialiseDatabase } from '$lib/server/db.js';
 import { getSession } from '$lib/server/session.js';
-import { startDailyImport } from '$lib/server/scheduler.js';
+import { startDailyImport, startBBImportScheduler } from '$lib/server/scheduler.js';
 import { initializeAdmin } from '$lib/server/setup.js';
 import { dev } from '$app/environment';
 import crypto from 'crypto';
@@ -8,8 +8,9 @@ import crypto from 'crypto';
 // Initialise database when server starts
 await initialiseDatabase();
 
-// Start the daily import scheduler when the server starts
+// Start the daily import schedulers when the server starts
 startDailyImport();
+startBBImportScheduler();
 
 // Initialize admin user on server start
 let adminInitialized = false;

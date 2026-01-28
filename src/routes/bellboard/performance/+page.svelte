@@ -1,16 +1,12 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
+    import { convertToHundredweight } from '$lib/mapUtils.js';
     export let data;
 
     // Convert lbs to hundredweight format
     function lbsToHundredweight(lbs) {
-        if (!lbs) return '';
-        const cwt = Math.floor(lbs / 112);
-        const remaining = lbs % 112;
-        const qtr = Math.floor(remaining / 28);
-        const finalLbs = remaining % 28;
-        return `${cwt}-${qtr}-${finalLbs}`;
+        return convertToHundredweight(lbs);
     }
 
     function formatDate(dateStr) {
@@ -47,7 +43,7 @@
 
 <main>
     <div class="breadcrumb-nav">
-        <a href="/bellboard/summary">← Back to Summary</a>
+        <button type="button" class="btn btn-link" on:click={() => history.back()}>← Back to previous page</button>
     </div>
     
     <h1>Performance Details</h1>
@@ -153,7 +149,3 @@
 </main>
 
 <Footer />
-
-<style>
-
-</style>
