@@ -9,7 +9,7 @@ export async function load({ locals, fetch }) {
 	let error = null;
 
 	try {
-		const res = await fetch('https://mtownson.com/dovedata/changelog.json');
+		const res = await fetch('https://test.mtownson.com/changelog.json');
 		if (!res.ok) {
 			throw new Error(`Failed to fetch changelog: ${res.status}`);
 		}
