@@ -478,31 +478,22 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
     gap: 2rem;
     align-items: flex-start;
-    /* background: #14161a; */
-    /* color: #f3f4f6; */
 }
 
 .settings-sidebar {
     min-width: 220px;
     max-width: 220px;
-    /* background: #23262b; */
-    border: none;
     border-radius: 8px;
     padding: 1.5rem 1rem;
     position: sticky;
     top: 2rem;
-    /* color: #f3f4f6; */
     height: fit-content;
-    box-shadow: none;
-    /* Bulma: is-dark, is-radiusless, is-shadowless */
 }
 
 .settings-sidebar h2 {
     margin-top: 0;
     margin-bottom: 1rem;
-    /* color: #8ee3ef; */
     font-size: 1.25rem;
-    font-family: 'IBM Plex Sans', 'Inter', Arial, sans-serif;
     font-weight: 600;
 }
 
@@ -520,54 +511,31 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 6px;
     cursor: pointer;
     font-size: 1rem;
-    /* color: #f3f4f6; */
     transition: background-color 0.2s, color 0.2s;
-    font-family: 'Inter', Arial, sans-serif;
-}
-
-.nav-item:hover {
-    /* background-color: #e85c74; */
-    /* color: #f3f4f6; */
-}
-
-.nav-item.active {
-    /* background-color: #c33c54; */
-    /* color: #f3f4f6; */
 }
 
 .settings-content {
     flex: 1;
     min-width: 0;
-    /* background: #14161a; */
-    /* color: #f3f4f6; */
     display: flex;
     flex-direction: column;
     gap: 2rem;
 }
 
 .settings-section {
-    /* background: #23262b; */
-    /* color: #f3f4f6; */
     border-radius: 8px;
     padding: 2rem 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: none;
-    font-family: 'Inter', Arial, sans-serif;
-    font-weight: 500;
-    /* Bulma: box, is-dark, is-radiusless, is-shadowless */
 }
 
 .settings-section h2 {
     font-size: 1.15rem;
     margin-bottom: 1rem;
-    /* color: #8ee3ef; */
-    font-family: 'IBM Plex Sans', 'Inter', Arial, sans-serif;
     font-weight: 600;
 }
 
 .settings-section label {
     font-weight: 500;
-    /* color: #f3f4f6; */
     margin-bottom: 0.5rem;
     display: block;
 }
@@ -575,28 +543,15 @@ h1, h2, h3, h4, h5, h6 {
 .settings-section input,
 .settings-section select,
 .settings-section textarea {
-    /* background: #23262b; */
-    /* color: #f3f4f6; */
-    /* border: 1px solid #23262b; */
     border-radius: 4px;
     padding: 0.5rem;
     box-shadow: none;
     font-size: 1rem;
-    font-family: 'Inter', Arial, sans-serif;
     transition: box-shadow 0.2s;
-}
-
-.settings-section input:focus,
-.settings-section select:focus,
-.settings-section textarea:focus {
-    /* box-shadow: 0 0 0 2px #c33c5480; */
-    /* border-color: #c33c54; */
 }
 
 .settings-section .button,
 .settings-section button {
-    /* background-color: #c33c54; */
-    /* color: #f3f4f6; */
     border: none;
     border-radius: 4px;
     padding: 0.75rem 1.25rem;
@@ -604,12 +559,6 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     transition: background-color 0.2s;
     font-size: 1rem;
-    font-family: 'Inter', Arial, sans-serif;
-}
-
-.settings-section .button:hover,
-.settings-section button:hover {
-    /* background-color: #a02f44; */
 }
 
 .settings-section .error,
@@ -622,47 +571,14 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1rem;
 }
 
-.settings-section .error {
-    /* background: #23262b; */
-    /* color: #ef4444; */
-}
-
-.settings-section .success {
-    /* background: #23262b; */
-    /* color: #22c55e; */
-}
-
-/* Consistent alias list styling */
-.alias-list {
-    margin-bottom: 1.5rem;
-}
-
 .alias-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    /* background-color: #23262b; */
-    /* border: 1px solid #23262b; */
     border-radius: 6px;
     margin-bottom: 0.75rem;
-    /* color: #f3f4f6; */
-    font-family: 'Inter', Arial, sans-serif;
-}
-
-.alias-item span {
     font-weight: 500;
-    /* color: #8ee3ef; */
-}
-
-.username-item {
-    /* background-color: #23262b !important; */
-    /* border-color: #8ee3ef !important; */
-    cursor: help;
-}
-
-.username-item span {
-    /* color: #8ee3ef; */
 }
 
 /* Responsive adjustments */
@@ -676,8 +592,6 @@ h1, h2, h3, h4, h5, h6 {
         min-width: auto;
         max-width: none;
         border-radius: 0;
-        border-left: none;
-        border-right: none;
         height: auto;
     }
     .settings-nav {

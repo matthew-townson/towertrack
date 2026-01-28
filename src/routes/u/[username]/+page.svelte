@@ -17,6 +17,11 @@
 	let imageUploadStatus = '';
 	let imageUploadError = '';
 	let isUploadingImage = false;
+	let showAddToListModal = false;
+	let userLists = [];
+	let addingToList = null;
+	let addToListError = '';
+	let addToListSuccess = '';
 
 	const isOwnProfile = data.user?.username === profile.username;
 
@@ -132,6 +137,58 @@
 		}
 	}
 
+	async function openAddToListModal() {
+		if (isOwnProfile) return; // Can't add yourself to lists
+		
+		showAddToListModal = true;
+		addToListError = '';
+		addToListSuccess = '';
+		
+		// Load user's lists
+		try {
+			const response = await fetch('/api/user-lists');
+			if (response.ok) {
+				const lists = await response.json();
+				userLists = lists || [];
+			}
+		} catch (error) {
+			addToListError = 'Failed to load lists';
+		}
+	}
+
+	function closeAddToListModal() {
+		showAddToListModal = false;
+		addToListError = '';
+		addToListSuccess = '';
+		addingToList = null;
+	}
+
+	async function addUserToList(listId) {
+		addingToList = listId;
+		addToListError = '';
+		addToListSuccess = '';
+
+		try {
+			const response = await fetch(`/api/user-lists/${listId}/members/${profile.userId}`, {
+				method: 'POST'
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Failed to add user to list');
+			}
+
+			addToListSuccess = 'User added to list!';
+			setTimeout(() => {
+				closeAddToListModal();
+			}, 1500);
+		} catch (error) {
+			addToListError = error.message || 'Failed to add user to list';
+		} finally {
+			addingToList = null;
+		}
+	}
+
 	// Calculate percentages for pie chart
 	$: totalQP = stats?.quarterCount || 0;
 	$: totalPeals = stats?.pealCount || 0;
@@ -228,6 +285,14 @@
 										<a href="/account/settings?section=profile" class="button is-small">
 											<span>Edit profile →</span>
 										</a>
+									{:else if data.user}
+										<button 
+											type="button"
+											class="button is-small is-info"
+											on:click={openAddToListModal}
+										>
+											<span>Add to List +</span>
+										</button>
 									{/if}
 								</div>
 							</div>
@@ -530,6 +595,63 @@
 				</button>
 			{/if}
 			<button type="button" class="button" on:click={closeImageUploadModal}>Cancel</button>
+		</footer>
+	</div>
+</div>
+
+<!-- Add to List Modal -->
+<div class="modal" class:is-active={showAddToListModal}>
+	<button 
+		class="modal-background" 
+		on:click={closeAddToListModal}
+		type="button"
+		aria-label="Close modal"
+	></button>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">Add {profile.username} to List</p>
+			<button class="delete" aria-label="close" on:click={closeAddToListModal}></button>
+		</header>
+		<section class="modal-card-body">
+			{#if addToListError}
+				<div class="notification is-danger mb-3">
+					{addToListError}
+				</div>
+			{/if}
+
+			{#if addToListSuccess}
+				<div class="notification is-success mb-3">
+					{addToListSuccess}
+				</div>
+			{/if}
+
+			{#if userLists.length > 0}
+				<div class="columns is-multiline is-mobile">
+					{#each userLists as list (list.id)}
+						<div class="column is-full-mobile is-half-tablet">
+							<div class="box" style="background-color: rgba(255,255,255,0.05);">
+								<h4 class="subtitle is-6 has-text-light mb-2">{list.name}</h4>
+								{#if list.description}
+									<p class="is-size-7 has-text-grey mb-2">{list.description}</p>
+								{/if}
+								<button 
+									type="button"
+									class="button is-small is-success is-fullwidth {addingToList === list.id ? 'is-loading' : ''}"
+									on:click={() => addUserToList(list.id)}
+									disabled={addingToList !== null}
+								>
+									Add to this list
+								</button>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<p class="has-text-grey">You don't have any lists yet. <a href="/account/settings/lists" class="has-text-link">Create one first</a>.</p>
+			{/if}
+		</section>
+		<footer class="modal-card-foot">
+			<button type="button" class="button" on:click={closeAddToListModal}>Close</button>
 		</footer>
 	</div>
 </div>

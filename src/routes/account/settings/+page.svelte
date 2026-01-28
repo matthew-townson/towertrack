@@ -191,6 +191,9 @@
             >
                 Grab Settings
             </button>
+            <a href="/lists" class="nav-item has-text-light" style="text-align: left; cursor: pointer;">
+                User Lists
+            </a>
         </nav>
     </div>
     
@@ -442,6 +445,8 @@
                 {/if}
             </form>
         {/if}
+
+
     </div>
 </main>
 

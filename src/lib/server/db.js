@@ -1,7 +1,6 @@
 import mysql from 'mysql2/promise';
 import { building } from '$app/environment';
 import { applyHotfix as hotfix001 } from './hotfix-add-profileImage.js';
-
 const DB_HOST = process.env.DB_HOST;
 const DB_PORT = process.env.DB_PORT;
 const DB_USER = process.env.DB_USER;
@@ -256,6 +255,45 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create GrabBell table:', error.message);
         }
 
+        // create user list table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`UserList\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`name\` VARCHAR(255) NOT NULL,
+                    \`description\` TEXT,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`updatedAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    UNIQUE KEY \`unique_name_per_user\` (\`userId\`, \`name\`)
+                )
+            `);
+            console.log('[ INFO ] UserList table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create UserList table:', error.message);
+        }
+
+        // create list member table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`ListMember\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`listId\` INTEGER UNSIGNED NOT NULL,
+                    \`memberId\` INTEGER UNSIGNED NOT NULL,
+                    \`addedAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`listId\`) REFERENCES \`UserList\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`memberId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    UNIQUE KEY \`unique_member_per_list\` (\`listId\`, \`memberId\`)
+                )
+            `);
+            console.log('[ INFO ] ListMember table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create ListMember table:', error.message);
+        }
+
         // create log table
         try {
             await connection.query(`
@@ -308,6 +346,10 @@ async function initialiseDatabase() {
             await connection.query(`ANALYZE TABLE \`Grab\``);
             console.log('         ├ Optimising GrabBell table');
             await connection.query(`ANALYZE TABLE \`GrabBell\``);
+            console.log('         ├ Optimising UserList table');
+            await connection.query(`ANALYZE TABLE \`UserList\``);
+            console.log('         ├ Optimising ListMember table');
+            await connection.query(`ANALYZE TABLE \`ListMember\``);
             console.log('         ├ Optimising Log table');
             await connection.query(`ANALYZE TABLE \`Log\``);
             console.log('         └ Optimising CSVImportLog table');

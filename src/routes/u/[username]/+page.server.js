@@ -65,6 +65,7 @@ export async function load({ params, depends }) {
 		// public: return sanitized user data and settings
 		return {
 			profile: {
+				userId: user.id,
 				username: user.username,
 				email: user.email,
 				permission: user.permission,
