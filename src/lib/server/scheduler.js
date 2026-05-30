@@ -3,11 +3,13 @@ import { importBBData } from '$lib/server/bbImport.js';
 import log from '$lib/server/log.js';
 import fs from 'fs';
 import pool from '$lib/server/db.js';
+import { notifyAdmins } from '$lib/server/notifications.js';
 
 let importInterval = null;
 let bbImportInterval = null;
 let isSchedulerEnabled = true; // Default enabled
 let isBBSchedulerEnabled = true; // Default enabled for BellBoard
+let isBBImportRunning = false;
 
 // Delay between importing each user's BB data (to avoid hammering BB servers)
 const BB_IMPORT_DELAY_MS = 5000; // 5 seconds between users
@@ -142,6 +144,12 @@ async function checkAndRunStartupImport() {
 }
 
 async function importBBDataForAllUsers() {
+    if (isBBImportRunning) {
+        log.info('BellBoard import is already running, skipping duplicate start');
+        return { started: false, alreadyRunning: true };
+    }
+
+    isBBImportRunning = true;
     try {
         // Get all users
         const [users] = await pool.query(`SELECT id, username FROM User ORDER BY id`);
@@ -158,7 +166,7 @@ async function importBBDataForAllUsers() {
                 successCount: 0,
                 failCount: 0
             };
-            return;
+            return { started: true, totalUsers: 0, successCount: 0, failCount: 0 };
         }
         
         log.info(`Starting BellBoard import for ${users.length} users`);
@@ -212,12 +220,72 @@ async function importBBDataForAllUsers() {
         bbImportProgress.currentUserIndex = -1;
         
         log.success(`BellBoard import complete: ${successCount} succeeded, ${failCount} failed`);
+
+        const importStatus = failCount === 0 ? 'success' : successCount === 0 ? 'error' : 'warning';
+        try {
+            await notifyAdmins(
+                'system_import',
+                'BellBoard Daily Import Finished',
+                `BellBoard import completed with ${successCount} successful and ${failCount} failed user imports.`,
+                {
+                    source: 'bellboard',
+                    status: importStatus,
+                    successCount,
+                    failCount,
+                    totalUsers: users.length,
+                    completedAt: new Date().toISOString()
+                }
+            );
+        } catch (notificationError) {
+            log.error(`Failed to notify admins about BellBoard import success: ${notificationError.message}`);
+        }
+
+        return { started: true, totalUsers: users.length, successCount, failCount };
     } catch (error) {
         log.error(`BellBoard import for all users failed: ${error.message}`);
         bbImportProgress.status = 'error';
         bbImportProgress.message = error.message;
+
+        try {
+            await notifyAdmins(
+                'system_import',
+                'BellBoard Daily Import Failed',
+                `BellBoard import failed: ${error.message}`,
+                {
+                    source: 'bellboard',
+                    status: 'error',
+                    error: error.message,
+                    failedAt: new Date().toISOString()
+                }
+            );
+        } catch (notificationError) {
+            log.error(`Failed to notify admins about BellBoard import failure: ${notificationError.message}`);
+        }
         throw error;
+    } finally {
+        isBBImportRunning = false;
     }
+}
+
+export function startManualBBImport() {
+    if (isBBImportRunning || bbImportProgress.status === 'running') {
+        return {
+            started: false,
+            message: 'BellBoard import is already running.'
+        };
+    }
+
+    // Schedule on the next tick so it continues independently of the request lifecycle.
+    setTimeout(() => {
+        importBBDataForAllUsers().catch((error) => {
+            log.error(`Manual BellBoard import failed: ${error.message}`);
+        });
+    }, 0);
+
+    return {
+        started: true,
+        message: 'BellBoard import started for all users.'
+    };
 }
 
 export { importBBDataForAllUsers };

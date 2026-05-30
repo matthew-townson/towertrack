@@ -47,6 +47,107 @@
 		document.querySelector('#alias-form').appendChild(removeInput);
 		document.querySelector('#alias-form').submit();
 	}
+
+	let imageUploadStatus = '';
+	let imageUploadError = '';
+	let isUploadingImage = false;
+	let selectedImageFile = null;
+
+	async function handleImageUpload(event) {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		selectedImageFile = file;
+		
+		// Validate file size (5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			imageUploadError = 'File size must be less than 5MB';
+			selectedImageFile = null;
+			return;
+		}
+
+		// Validate file type
+		const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+		if (!validTypes.includes(file.type)) {
+			imageUploadError = 'Only JPEG, PNG, WebP, and GIF images are allowed';
+			selectedImageFile = null;
+			return;
+		}
+
+		imageUploadError = '';
+	}
+
+	async function uploadProfileImage() {
+		if (!selectedImageFile) return;
+
+		isUploadingImage = true;
+		imageUploadError = '';
+		imageUploadStatus = 'Uploading...';
+
+		try {
+			const formData = new FormData();
+			formData.append('image', selectedImageFile);
+
+			const response = await fetch('/api/profile-image', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Upload failed');
+			}
+
+			imageUploadStatus = 'Profile image uploaded successfully!';
+			selectedImageFile = null;
+			const fileInput = document.querySelector('#profile-image-input');
+			if (fileInput) fileInput.value = '';
+			
+			// Refresh after 2 seconds to show new image
+			setTimeout(() => {
+				window.location.reload();
+			}, 2000);
+		} catch (error) {
+			imageUploadError = error.message || 'Failed to upload image';
+			imageUploadStatus = '';
+		} finally {
+			isUploadingImage = false;
+		}
+	}
+
+	async function deleteProfileImage() {
+		if (!confirm('Are you sure you want to delete your profile image?')) return;
+
+		isUploadingImage = true;
+		imageUploadError = '';
+		imageUploadStatus = 'Deleting...';
+
+		try {
+			const response = await fetch('/api/profile-image', {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Delete failed');
+			}
+
+			imageUploadStatus = 'Profile image deleted successfully!';
+			selectedImageFile = null;
+			const fileInput = document.querySelector('#profile-image-input');
+			if (fileInput) fileInput.value = '';
+
+			// Refresh after 2 seconds
+			setTimeout(() => {
+				window.location.reload();
+			}, 2000);
+		} catch (error) {
+			imageUploadError = error.message || 'Failed to delete image';
+			imageUploadStatus = '';
+		} finally {
+			isUploadingImage = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -90,6 +191,9 @@
             >
                 Grab Settings
             </button>
+            <a href="/lists" class="nav-item has-text-light" style="text-align: left; cursor: pointer;">
+                User Lists
+            </a>
         </nav>
     </div>
     
@@ -116,6 +220,68 @@
                     </div>
                 {/if}
             </form>
+
+            <div class="settings-section box is-dark mt-4">
+                <h2 class="title is-5 has-text-light mb-4">Profile Image</h2>
+                <div class="field mb-4">
+                    <div class="mb-3">
+                        <p class="has-text-light is-size-7">Upload a profile picture (Max 5MB, JPEG/PNG/WebP/GIF)</p>
+                    </div>
+                    <div class="file is-dark">
+                        <label class="file-label">
+                            <input 
+                                id="profile-image-input"
+                                class="file-input" 
+                                type="file" 
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                on:change={handleImageUpload}
+                                disabled={isUploadingImage}
+                            />
+                            <span class="file-cta">
+                                <span class="file-label has-text-light">Choose a file…</span>
+                            </span>
+                            <span class="file-name has-text-light">
+                                {selectedImageFile?.name || 'No file selected'}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                {#if imageUploadError}
+                    <div class="notification is-danger mb-3">
+                        {imageUploadError}
+                    </div>
+                {/if}
+
+                {#if imageUploadStatus}
+                    <div class="notification is-success mb-3">
+                        {imageUploadStatus}
+                    </div>
+                {/if}
+
+                <div class="is-flex is-flex-wrap-wrap is-gap-2">
+                    {#if selectedImageFile || data.user?.profileImage}
+                        <button 
+                            type="button" 
+                            class="button is-success {isUploadingImage ? 'is-loading' : ''}"
+                            on:click={uploadProfileImage}
+                            disabled={!selectedImageFile || isUploadingImage}
+                        >
+                            Upload Image
+                        </button>
+                    {/if}
+                    {#if data.user?.profileImage}
+                        <button 
+                            type="button" 
+                            class="button is-danger {isUploadingImage ? 'is-loading' : ''}"
+                            on:click={deleteProfileImage}
+                            disabled={isUploadingImage}
+                        >
+                            Delete Current Image
+                        </button>
+                    {/if}
+                </div>
+            </div>
         {/if}
 
         {#if activeSection === 'aliases'}
@@ -279,6 +445,8 @@
                 {/if}
             </form>
         {/if}
+
+
     </div>
 </main>
 

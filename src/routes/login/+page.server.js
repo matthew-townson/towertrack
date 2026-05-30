@@ -14,18 +14,21 @@ export const actions = {
             return fail(400, { error: true, message: 'Please enter your username and password', username });
         }
 
-        const result = await validateUser(username, password);
-        
-        if (!result.success) {
-            return fail(400, { error: true, message: result.message, username });
-        }
-
+        // Check rate limit first, before validation
         const { limited, message } = checkRateLimit(request.headers.get('x-forwarded-for') || 'localhost');
         if (limited) {
             return fail(429, { error: true, message });
         }
 
-        const sessionId = createSession(result.user.id, result.user.username, result.user.permission);
+        const result = await validateUser(username, password);
+        
+        if (!result.success) {
+            // Only record failed attempt in rate limit on actual validation failure
+            checkRateLimit(request.headers.get('x-forwarded-for') || 'localhost');
+            return fail(400, { error: true, message: result.message, username });
+        }
+
+        const sessionId = await createSession(result.user.id, result.user.username, result.user.permission);
         
         cookies.set('session', sessionId, {
             path: '/',

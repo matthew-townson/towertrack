@@ -1,60 +1,119 @@
 <script>
-    export let data;
+    import { onMount } from 'svelte';
 
-    // pagination
     let page = 1;
     const pageSize = 100;
-
-    // new: filter + sort by type
-    let selectedType = 'All'; // All, Info, Error, Success, Warn, Debug
+    let selectedType = 'All';
     let sortByType = false;
     let sortAsc = true;
+    let search = '';
 
-    $: allLogs = data?.logs ?? [];
+    let logs = [];
+    let totalLogs = 0;
+    let loading = false;
+    let loadError = '';
 
-    // filtered by selectedType
-    $: filteredLogs = selectedType === 'All'
-        ? allLogs
-        : allLogs.filter(l => (l.type || '').toLowerCase() === selectedType.toLowerCase());
-
-    // sorted if requested (stable-ish)
-    $: sortedLogs = sortByType
-        ? filteredLogs.slice().sort((a, b) => {
-            const ta = (a.type || '').toLowerCase();
-            const tb = (b.type || '').toLowerCase();
-            if (ta === tb) return 0;
-            return sortAsc ? (ta < tb ? -1 : 1) : (ta < tb ? 1 : -1);
-        })
-        : filteredLogs;
-
-    // pagination derived from sortedLogs
-    $: totalPages = Math.max(1, Math.ceil(sortedLogs.length / pageSize));
-    $: startIndex = (page - 1) * pageSize;
-    $: endIndex = Math.min(page * pageSize, sortedLogs.length);
-    $: pagedLogs = sortedLogs.slice(startIndex, endIndex);
-
-    // group current page by date string
-    $: grouped = pagedLogs.reduce((acc, l) => {
-        const d = l.timestamp ? new Date(l.timestamp).toLocaleDateString() : 'Unknown';
-        (acc[d] = acc[d] || []).push(l);
+    $: startIndex = totalLogs === 0 ? 0 : (page - 1) * pageSize;
+    $: endIndex = Math.min(page * pageSize, totalLogs);
+    $: totalPages = Math.max(1, Math.ceil(totalLogs / pageSize));
+    $: grouped = logs.reduce((acc, log) => {
+        const dateKey = log.timestamp ? new Date(log.timestamp).toLocaleDateString() : 'Unknown';
+        (acc[dateKey] = acc[dateKey] || []).push(log);
         return acc;
     }, {});
 
+    function scrollToTop() {
+        if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    async function loadLogsPage() {
+        loading = true;
+        loadError = '';
+
+        try {
+            const params = new URLSearchParams({
+                page: String(page),
+                pageSize: String(pageSize),
+                type: selectedType,
+                sortByType: String(sortByType),
+                sortAsc: String(sortAsc),
+                search: search
+            });
+
+            const response = await fetch(`/api/admin/logs?${params.toString()}`);
+            if (!response.ok) {
+                throw new Error('Failed to load logs');
+            }
+
+            const payload = await response.json();
+            logs = payload.logs ?? [];
+            totalLogs = payload.total ?? 0;
+            page = payload.page ?? page;
+        } catch (error) {
+            loadError = error.message || 'Failed to load logs';
+            logs = [];
+            totalLogs = 0;
+        } finally {
+            loading = false;
+        }
+    }
+
     function prev() {
-        if (page > 1) page -= 1;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (page > 1) {
+            page -= 1;
+            scrollToTop();
+            loadLogsPage();
+        }
     }
+
     function next() {
-        if (page < totalPages) page += 1;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (page < totalPages) {
+            page += 1;
+            scrollToTop();
+            loadLogsPage();
+        }
     }
+
     function goTo(n) {
         const v = Number(n);
         if (!isNaN(v)) {
             page = Math.max(1, Math.min(totalPages, v));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToTop();
+            loadLogsPage();
         }
     }
+
+    function onTypeChange() {
+        page = 1;
+        scrollToTop();
+        loadLogsPage();
+    }
+
+    function onSearchChange() {
+        page = 1;
+        scrollToTop();
+        loadLogsPage();
+    }
+
+    function toggleSortByType() {
+        sortByType = !sortByType;
+        page = 1;
+        scrollToTop();
+        loadLogsPage();
+    }
+
+    function toggleSortDirection() {
+        sortAsc = !sortAsc;
+        page = 1;
+        scrollToTop();
+        loadLogsPage();
+    }
+
+    onMount(() => {
+        loadLogsPage();
+    });
 </script>
 
 <svelte:head>
@@ -65,22 +124,32 @@
 <div class="logs-page">
     <h1>Application Logs</h1>
 
-    {#if data.error}
-        <div class="logs-error">{data.error}</div>
+    {#if loadError}
+        <div class="logs-error">{loadError}</div>
     {:else}
         <div class="logs-controls columns is-vcentered is-multiline">
             <div class="column is-narrow logs-info">
-                Showing {startIndex + 1}–{endIndex} of {sortedLogs.length} logs
+                Showing {totalLogs === 0 ? 0 : startIndex + 1}–{endIndex} of {totalLogs} logs
             </div>
             <div class="column">
                 <div class="field is-grouped is-grouped-right is-align-items-center" role="toolbar" aria-label="Log controls">
+                    <div class="control is-expanded">
+                        <input 
+                            class="input is-small" 
+                            type="text" 
+                            placeholder="Search logs..."
+                            bind:value={search}
+                            on:change={onSearchChange}
+                        />
+                    </div>
+
                     <div class="control">
                         <button class="button is-small" on:click={prev} disabled={page === 1}>Prev</button>
                     </div>
 
                     <div class="control">
                         <div class="select is-small">
-                            <select bind:value={selectedType} on:change={() => page = 1}>
+                            <select bind:value={selectedType} on:change={onTypeChange}>
                                 <option>All</option>
                                 <option>Info</option>
                                 <option>Error</option>
@@ -92,13 +161,13 @@
                     </div>
 
                     <div class="control">
-                        <button class="button is-small" on:click={() => { sortByType = !sortByType; page = 1; }} aria-pressed={sortByType}>
+                        <button class="button is-small" on:click={toggleSortByType} aria-pressed={sortByType}>
                             {#if sortByType}Sort: {sortAsc ? 'Type ▲' : 'Type ▼'}{:else}Sort: Off{/if}
                         </button>
                     </div>
                     {#if sortByType}
                         <div class="control">
-                            <button class="button is-small" on:click={() => { sortAsc = !sortAsc; page = 1; }}>
+                            <button class="button is-small" on:click={toggleSortDirection}>
                                 Toggle ↑/↓
                             </button>
                         </div>
@@ -122,7 +191,9 @@
         </div>
 
         <div class="logs-container" role="region" aria-label="Logs list">
-            {#if pagedLogs.length === 0}
+            {#if loading}
+                <div class="empty">Loading logs...</div>
+            {:else if logs.length === 0}
                 <div class="empty">No logs to display for this page.</div>
             {:else}
                 {#each Object.entries(grouped) as [date, items]}
@@ -154,7 +225,7 @@
         </div>
 
         <div class="logs-footer">
-            <div class="logs-info">Showing {startIndex + 1}–{endIndex} of {sortedLogs.length}</div>
+            <div class="logs-info">Showing {totalLogs === 0 ? 0 : startIndex + 1}–{endIndex} of {totalLogs}</div>
             <nav class="pagination is-small" aria-label="pagination">
                 <button class="pagination-previous button is-small" on:click={prev} disabled={page === 1}>Prev</button>
                 <button class="pagination-next button is-small" on:click={next} disabled={page === totalPages}>Next</button>

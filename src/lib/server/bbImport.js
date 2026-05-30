@@ -75,7 +75,13 @@ async function cleanExistingPerformancesForUser(userId, normalisedNames) {
         );
         if (!hasUser) continue;
         const perfId = row.PerformanceID;
-        const finalId = await getPerfHTTPStatus(perfId);
+        let finalId;
+        try {
+            finalId = await getPerfHTTPStatus(perfId);
+        } catch (err) {
+            log.error(`Failed to check HTTP status for performance ${perfId}: ${err.message}. Skipping cleanup.`);
+            return;
+        }
         if (!finalId) {
             await pool.query(`DELETE FROM Performance WHERE PerformanceID = ?`, [perfId]);
         } else if (String(finalId) !== String(perfId)) {
@@ -90,6 +96,8 @@ export async function importBBData(userId) {
     const [[settings]] = await pool.query('SELECT exShort, bellsPercent FROM UserSettings WHERE userId = ?', [userId]);
     const names = [user.username, ...aliases.map(a => a.Name)];
     const exShort = !!settings?.exShort;
+
+    let hadNetworkError = false;
 
     function normName(n) {
         if (!n) return '';
@@ -459,12 +467,14 @@ export async function importBBData(userId) {
         try {
             res = await fetch(url);
         } catch (err) {
+            hadNetworkError = true;
             log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}): ${err.message}`);
             setProgress(userId, { stage: 'error', message: `Download failed for ${name}: ${err.message}` });
             return;
         }
 
         if (!res.ok) {
+            hadNetworkError = true;
             log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}, Status: ${res.status})`);
             setProgress(userId, { stage: 'error', message: `Failed to download for ${name}: ${res.status}` });
             return;
@@ -644,6 +654,13 @@ export async function importBBData(userId) {
     try {
         await runLimited(tasks, CONCURRENCY);
         
+        // Skip cleanup if there were network errors to prevent data loss
+        if (hadNetworkError) {
+            setProgress(userId, { stage: 'error', message: 'Import had network errors - skipping cleanup to preserve data' });
+            log.warn(`Import for ${user.username} had network errors - skipping cleanup to prevent data loss`);
+            return;
+        }
+        
         // update grab dates based on the earliest performances we found
         setProgress(userId, { stage: 'finalizing', message: 'Updating grab dates...' });
         log.info(`Updating grab dates for ${towerEarliestPerformance.size} towers`);
@@ -662,9 +679,11 @@ export async function importBBData(userId) {
                 );
 
                 if (existingGrab.length === 0) {
+                    // Use INSERT ... ON DUPLICATE KEY UPDATE to handle concurrent inserts atomically
                     await pool.query(
-                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed)
-                         VALUES (?, ?, ?, ?, ?, ?)`,
+                        `INSERT INTO Grab (userID, towerID, ringID, dateGrabbed, monthGrabbed, yearGrabbed, lastUpdated)
+                         VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                         ON DUPLICATE KEY UPDATE lastUpdated = CURRENT_TIMESTAMP`,
                         [userId, towerID, ringID, perfInfo.day, perfInfo.month, perfInfo.year]
                     );
                     log.debug(`Created Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);

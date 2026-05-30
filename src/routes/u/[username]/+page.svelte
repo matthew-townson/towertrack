@@ -8,12 +8,212 @@
 	const settings = data?.settings || {};
 	const stats = data?.stats || null;
 	const towerData = data?.towerData || null;
+	const permission = data?.permission || null;
 
 	let activeSection = 'quarters'; // 'quarters' or 'peals'
 	let hoveredSlice = null;
+	let showImageModal = false;
+	let selectedImageFile = null;
+	let imageUploadStatus = '';
+	let imageUploadError = '';
+	let isUploadingImage = false;
+	let showAddToListModal = false;
+	let userLists = [];
+	let addingToList = null;
+	let addToListError = '';
+	let addToListSuccess = '';
+
+	const isOwnProfile = data.user?.username === profile.username;
 
 	function setActiveSection(section) {
 		activeSection = section;
+	}
+
+	function getMergedTowers() {
+		const towerMap = new Map();
+		const allTowers = [
+			...(towerData?.grabbed || []),
+			...(towerData?.quartered || []),
+			...(towerData?.pealed || [])
+		];
+
+		allTowers.forEach(tower => {
+			const key = String(tower.TowerID);
+			if (!towerMap.has(key)) {
+				towerMap.set(key, { 
+					...tower, 
+					grabbed: false, 
+					quartered: false, 
+					pealed: false 
+				});
+			}
+			const existing = towerMap.get(key);
+			if (towerData?.grabbed?.some(t => String(t.TowerID) === key)) existing.grabbed = true;
+			if (towerData?.quartered?.some(t => String(t.TowerID) === key)) existing.quartered = true;
+			if (towerData?.pealed?.some(t => String(t.TowerID) === key)) existing.pealed = true;
+		});
+
+		return Array.from(towerMap.values());
+	}
+
+	function openImageUploadModal() {
+		if (!isOwnProfile) return;
+		showImageModal = true;
+	}
+
+	function closeImageUploadModal() {
+		showImageModal = false;
+		selectedImageFile = null;
+		imageUploadStatus = '';
+		imageUploadError = '';
+	}
+
+	async function handleImageUpload(event) {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		selectedImageFile = file;
+		
+		// Validate file size (5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			imageUploadError = 'File size must be less than 5MB';
+			selectedImageFile = null;
+			return;
+		}
+
+		// Validate file type
+		const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+		if (!validTypes.includes(file.type)) {
+			imageUploadError = 'Only JPEG, PNG, WebP, and GIF images are allowed';
+			selectedImageFile = null;
+			return;
+		}
+
+		imageUploadError = '';
+	}
+
+	async function uploadProfileImage() {
+		if (!selectedImageFile) return;
+
+		isUploadingImage = true;
+		imageUploadError = '';
+		imageUploadStatus = 'Uploading...';
+
+		try {
+			const formData = new FormData();
+			formData.append('image', selectedImageFile);
+
+			const response = await fetch('/api/profile-image', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Upload failed');
+			}
+
+			imageUploadStatus = 'Profile image uploaded successfully!';
+			selectedImageFile = null;
+			const fileInput = document.querySelector('#profile-image-input');
+			if (fileInput) fileInput.value = '';
+			
+			// Refresh after 2 seconds to show new image
+			setTimeout(() => {
+				window.location.reload();
+			}, 2000);
+		} catch (error) {
+			imageUploadError = error.message || 'Failed to upload image';
+			imageUploadStatus = '';
+		} finally {
+			isUploadingImage = false;
+		}
+	}
+
+	async function deleteProfileImage() {
+		if (!confirm('Are you sure you want to delete your profile image?')) return;
+
+		isUploadingImage = true;
+		imageUploadError = '';
+		imageUploadStatus = 'Deleting...';
+
+		try {
+			const response = await fetch('/api/profile-image', {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Delete failed');
+			}
+
+			imageUploadStatus = 'Profile image deleted successfully!';
+			selectedImageFile = null;
+			const fileInput = document.querySelector('#profile-image-input');
+			if (fileInput) fileInput.value = '';
+
+			// Refresh after 2 seconds
+			setTimeout(() => {
+				window.location.reload();
+			}, 2000);
+		} catch (error) {
+			imageUploadError = error.message || 'Failed to delete image';
+			imageUploadStatus = '';
+		} finally {
+			isUploadingImage = false;
+		}
+	}
+
+	async function openAddToListModal() {
+		if (isOwnProfile) return; // Can't add yourself to lists
+		
+		showAddToListModal = true;
+		addToListError = '';
+		addToListSuccess = '';
+		
+		// Load user's lists
+		try {
+			const response = await fetch('/api/user-lists');
+			if (response.ok) {
+				const lists = await response.json();
+				userLists = lists || [];
+			}
+		} catch (error) {
+			addToListError = 'Failed to load lists';
+		}
+	}
+
+	function closeAddToListModal() {
+		showAddToListModal = false;
+		addToListError = '';
+		addToListSuccess = '';
+		addingToList = null;
+	}
+
+	async function addUserToList(listId) {
+		addingToList = listId;
+		addToListError = '';
+		addToListSuccess = '';
+
+		try {
+			const response = await fetch(`/api/user-lists/${listId}/members/${profile.userId}`, {
+				method: 'POST'
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || 'Failed to add user to list');
+			}
+
+			addToListSuccess = 'User added to list!';
+			setTimeout(() => {
+				closeAddToListModal();
+			}, 1500);
+		} catch (error) {
+			addToListError = error.message || 'Failed to add user to list';
+		} finally {
+			addingToList = null;
+		}
 	}
 
 	// Calculate percentages for pie chart
@@ -65,19 +265,63 @@
 					<div class="box">
 						<div class="columns is-mobile is-vcentered profile-top">
 							<div class="column is-narrow">
-								<div class="profile-avatar" role="img" aria-label="Profile image placeholder">
-									<span class="avatar-initials">{profile.username ? profile.username.charAt(0).toUpperCase() : '?'}</span>
-								</div>
+								{#if profile.profileImage}
+									<button
+										type="button"
+										class="profile-avatar-button {isOwnProfile ? 'is-clickable' : ''}"
+										on:click={openImageUploadModal}
+										disabled={!isOwnProfile}
+										title={isOwnProfile ? 'Click to change profile image' : 'View profile image'}
+										aria-label="Profile image"
+									>
+										<img 
+											src="/uploads/profiles/{profile.profileImage}" 
+											alt="{profile.username}'s profile image"
+											class="profile-avatar"
+											loading="lazy"
+										/>
+									</button>
+								{:else}
+									<button
+										type="button"
+										class="profile-avatar-button {isOwnProfile ? 'is-clickable' : ''}"
+										on:click={openImageUploadModal}
+										disabled={!isOwnProfile}
+										title={isOwnProfile ? 'Click to add profile image' : ''}
+										aria-label="Profile image placeholder"
+									>
+										<div class="profile-avatar" role="img">
+											<span class="avatar-initials">{profile.username ? profile.username.charAt(0).toUpperCase() : '?'}</span>
+										</div>
+									</button>
+								{/if}
 							</div>
 
 							<div class="column">
-								<h1 class="title is-4 mb-1" style="margin-bottom:0.25rem; text-align:left;">{profile.username}</h1>
-								{#if profile.otherNames}
-									<div class="subtitle is-6" style="margin-top:0.25rem; text-align:left;">{profile.otherNames}</div>
-								{/if}
-								{#if profile.permission !== undefined}
-									<div class="is-size-7 has-text-grey" style="text-align:left;">Permission: {profile.permission}</div>
-								{/if}
+								<div class="is-flex is-justify-content-space-between is-align-items-start">
+									<div style="flex: 1;">
+										<h1 class="title is-4 mb-1" style="margin-bottom:0.25rem; text-align:left;">{profile.username}</h1>
+										{#if profile.otherNames}
+											<div class="subtitle is-6" style="margin-top:0.25rem; text-align:left;">{profile.otherNames}</div>
+										{/if}
+										{#if profile.permission !== undefined}
+											<div class="is-size-7 has-text-grey" style="text-align:left;">Permission: {profile.permission}</div>
+										{/if}
+									</div>
+									{#if isOwnProfile}
+										<a href="/account/settings?section=profile" class="button is-small">
+											<span>Edit profile →</span>
+										</a>
+									{:else if data.user}
+										<button 
+											type="button"
+											class="button is-small is-info"
+											on:click={openAddToListModal}
+										>
+											<span>Add to List +</span>
+										</button>
+									{/if}
+								</div>
 							</div>
 						</div>
 
@@ -91,16 +335,18 @@
 									<p><strong>Other names / also goes by:</strong> {profile.otherNames}</p>
 								{/if}
 								<hr />
-								<h3 class="subtitle is-6">[DEBUG] Settings</h3>
-								{#if settings}
-									<ul>
-										<li><strong>Profile visibility:</strong> {settings.profileVisibility ? 'Public' : 'Private'}</li>
-										<li><strong>Data visibility:</strong> {settings.dataVisibility ? 'Public' : 'Restricted'}</li>
-										<li><strong>Minimum bells percent for grab:</strong> {settings.bellsPercent ?? '100'}%</li>
-										<li><strong>Exclude vshort imports:</strong> {settings.exShort ? 'Yes' : 'No'}</li>
-									</ul>
-								{:else}
-									<p>No settings available.</p>
+								{#if permission === 0}
+									<h3 class="subtitle is-6">[DEBUG] Settings</h3>
+									{#if settings}
+										<ul>
+											<li><strong>Profile visibility:</strong> {settings.profileVisibility ? 'Public' : 'Private'}</li>
+											<li><strong>Data visibility:</strong> {settings.dataVisibility ? 'Public' : 'Restricted'}</li>
+											<li><strong>Minimum bells percent for grab:</strong> {settings.bellsPercent ?? '100'}%</li>
+											<li><strong>Exclude vshort imports:</strong> {settings.exShort ? 'Yes' : 'No'}</li>
+										</ul>
+									{:else}
+										<p>No settings available.</p>
+									{/if}
 								{/if}
 							</div>
 
@@ -275,11 +521,7 @@
 									<div id="tower-map" class="box mt-4">
 										<h4 class="subtitle is-6">Tower Map</h4>
 										<TowerMap 
-											towers={[
-												...towerData.grabbed.map(t => ({ ...t, grabbed: true, quartered: false, pealed: false })),
-												...towerData.quartered.map(t => ({ ...t, grabbed: false, quartered: true, pealed: false })),
-												...towerData.pealed.map(t => ({ ...t, grabbed: false, quartered: false, pealed: true }))
-											]}
+											towers={getMergedTowers()}
 											bellsFilter={3}
 											isMinimumBells={true}
 											showUnringable={true}
@@ -307,5 +549,134 @@
 		</div>
 	</div>
 </main>
+
+<!-- Image Upload Modal -->
+<div class="modal" class:is-active={showImageModal}>
+	<button 
+		class="modal-background" 
+		on:click={closeImageUploadModal}
+		type="button"
+		aria-label="Close modal"
+	></button>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">Upload Profile Image</p>
+			<button class="delete" aria-label="close" on:click={closeImageUploadModal}></button>
+		</header>
+		<section class="modal-card-body">
+			<div class="field mb-4">
+				<p class="help mb-3">Max 5MB, JPEG/PNG/WebP/GIF</p>
+				<div class="file is-fullwidth">
+					<label class="file-label">
+						<input 
+							id="profile-image-input"
+							class="file-input" 
+							type="file" 
+							accept="image/jpeg,image/png,image/webp,image/gif"
+							on:change={handleImageUpload}
+							disabled={isUploadingImage}
+						/>
+						<span class="file-cta">
+							<span class="file-label">Choose a file…</span>
+						</span>
+						<span class="file-name">
+							{selectedImageFile?.name || 'No file selected'}
+						</span>
+					</label>
+				</div>
+			</div>
+
+			{#if imageUploadError}
+				<div class="notification is-danger mb-3">
+					{imageUploadError}
+				</div>
+			{/if}
+
+			{#if imageUploadStatus}
+				<div class="notification is-success mb-3">
+					{imageUploadStatus}
+				</div>
+			{/if}
+		</section>
+		<footer class="modal-card-foot is-flex is-flex-wrap-wrap is-gap-2">
+			<button 
+				type="button" 
+				class="button is-success {isUploadingImage ? 'is-loading' : ''}"
+				on:click={uploadProfileImage}
+				disabled={!selectedImageFile || isUploadingImage}
+			>
+				Upload Image
+			</button>
+			{#if profile.profileImage}
+				<button 
+					type="button" 
+					class="button is-danger {isUploadingImage ? 'is-loading' : ''}"
+					on:click={deleteProfileImage}
+					disabled={isUploadingImage}
+				>
+					Delete Current Image
+				</button>
+			{/if}
+			<button type="button" class="button" on:click={closeImageUploadModal}>Cancel</button>
+		</footer>
+	</div>
+</div>
+
+<!-- Add to List Modal -->
+<div class="modal" class:is-active={showAddToListModal}>
+	<button 
+		class="modal-background" 
+		on:click={closeAddToListModal}
+		type="button"
+		aria-label="Close modal"
+	></button>
+	<div class="modal-card">
+		<header class="modal-card-head">
+			<p class="modal-card-title">Add {profile.username} to List</p>
+			<button class="delete" aria-label="close" on:click={closeAddToListModal}></button>
+		</header>
+		<section class="modal-card-body">
+			{#if addToListError}
+				<div class="notification is-danger mb-3">
+					{addToListError}
+				</div>
+			{/if}
+
+			{#if addToListSuccess}
+				<div class="notification is-success mb-3">
+					{addToListSuccess}
+				</div>
+			{/if}
+
+			{#if userLists.length > 0}
+				<div class="columns is-multiline is-mobile">
+					{#each userLists as list (list.id)}
+						<div class="column is-full-mobile is-half-tablet">
+							<div class="box" style="background-color: rgba(255,255,255,0.05);">
+								<h4 class="subtitle is-6 has-text-light mb-2">{list.name}</h4>
+								{#if list.description}
+									<p class="is-size-7 has-text-grey mb-2">{list.description}</p>
+								{/if}
+								<button 
+									type="button"
+									class="button is-small is-success is-fullwidth {addingToList === list.id ? 'is-loading' : ''}"
+									on:click={() => addUserToList(list.id)}
+									disabled={addingToList !== null}
+								>
+									Add to this list
+								</button>
+							</div>
+						</div>
+					{/each}
+				</div>
+			{:else}
+				<p class="has-text-grey">You don't have any lists yet. <a href="/account/settings/lists" class="has-text-link">Create one first</a>.</p>
+			{/if}
+		</section>
+		<footer class="modal-card-foot">
+			<button type="button" class="button" on:click={closeAddToListModal}>Close</button>
+		</footer>
+	</div>
+</div>
 
 <Footer />

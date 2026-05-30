@@ -23,6 +23,7 @@
                     - User profiles<br>
                     - Statistics and analysis of BellBoard data and grabs<br>
                 </p>
+            </div>
 		</div>
 	</div>
 </main>

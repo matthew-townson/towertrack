@@ -1,7 +1,7 @@
 <script>
     import { enhance } from '$app/forms';
     import { invalidateAll } from '$app/navigation';
-    import { onDestroy } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     
     export let data;
     
@@ -69,6 +69,14 @@
     
     onDestroy(() => {
         stopPolling();
+    });
+
+    onMount(async () => {
+        await pollProgress();
+        if (progress && progress.status === 'running') {
+            loading = true;
+            startPolling();
+        }
     });
 </script>
 

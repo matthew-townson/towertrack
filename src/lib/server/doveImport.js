@@ -3,6 +3,7 @@ import log from '$lib/server/log.js';
 import pool from '$lib/server/db.js';
 import fs from 'fs';
 import crypto from 'crypto';
+import { notifyAdmins } from '$lib/server/notifications.js';
 
 // Progress tracking for Dove import
 let doveImportProgress = {
@@ -27,6 +28,8 @@ function updateProgress(updates) {
 }
 
 export async function importDoveData() {
+    const importStart = Date.now();
+
     // Reset progress at start
     updateProgress({
         status: 'running',
@@ -308,6 +311,24 @@ export async function importDoveData() {
         
         log.info(`Committed ${filteredTowersData.length} towers and ${filteredBellsData.length} bells`);
         log.success(`Successfully imported ${filteredTowersData.length} towers and ${filteredBellsData.length} bells`);
+
+        try {
+            await notifyAdmins(
+                'system_import',
+                'Tower Database Updated',
+                `Successfully imported ${filteredTowersData.length} towers and ${filteredBellsData.length} bells.`,
+                {
+                    source: 'dove',
+                    status: 'success',
+                    towersImported: filteredTowersData.length,
+                    bellsImported: filteredBellsData.length,
+                    startedAt: new Date(importStart).toISOString(),
+                    completedAt: new Date().toISOString()
+                }
+            );
+        } catch (notificationError) {
+            log.error(`Failed to notify admins about Dove import success: ${notificationError.message}`);
+        }
         
         updateProgress({
             status: 'complete',
@@ -325,6 +346,23 @@ export async function importDoveData() {
             error: error.message,
             endTime: new Date()
         });
+
+        try {
+            await notifyAdmins(
+                'system_import',
+                'Tower Database Import Failed',
+                `Failed to update towers and bells data: ${error.message}`,
+                {
+                    source: 'dove',
+                    status: 'error',
+                    error: error.message,
+                    startedAt: new Date(importStart).toISOString(),
+                    failedAt: new Date().toISOString()
+                }
+            );
+        } catch (notificationError) {
+            log.error(`Failed to notify admins about Dove import failure: ${notificationError.message}`);
+        }
         throw error;
     } finally {
         // Always re-enable foreign key checks and release the connection

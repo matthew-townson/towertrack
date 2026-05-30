@@ -31,3 +31,6 @@ bbdata/*.csv
 
 # node package lock
 package-lock.json
+
+# uploads
+static/uploads/*

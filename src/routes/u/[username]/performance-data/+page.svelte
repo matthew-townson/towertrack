@@ -351,8 +351,8 @@
                 <div class="filter-panel">
                     <!-- Quick type filters -->
                     <div class="filter-group">
-                        <label>Performance Type:</label>
-                        <div class="filter-buttons">
+                        <label for="perf-type-filter">Performance Type:</label>
+                        <div class="filter-buttons" id="perf-type-filter">
                             <button class:active={filters.type === 'all'} on:click={() => setTypeFilter('all')}>All</button>
                             <button class:active={filters.type === 'peal'} on:click={() => setTypeFilter('peal')}>Peals (5000+)</button>
                             <button class:active={filters.type === 'half'} on:click={() => setTypeFilter('half')}>Half Peals (2500-4999)</button>

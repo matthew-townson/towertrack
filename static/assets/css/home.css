@@ -91,6 +91,52 @@
     font-size: 0.9rem;
 }
 
+/* ==================== Default (Light) Styles - ensure light accessibility by default ==================== */
+.dashboard-section {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-section h2 {
+    color: #c33c54;
+}
+
+.section-description {
+    color: #6b6b6b;
+}
+
+.stat-card {
+    background: #f9f9f9;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.stat-number {
+    color: #c33c54;
+}
+
+.stat-label {
+    color: #363636;
+}
+
+.feature-card {
+    background: #fafafa;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.feature-card:hover {
+    background: #f1f1f1;
+}
+
+.feature-text h3 {
+    color: #363636;
+}
+
+.feature-text p {
+    color: #6b6b6b;
+}
+
+/* removed force-light overrides so home follows prefers-color-scheme media queries */
+
 @media (max-width: 768px) {
     .feature-links {
         grid-template-columns: 1fr;
