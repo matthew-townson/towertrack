@@ -287,6 +287,26 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create ListMember table:', error.message);
         }
 
+        // create session table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`Session\` (
+                    \`sessionId\` VARCHAR(64) NOT NULL,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`username\` VARCHAR(255) NOT NULL,
+                    \`permission\` INTEGER NOT NULL,
+                    \`expiresAt\` DATETIME NOT NULL,
+                    PRIMARY KEY (\`sessionId\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    INDEX \`idx_session_user\` (\`userId\`),
+                    INDEX \`idx_session_expires\` (\`expiresAt\`)
+                )
+            `);
+            console.log('[ INFO ] Session table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create Session table:', error.message);
+        }
+
         // create user calendar table
         try {
             await connection.query(`

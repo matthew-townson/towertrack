@@ -17,13 +17,21 @@ export async function createSession(userId, username, permission) {
 }
 
 export async function getSession(sessionId) {
-    const [rows] = await db.execute(
-        `SELECT userId, username, permission, expiresAt
-         FROM Session
-         WHERE sessionId = ?
-         LIMIT 1`,
-        [sessionId]
-    );
+    let rows;
+    try {
+        [rows] = await db.execute(
+            `SELECT userId, username, permission, expiresAt
+             FROM Session
+             WHERE sessionId = ?
+             LIMIT 1`,
+            [sessionId]
+        );
+    } catch (error) {
+        if (error.code === 'ER_NO_SUCH_TABLE') {
+            return null;
+        }
+        throw error;
+    }
 
     const session = rows[0];
     if (!session) return null;
