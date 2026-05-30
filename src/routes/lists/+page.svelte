@@ -335,11 +335,11 @@
 						/>
 					</div>
 					<div class="field">
-						<label class="label" for="newListDescription">Description (optional)</label>
+						<label class="label" for="newListDescription">Notes (optional)</label>
 						<textarea 
 							id="newListDescription"
 							class="textarea" 
-							placeholder="Add a description for this list"
+							placeholder="Add notes for this list"
 							bind:value={newListDescription}
 							disabled={creatingList}
 							rows="2"

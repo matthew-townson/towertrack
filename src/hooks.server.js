@@ -25,7 +25,7 @@ export const handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get('session');
 
 	if (sessionId) {
-		const session = getSession(sessionId);
+		const session = await getSession(sessionId);
 		if (session) {
 			event.locals.user = {
 				id: session.userId,

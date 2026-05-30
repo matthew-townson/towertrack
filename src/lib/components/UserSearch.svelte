@@ -2,10 +2,16 @@
 	export let onUserSelect = null;
 	export let showAddButton = false;
 	export let maxHeight = '400px';
+	export let placeholder = 'Search by username...';
+	export let excludeUserIds = [];
 
 	let searchQuery = '';
 	let searchResults = [];
 	let searching = false;
+
+	$: filteredResults = excludeUserIds.length > 0 
+		? searchResults.filter(u => !excludeUserIds.includes(u.id))
+		: searchResults;
 
 	async function searchUsers(query) {
 		if (!query || query.trim().length === 0) {
@@ -30,6 +36,8 @@
 	function handleUserClick(user) {
 		if (onUserSelect) {
 			onUserSelect(user);
+			searchQuery = '';
+			searchResults = [];
 		}
 	}
 </script>
@@ -40,7 +48,7 @@
 			<input 
 				class="input" 
 				type="text" 
-				placeholder="Search by username..."
+				placeholder={placeholder}
 				bind:value={searchQuery}
 				on:input={(e) => searchUsers(e.target.value)}
 			/>
@@ -52,24 +60,25 @@
 		</div>
 	</div>
 
-		{#if searchResults.length > 0}
+		{#if filteredResults.length > 0}
 			<div class="user-results" style="max-height: {maxHeight}; overflow-y: auto;">
-				{#each searchResults as user (user.id)}
+				{#each filteredResults as user (user.id)}
 					<div class="user-result-row">
-						{#if user.profileImage}
-							<img 
-								src="/uploads/profiles/{user.profileImage}" 
-								alt="{user.username}"
-								class="user-result-avatar"
-							/>
-						{:else}
-							<div 
-								class="user-result-avatar-placeholder"
-								style="background: linear-gradient(135deg, #a1e9f5 0%, #6ac6c6 100%); color: #073642;"
-							>
-								{user.username.charAt(0).toUpperCase()}
-							</div>
-						{/if}
+						<div class="user-avatar-container">
+							{#if user.profileImage}
+								<img 
+									src="/uploads/profiles/{user.profileImage}" 
+									alt="{user.username}"
+									style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+								/>
+							{:else}
+								<div 
+									style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #a1e9f5 0%, #6ac6c6 100%); color: #073642; font-weight: bold;"
+								>
+									{user.username.charAt(0).toUpperCase()}
+								</div>
+							{/if}
+						</div>
 						<div class="user-result-info">
 							<a href="/u/{user.username.replace(/ /g, '-')}" class="has-text-link">
 								<strong>{user.username}</strong>
@@ -147,24 +156,12 @@
 		}
 	}
 
-	.user-result-avatar {
+	.user-avatar-container {
 		flex-shrink: 0;
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
-		object-fit: cover;
-	}
-
-	.user-result-avatar-placeholder {
-		flex-shrink: 0;
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 700;
-		font-size: 0.875rem;
+		overflow: hidden;
 	}
 
 	.user-result-info {

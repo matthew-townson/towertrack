@@ -82,5 +82,16 @@
             "Added user searching",
             "Lists [Alpha feature - work in progress]"
         ]
+    },
+    {
+        "version": "v0.0.10 (beta)",
+        "date": "30-05-2026",
+        "items": [
+            "Calendar update - added calendar view to organise ringing events",
+            "Changes to the top navigation bar",
+            "Notifications for invitations to events",
+            "General bug fixes",
+            "CSS fixes"
+        ]
     }
 ]

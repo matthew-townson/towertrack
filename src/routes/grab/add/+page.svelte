@@ -410,7 +410,6 @@
                             on:keydown={handleKeydown}
                             autocomplete="off"
                             aria-autocomplete="list"
-                            aria-expanded={searchResults.length > 0}
                         />
                         {#if loading}
                             <span class="icon is-small is-right search-loading-indicator">⏳</span>
@@ -419,7 +418,7 @@
                         {#if searchResults.length > 0}
                             <div class="search-results-dropdown">
                                 {#each searchResults as tower}
-                                    <a href="#" class="dropdown-item" on:click|preventDefault={() => selectTower(tower)}>
+                                    <button type="button" class="dropdown-item" on:click={() => selectTower(tower)}>
                                         <strong>{tower.Place}</strong>
                                         <div class="tower-meta">
                                             {tower.Dedicn ? `${tower.Dedicn}, ` : ''}{tower.County ? `${tower.County}` : ''}{tower.Country && tower.Country !== tower.County ? `, ${tower.Country}` : ''}
@@ -427,7 +426,7 @@
                                                 {tower.Bells} bells {tower.UR === '1' || tower.UR === 1 ? ' • Unringable' : ''}
                                             </div>
                                         </div>
-                                    </a>
+                                    </button>
                                 {/each}
                             </div>
                         {:else if searchQuery.length >= 2 && !loading}

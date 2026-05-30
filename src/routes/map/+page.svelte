@@ -284,9 +284,9 @@
                     <!-- Practice Night moved into Advanced Filters panel -->
                     
                     <div class="field mb-5">
-                        <label class="label">Special Filters</label>
+                        <label class="label" for="special-filters">Special Filters</label>
                         <div class="control">
-                            <div class="table-container">
+                            <div class="table-container" id="special-filters">
                                 <table class="table is-fullwidth is-narrow">
                                     <thead>
                                         <tr>
@@ -364,10 +364,10 @@
                         {#if advancedOpen}
                             <div id="advanced-panel" class="box mt-3">
                                 <div class="field">
-                                    <label class="label">County</label>
+                                    <label class="label" for="county-select">County</label>
                                     <div class="control">
                                         <div class="select is-fullwidth">
-                                            <select bind:value={selectedCounty}>
+                                            <select id="county-select" bind:value={selectedCounty}>
                                                 <option value="">(Any)</option>
                                                 {#each counties as c}
                                                     <option value={c}>{c}</option>
@@ -392,10 +392,10 @@
                                 </div>
 
                                 <div class="field">
-                                    <label class="label">Country</label>
+                                    <label class="label" for="country-select">Country</label>
                                     <div class="control">
                                         <div class="select is-fullwidth">
-                                            <select bind:value={selectedCountry}>
+                                            <select id="country-select" bind:value={selectedCountry}>
                                                 <option value="">(Any)</option>
                                                 {#each countries as c}
                                                     <option value={c}>{c}</option>
@@ -406,10 +406,10 @@
                                 </div>
 
                                 <div class="field">
-                                    <label class="label">Diocese</label>
+                                    <label class="label" for="diocese-select">Diocese</label>
                                     <div class="control">
                                         <div class="select is-fullwidth">
-                                            <select bind:value={selectedDiocese}>
+                                            <select id="diocese-select" bind:value={selectedDiocese}>
                                                 <option value="">(Any)</option>
                                                 {#each dioceses as d}
                                                     <option value={d}>{d}</option>
@@ -420,9 +420,9 @@
                                 </div>
 
                                 <div class="field">
-                                    <label class="label">Weight (cwt)</label>
+                                    <label class="label" for="min-weight-cwt">Weight (cwt)</label>
                                     <div class="control is-flex">
-                                        <input class="input" type="number" step="0.25" min="0" placeholder="Min cwt" bind:value={minWeightCwt} />
+                                        <input class="input" id="min-weight-cwt" type="number" step="0.25" min="0" placeholder="Min cwt" bind:value={minWeightCwt} />
                                         <div style="width:8px"></div>
                                         <input class="input" type="number" step="0.25" min="0" placeholder="Max cwt" bind:value={maxWeightCwt} />
                                     </div>

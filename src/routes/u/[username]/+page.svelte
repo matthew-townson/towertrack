@@ -29,6 +29,33 @@
 		activeSection = section;
 	}
 
+	function getMergedTowers() {
+		const towerMap = new Map();
+		const allTowers = [
+			...(towerData?.grabbed || []),
+			...(towerData?.quartered || []),
+			...(towerData?.pealed || [])
+		];
+
+		allTowers.forEach(tower => {
+			const key = String(tower.TowerID);
+			if (!towerMap.has(key)) {
+				towerMap.set(key, { 
+					...tower, 
+					grabbed: false, 
+					quartered: false, 
+					pealed: false 
+				});
+			}
+			const existing = towerMap.get(key);
+			if (towerData?.grabbed?.some(t => String(t.TowerID) === key)) existing.grabbed = true;
+			if (towerData?.quartered?.some(t => String(t.TowerID) === key)) existing.quartered = true;
+			if (towerData?.pealed?.some(t => String(t.TowerID) === key)) existing.pealed = true;
+		});
+
+		return Array.from(towerMap.values());
+	}
+
 	function openImageUploadModal() {
 		if (!isOwnProfile) return;
 		showImageModal = true;
@@ -494,11 +521,7 @@
 									<div id="tower-map" class="box mt-4">
 										<h4 class="subtitle is-6">Tower Map</h4>
 										<TowerMap 
-											towers={[
-												...towerData.grabbed.map(t => ({ ...t, grabbed: true, quartered: false, pealed: false })),
-												...towerData.quartered.map(t => ({ ...t, grabbed: false, quartered: true, pealed: false })),
-												...towerData.pealed.map(t => ({ ...t, grabbed: false, quartered: false, pealed: true }))
-											]}
+											towers={getMergedTowers()}
 											bellsFilter={3}
 											isMinimumBells={true}
 											showUnringable={true}

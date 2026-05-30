@@ -35,10 +35,15 @@
     export let mapHeight = '100%';
     
     // advanced filter options (exported so parent can bind)
+    // svelte-ignore export_let_unused
     export let counties = [];
+    // svelte-ignore export_let_unused
     export let countries = [];
+    // svelte-ignore export_let_unused
     export let dioceses = [];
+    // svelte-ignore export_let_unused
     export let minWtLbs = null;
+    // svelte-ignore export_let_unused
     export let maxWtLbs = null;
 
     // selected advanced filters (exported for parent binding)

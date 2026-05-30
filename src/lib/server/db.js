@@ -1,6 +1,5 @@
 import mysql from 'mysql2/promise';
 import { building } from '$app/environment';
-import { applyHotfix as hotfix001 } from './hotfix-add-profileImage.js';
 const DB_HOST = process.env.DB_HOST;
 const DB_PORT = process.env.DB_PORT;
 const DB_USER = process.env.DB_USER;
@@ -17,12 +16,6 @@ const connectionConfig = {
     connectionLimit: 10,
     queueLimit: 0
 };
-
-// apply hotfix
-async function applyHotfixes(connection) {
-    console.log('[ INFO ] Applying database hotfixes');
-    await hotfix001(connection);
-}
 
 // init db
 async function initialiseDatabase() {
@@ -294,6 +287,175 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create ListMember table:', error.message);
         }
 
+        // create user calendar table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`UserCalendar\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`name\` VARCHAR(100) NOT NULL,
+                    \`colour\` VARCHAR(7) DEFAULT '#3788d8',
+                    \`isPreset\` BOOLEAN DEFAULT FALSE,
+                    \`presetType\` VARCHAR(50) DEFAULT NULL,
+                    \`requireOrganise\` BOOLEAN DEFAULT FALSE,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    UNIQUE KEY \`unique_user_calendar\` (\`userId\`, \`name\`)
+                )
+            `);
+            console.log('[ INFO ] UserCalendar table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create UserCalendar table:', error.message);
+        }
+
+        // create calendar event table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`CalendarEvent\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`calendarId\` INTEGER UNSIGNED NOT NULL,
+                    \`title\` VARCHAR(255) NOT NULL,
+                    \`description\` TEXT,
+                    \`location\` VARCHAR(255),
+                    \`towerID\` INTEGER UNSIGNED DEFAULT NULL,
+                    \`startDate\` DATETIME NOT NULL,
+                    \`endDate\` DATETIME,
+                    \`allDay\` BOOLEAN DEFAULT FALSE,
+                    \`sourceEventId\` INTEGER UNSIGNED DEFAULT NULL,
+                    \`status\` ENUM('confirmed', 'tentative', 'cancelled') DEFAULT 'confirmed',
+                    \`recurrenceType\` ENUM('none', 'daily', 'weekly', 'monthly', 'monthly_nth', 'yearly') DEFAULT 'none',
+                    \`recurrenceInterval\` TINYINT UNSIGNED DEFAULT 1,
+                    \`recurrenceEndDate\` DATE DEFAULT NULL,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`updatedAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`calendarId\`) REFERENCES \`UserCalendar\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`sourceEventId\`) REFERENCES \`CalendarEvent\`(\`id\`) ON DELETE CASCADE
+                )
+            `);
+            console.log('[ INFO ] CalendarEvent table created successfully or already exists');
+
+            // Add method and composition columns to CalendarEvent if they don't exist
+            try {
+                const [columns] = await connection.query(`
+                    SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'CalendarEvent' AND COLUMN_NAME = 'method'
+                `, [DB_NAME]);
+
+                if (columns.length === 0) {
+                    await connection.query(`
+                        ALTER TABLE \`CalendarEvent\` 
+                        ADD COLUMN \`method\` VARCHAR(255) NULL AFTER \`towerID\`,
+                        ADD COLUMN \`composition\` VARCHAR(500) NULL AFTER \`method\`
+                    `);
+                    console.log('[ INFO ] Added method and composition columns to CalendarEvent');
+                }
+            } catch (migrationError) {
+                console.error('[ ERROR ] Failed to add columns to CalendarEvent:', migrationError.message);
+            }
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create CalendarEvent table:', error.message);
+        }
+
+        // create calendar secret table for iCal links
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`CalendarSecret\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`userId\` INTEGER UNSIGNED NOT NULL UNIQUE,
+                    \`secretKey\` VARCHAR(64) NOT NULL UNIQUE,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`lastAccessed\` TIMESTAMP DEFAULT NULL,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE
+                )
+            `);
+            console.log('[ INFO ] CalendarSecret table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create CalendarSecret table:', error.message);
+        }
+
+        // create event invitation table for organise feature
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`EventInvitation\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`eventId\` INTEGER UNSIGNED NOT NULL,
+                    \`invitedUserId\` INTEGER UNSIGNED NULL,
+                    \`guestName\` VARCHAR(100) NULL,
+                    \`invitedBy\` INTEGER UNSIGNED NOT NULL,
+                    \`status\` ENUM('pending', 'accepted', 'declined', 'maybe', 'guest') DEFAULT 'pending',
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`respondedAt\` TIMESTAMP DEFAULT NULL,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`eventId\`) REFERENCES \`CalendarEvent\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`invitedUserId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`invitedBy\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    UNIQUE KEY \`unique_event_invitation\` (\`eventId\`, \`invitedUserId\`)
+                )
+            `);
+            console.log('[ INFO ] EventInvitation table created successfully or already exists');
+            
+            // Add guestName column if it doesn't exist (for existing tables)
+            try {
+                const [columns] = await connection.query(`
+                    SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'EventInvitation' AND COLUMN_NAME = 'guestName'
+                `, [DB_NAME]);
+                
+                if (columns.length === 0) {
+                    await connection.query(`
+                        ALTER TABLE \`EventInvitation\` 
+                        ADD COLUMN \`guestName\` VARCHAR(100) NULL AFTER \`invitedUserId\`
+                    `);
+                    console.log('[ INFO ] Added guestName column to EventInvitation');
+                }
+                
+                // Also make sure invitedUserId is nullable
+                await connection.query(`
+                    ALTER TABLE \`EventInvitation\` 
+                    MODIFY COLUMN \`invitedUserId\` INTEGER UNSIGNED NULL
+                `);
+                
+                // Add 'guest' to status ENUM if not present
+                await connection.query(`
+                    ALTER TABLE \`EventInvitation\` 
+                    MODIFY COLUMN \`status\` ENUM('pending', 'accepted', 'declined', 'maybe', 'guest') DEFAULT 'pending'
+                `);
+            } catch (migrationError) {
+                // Migration might fail if already applied, ignore
+                console.log('[ INFO ] EventInvitation migration check completed');
+            }
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create EventInvitation table:', error.message);
+        }
+
+        // create notifications table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`Notification\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`type\` VARCHAR(50) NOT NULL,
+                    \`title\` VARCHAR(255) NOT NULL,
+                    \`message\` TEXT,
+                    \`data\` JSON,
+                    \`isRead\` BOOLEAN NOT NULL DEFAULT FALSE,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    INDEX \`idx_user_read\` (\`userId\`, \`isRead\`),
+                    INDEX \`idx_user_created\` (\`userId\`, \`createdAt\`)
+                )
+            `);
+            console.log('[ INFO ] Notification table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create Notification table:', error.message);
+        }
+
         // create log table
         try {
             await connection.query(`
@@ -326,8 +488,124 @@ async function initialiseDatabase() {
             console.error('[ ERROR ] Failed to create CSVImportLog table:', error.message);
         }
 
-        // Apply database hotfixes
-        await applyHotfixes(connection);
+        // create shared calendar table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`SharedCalendar\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`ownerId\` INTEGER UNSIGNED NOT NULL,
+                    \`name\` VARCHAR(100) NOT NULL,
+                    \`colour\` VARCHAR(7) DEFAULT '#3788d8',
+                    \`secretKey\` VARCHAR(64) NOT NULL UNIQUE,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`updatedAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`ownerId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    INDEX \`idx_owner\` (\`ownerId\`)
+                )
+            `);
+            console.log('[ INFO ] SharedCalendar table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create SharedCalendar table:', error.message);
+        }
+
+        // create shared calendar member table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`SharedCalendarMember\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`sharedCalendarId\` INTEGER UNSIGNED NOT NULL,
+                    \`userId\` INTEGER UNSIGNED NOT NULL,
+                    \`role\` ENUM('editor', 'viewer') DEFAULT 'editor',
+                    \`addedAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`sharedCalendarId\`) REFERENCES \`SharedCalendar\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`userId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    UNIQUE KEY \`unique_member\` (\`sharedCalendarId\`, \`userId\`),
+                    INDEX \`idx_user\` (\`userId\`)
+                )
+            `);
+            console.log('[ INFO ] SharedCalendarMember table created successfully or already exists');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create SharedCalendarMember table:', error.message);
+        }
+
+        // create shared calendar event table
+        try {
+            await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`SharedCalendarEvent\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`sharedCalendarId\` INTEGER UNSIGNED NOT NULL,
+                    \`createdBy\` INTEGER UNSIGNED NOT NULL,
+                    \`title\` VARCHAR(255) NOT NULL,
+                    \`description\` TEXT,
+                    \`location\` VARCHAR(255),
+                    \`towerID\` INTEGER UNSIGNED DEFAULT NULL,
+                    \`startDate\` DATETIME NOT NULL,
+                    \`endDate\` DATETIME,
+                    \`allDay\` BOOLEAN DEFAULT FALSE,
+                    \`status\` ENUM('confirmed', 'tentative', 'cancelled') DEFAULT 'confirmed',
+                    \`recurrenceType\` ENUM('none', 'daily', 'weekly', 'monthly', 'monthly_nth', 'yearly') DEFAULT 'none',
+                    \`recurrenceInterval\` TINYINT UNSIGNED DEFAULT 1,
+                    \`recurrenceEndDate\` DATE DEFAULT NULL,
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`updatedAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`sharedCalendarId\`) REFERENCES \`SharedCalendar\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`createdBy\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    INDEX \`idx_calendar\` (\`sharedCalendarId\`),
+                    INDEX \`idx_start_date\` (\`startDate\`)
+                )
+            `);
+            console.log('[ INFO ] SharedCalendarEvent table created successfully or already exists');
+            
+            // Add method, composition, and coordinates columns to SharedCalendarEvent if they don't exist
+            try {
+                const [methodCol] = await connection.query(`
+                    SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
+                    WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'SharedCalendarEvent' AND COLUMN_NAME = 'method'
+                `, [DB_NAME]);
+                
+                if (methodCol.length === 0) {
+                    await connection.query(`
+                        ALTER TABLE \`SharedCalendarEvent\` 
+                        ADD COLUMN \`method\` VARCHAR(255) NULL,
+                        ADD COLUMN \`composition\` VARCHAR(255) NULL,
+                        ADD COLUMN \`coordinates\` VARCHAR(100) NULL
+                    `);
+                    console.log('[ INFO ] Added method, composition, and coordinates columns to SharedCalendarEvent');
+                }
+            } catch (error) {
+                console.error('[ ERROR ] Failed to add columns to SharedCalendarEvent:', error.message);
+            }
+            
+            // Create SharedEventInvitation table
+            try {
+                await connection.query(`
+                CREATE TABLE IF NOT EXISTS \`SharedEventInvitation\` (
+                    \`id\` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+                    \`sharedEventId\` INTEGER UNSIGNED NOT NULL,
+                    \`invitedUserId\` INTEGER UNSIGNED,
+                    \`guestName\` VARCHAR(100),
+                    \`invitedBy\` INTEGER UNSIGNED NOT NULL,
+                    \`instanceDate\` DATE NOT NULL,
+                    \`status\` ENUM('pending', 'accepted', 'declined', 'maybe') DEFAULT 'pending',
+                    \`createdAt\` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    \`respondedAt\` TIMESTAMP DEFAULT NULL,
+                    PRIMARY KEY (\`id\`),
+                    FOREIGN KEY (\`sharedEventId\`) REFERENCES \`SharedCalendarEvent\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`invitedUserId\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    FOREIGN KEY (\`invitedBy\`) REFERENCES \`User\`(\`id\`) ON DELETE CASCADE,
+                    UNIQUE KEY \`unique_shared_invitation\` (\`sharedEventId\`, \`invitedUserId\`, \`instanceDate\`)
+                )
+            `);
+                console.log('[ INFO ] SharedEventInvitation table created successfully or already exists');
+            } catch (error) {
+                console.error('[ ERROR ] Failed to create SharedEventInvitation table:', error.message);
+            }
+        } catch (error) {
+            console.error('[ ERROR ] Failed to create SharedCalendarEvent table:', error.message);
+        }
 
         // optimise all tables
         try {
@@ -338,7 +616,7 @@ async function initialiseDatabase() {
             await connection.query(`ANALYZE TABLE \`UserSettings\``);
             console.log('         ├ Optimising Tower table');
             await connection.query(`ANALYZE TABLE \`Tower\``);
-            console.log('         ├ Optimising Bell table');
+            console.log('         ├ Optimising Bell table');    
             await connection.query(`ANALYZE TABLE \`Bell\``);
             console.log('         ├ Optimising Performance table');
             await connection.query(`ANALYZE TABLE \`Performance\``);
@@ -352,11 +630,113 @@ async function initialiseDatabase() {
             await connection.query(`ANALYZE TABLE \`ListMember\``);
             console.log('         ├ Optimising Log table');
             await connection.query(`ANALYZE TABLE \`Log\``);
-            console.log('         └ Optimising CSVImportLog table');
+            console.log('         ├ Optimising CSVImportLog table');
             await connection.query(`ANALYZE TABLE \`CSVImportLog\``);
+            console.log('         ├ Optimising UserCalendar table');
+            await connection.query(`ANALYZE TABLE \`UserCalendar\``);
+            console.log('         ├ Optimising CalendarEvent table');
+            await connection.query(`ANALYZE TABLE \`CalendarEvent\``);
+            console.log('         ├ Optimising CalendarSecret table');
+            await connection.query(`ANALYZE TABLE \`CalendarSecret\``);
+            console.log('         ├ Optimising EventInvitation table');
+            await connection.query(`ANALYZE TABLE \`EventInvitation\``);
+            console.log('         ├ Optimising SharedCalendar table');
+            await connection.query(`ANALYZE TABLE \`SharedCalendar\``);
+            console.log('         ├ Optimising SharedCalendarMember table');
+            await connection.query(`ANALYZE TABLE \`SharedCalendarMember\``);
+            console.log('         └ Optimising SharedCalendarEvent table');
+            await connection.query(`ANALYZE TABLE \`SharedCalendarEvent\``);
             console.log('[ SUCCESS ] Tables optimized successfully');
         } catch (error) {
             console.error('[ ERROR ] Failed to optimize tables:', error.message);
+        }
+
+        // Schema migrations for existing databases
+        try {
+            console.log('[ INFO ] Running schema migrations...');
+            
+            // Add requireOrganise column to UserCalendar if it doesn't exist
+            const [columns] = await connection.query(`
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = ? 
+                AND TABLE_NAME = 'UserCalendar' 
+                AND COLUMN_NAME = 'requireOrganise'
+            `, [DB_NAME]);
+            
+            if (columns.length === 0) {
+                await connection.query(`
+                    ALTER TABLE \`UserCalendar\` 
+                    ADD COLUMN \`requireOrganise\` BOOLEAN DEFAULT FALSE AFTER \`presetType\`
+                `);
+                console.log('[ INFO ] Added requireOrganise column to UserCalendar');
+                
+                // Update existing quarter_peal and peal presets to require organise
+                await connection.query(`
+                    UPDATE \`UserCalendar\` 
+                    SET \`requireOrganise\` = TRUE 
+                    WHERE \`presetType\` IN ('quarter_peal', 'peal')
+                `);
+                console.log('[ INFO ] Updated quarter_peal and peal presets to require organise');
+            }
+            
+            // Add sourceEventId column to CalendarEvent if it doesn't exist
+            const [sourceEventIdCol] = await connection.query(`
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = ? 
+                AND TABLE_NAME = 'CalendarEvent' 
+                AND COLUMN_NAME = 'sourceEventId'
+            `, [DB_NAME]);
+            
+            if (sourceEventIdCol.length === 0) {
+                await connection.query(`
+                    ALTER TABLE \`CalendarEvent\` 
+                    ADD COLUMN \`sourceEventId\` INTEGER UNSIGNED DEFAULT NULL AFTER \`allDay\`,
+                    ADD FOREIGN KEY (\`sourceEventId\`) REFERENCES \`CalendarEvent\`(\`id\`) ON DELETE CASCADE
+                `);
+                console.log('[ INFO ] Added sourceEventId column to CalendarEvent');
+            }
+            
+            // Add status column to CalendarEvent if it doesn't exist
+            const [statusCol] = await connection.query(`
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = ? 
+                AND TABLE_NAME = 'CalendarEvent' 
+                AND COLUMN_NAME = 'status'
+            `, [DB_NAME]);
+            
+            if (statusCol.length === 0) {
+                await connection.query(`
+                    ALTER TABLE \`CalendarEvent\` 
+                    ADD COLUMN \`status\` ENUM('confirmed', 'tentative', 'cancelled') DEFAULT 'confirmed' AFTER \`sourceEventId\`
+                `);
+                console.log('[ INFO ] Added status column to CalendarEvent');
+            }
+            
+            // Add recurrence columns to CalendarEvent if they don't exist
+            const [recurrenceTypeCol] = await connection.query(`
+                SELECT COLUMN_NAME 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = ? 
+                AND TABLE_NAME = 'CalendarEvent' 
+                AND COLUMN_NAME = 'recurrenceType'
+            `, [DB_NAME]);
+            
+            if (recurrenceTypeCol.length === 0) {
+                await connection.query(`
+                    ALTER TABLE \`CalendarEvent\` 
+                    ADD COLUMN \`recurrenceType\` ENUM('none', 'daily', 'weekly', 'monthly', 'monthly_nth', 'yearly') DEFAULT 'none' AFTER \`status\`,
+                    ADD COLUMN \`recurrenceInterval\` TINYINT UNSIGNED DEFAULT 1 AFTER \`recurrenceType\`,
+                    ADD COLUMN \`recurrenceEndDate\` DATE DEFAULT NULL AFTER \`recurrenceInterval\`
+                `);
+                console.log('[ INFO ] Added recurrence columns to CalendarEvent');
+            }
+            
+            console.log('[ SUCCESS ] Schema migrations completed');
+        } catch (error) {
+            console.error('[ ERROR ] Failed to run schema migrations:', error.message);
         }
 
         console.log('[ SUCCESS ] Database and tables initialisation completed');

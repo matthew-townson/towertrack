@@ -9,7 +9,24 @@ export async function GET({ url, locals }) {
     }
 
     try {
-        const searchTerm = `%${query}%`;
+        // Split query into individual words for more flexible matching
+        const words = query.trim().split(/\s+/).filter(w => w.length > 0);
+        
+        if (words.length === 0) {
+            return json([]);
+        }
+
+        // Build WHERE clause: ALL words must match in username or otherNames
+        const whereClauses = words.map(() => '(username LIKE ? OR otherNames LIKE ?)');
+        const whereSQL = whereClauses.join(' AND ');
+        
+        // Build parameters: each word repeated twice (for username and otherNames)
+        const params = [];
+        words.forEach(word => {
+            params.push(`%${word}%`);
+            params.push(`%${word}%`);
+        });
+
         const [users] = await db.execute(`
             SELECT 
                 id,
@@ -17,11 +34,11 @@ export async function GET({ url, locals }) {
                 profileImage,
                 otherNames
             FROM User
-            WHERE (username LIKE ? OR otherNames LIKE ?)
+            WHERE ${whereSQL}
             AND permission >= 0
             ORDER BY username ASC
             LIMIT 20
-        `, [searchTerm, searchTerm]);
+        `, params);
 
         return json(users || []);
     } catch (err) {
