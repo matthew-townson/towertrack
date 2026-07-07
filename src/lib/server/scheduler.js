@@ -10,6 +10,7 @@ let bbImportInterval = null;
 let isSchedulerEnabled = true; // Default enabled
 let isBBSchedulerEnabled = true; // Default enabled for BellBoard
 let isBBImportRunning = false;
+const BB_IMPORT_STALE_MS = 30 * 60 * 1000;
 
 // Delay between importing each user's BB data (to avoid hammering BB servers)
 const BB_IMPORT_DELAY_MS = 5000; // 5 seconds between users
@@ -23,10 +24,42 @@ let bbImportProgress = {
     totalUsers: 0,
     completedUsers: 0,
     successCount: 0,
-    failCount: 0
+    failCount: 0,
+    lastUpdated: Date.now()
 };
 
+function setBBImportProgress(update) {
+    bbImportProgress = {
+        ...bbImportProgress,
+        ...update,
+        lastUpdated: Date.now()
+    };
+}
+
+function resetStaleBBImportIfNeeded() {
+    if (bbImportProgress.status !== 'running') {
+        return false;
+    }
+
+    const lastUpdated = bbImportProgress.lastUpdated || 0;
+    if (Date.now() - lastUpdated <= BB_IMPORT_STALE_MS) {
+        return false;
+    }
+
+    log.warn('BellBoard import appeared stalled; clearing stale running state');
+    bbImportProgress = {
+        ...bbImportProgress,
+        status: 'error',
+        message: 'BellBoard import stalled and was marked failed',
+        currentUserIndex: -1,
+        lastUpdated: Date.now()
+    };
+    isBBImportRunning = false;
+    return true;
+}
+
 export function getBBImportProgress() {
+    resetStaleBBImportIfNeeded();
     return { ...bbImportProgress };
 }
 
@@ -156,7 +189,7 @@ async function importBBDataForAllUsers() {
         
         if (users.length === 0) {
             log.info('No users to import BellBoard data for');
-            bbImportProgress = {
+            setBBImportProgress({
                 status: 'complete',
                 message: 'No users to import',
                 users: [],
@@ -165,14 +198,14 @@ async function importBBDataForAllUsers() {
                 completedUsers: 0,
                 successCount: 0,
                 failCount: 0
-            };
+            });
             return { started: true, totalUsers: 0, successCount: 0, failCount: 0 };
         }
         
         log.info(`Starting BellBoard import for ${users.length} users`);
         
         // Initialize progress
-        bbImportProgress = {
+        setBBImportProgress({
             status: 'running',
             message: 'Starting BellBoard import...',
             users: users.map(u => ({ id: u.id, username: u.username, status: 'pending' })),
@@ -181,43 +214,52 @@ async function importBBDataForAllUsers() {
             completedUsers: 0,
             successCount: 0,
             failCount: 0
-        };
+        });
         
         let successCount = 0;
         let failCount = 0;
         
         for (let i = 0; i < users.length; i++) {
             const user = users[i];
-            bbImportProgress.currentUserIndex = i;
-            bbImportProgress.users[i].status = 'importing';
-            bbImportProgress.message = `Importing data for ${user.username}...`;
+            setBBImportProgress({
+                currentUserIndex: i,
+                users: bbImportProgress.users.map((entry, index) => index === i ? { ...entry, status: 'importing' } : entry),
+                message: `Importing data for ${user.username}...`
+            });
             
             try {
                 log.info(`Importing BellBoard data for user: ${user.username} (ID: ${user.id})`);
                 await importBBData(user.id);
                 successCount++;
-                bbImportProgress.users[i].status = 'success';
+                setBBImportProgress({
+                    users: bbImportProgress.users.map((entry, index) => index === i ? { ...entry, status: 'success' } : entry)
+                });
             } catch (error) {
                 log.error(`BellBoard import failed for ${user.username}: ${error.message}`);
                 failCount++;
-                bbImportProgress.users[i].status = 'error';
-                bbImportProgress.users[i].error = error.message;
+                setBBImportProgress({
+                    users: bbImportProgress.users.map((entry, index) => index === i ? { ...entry, status: 'error', error: error.message } : entry)
+                });
             }
             
-            bbImportProgress.completedUsers = i + 1;
-            bbImportProgress.successCount = successCount;
-            bbImportProgress.failCount = failCount;
+            setBBImportProgress({
+                completedUsers: i + 1,
+                successCount,
+                failCount
+            });
             
             // Delay between users to be nice to BellBoard servers
             if (i < users.length - 1) {
-                bbImportProgress.message = `Waiting before next user...`;
+                setBBImportProgress({ message: 'Waiting before next user...' });
                 await new Promise(resolve => setTimeout(resolve, BB_IMPORT_DELAY_MS));
             }
         }
         
-        bbImportProgress.status = 'complete';
-        bbImportProgress.message = `Import complete: ${successCount} succeeded, ${failCount} failed`;
-        bbImportProgress.currentUserIndex = -1;
+        setBBImportProgress({
+            status: 'complete',
+            message: `Import complete: ${successCount} succeeded, ${failCount} failed`,
+            currentUserIndex: -1
+        });
         
         log.success(`BellBoard import complete: ${successCount} succeeded, ${failCount} failed`);
 
@@ -243,8 +285,7 @@ async function importBBDataForAllUsers() {
         return { started: true, totalUsers: users.length, successCount, failCount };
     } catch (error) {
         log.error(`BellBoard import for all users failed: ${error.message}`);
-        bbImportProgress.status = 'error';
-        bbImportProgress.message = error.message;
+        setBBImportProgress({ status: 'error', message: error.message, currentUserIndex: -1 });
 
         try {
             await notifyAdmins(
@@ -268,6 +309,7 @@ async function importBBDataForAllUsers() {
 }
 
 export function startManualBBImport() {
+    resetStaleBBImportIfNeeded();
     if (isBBImportRunning || bbImportProgress.status === 'running') {
         return {
             started: false,

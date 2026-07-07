@@ -12,6 +12,7 @@ const connectionConfig = {
     port: parseInt(DB_PORT),
     user: DB_USER,
     password: DB_PASSWORD,
+    dateStrings: true,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0

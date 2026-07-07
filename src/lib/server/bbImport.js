@@ -4,6 +4,26 @@ import fetch from 'node-fetch';
 import xml2js from 'xml2js';
 
 export const importProgress = new Map();
+const REQUEST_TIMEOUT_MS = 60000;
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        return await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+    } catch (err) {
+        if (err?.name === 'AbortError') {
+            throw new Error(`Request timed out after ${Math.round(timeoutMs / 1000)}s`);
+        }
+        throw err;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
 
 function initProgress(userId) {
     importProgress.set(userId, {
@@ -40,7 +60,7 @@ async function getPerfHTTPStatus(performanceID) {
     if (!performanceID) return null;
     const url = `https://bb.ringingworld.co.uk/view.php?id=${performanceID}`;
     try {
-        const res = await fetch(url, { method: 'HEAD', redirect: 'manual' });
+        const res = await fetchWithTimeout(url, { method: 'HEAD', redirect: 'manual' });
         if (res.status === 302 && res.headers.get('location')) {
             const location = res.headers.get('location');
             const match = location.match(/id=(\d+)/);
@@ -465,7 +485,7 @@ export async function importBBData(userId) {
 
         let res;
         try {
-            res = await fetch(url);
+            res = await fetchWithTimeout(url);
         } catch (err) {
             hadNetworkError = true;
             log.error(`Failed to fetch BellBoard data for "${name}" (URL: ${url}): ${err.message}`);

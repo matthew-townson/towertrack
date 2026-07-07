@@ -141,7 +141,8 @@
 			case 'monthly': desc += interval === 1 ? 'month' : 'months'; break;
 			case 'monthly_nth': {
 				if (startDate) {
-					const date = new Date(startDate);
+					const date = parseEventDateTimeLocal(startDate);
+					if (!date) break;
 					const weekday = date.getDay();
 					const nth = Math.ceil(date.getDate() / 7);
 					const ordinal = nth <= 4 ? ordinals[nth] : 'last';
@@ -155,7 +156,8 @@
 		}
 		
 		if (endDate) {
-			const end = new Date(endDate);
+			const end = parseEventDateTimeLocal(endDate);
+			if (!end) return desc;
 			desc += ` until ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 		}
 		
@@ -268,7 +270,8 @@
 	}
 
 	function formatEventDate(dateStr) {
-		const date = new Date(dateStr);
+		const date = parseEventDateTimeLocal(dateStr);
+		if (!date) return '';
 		return date.toLocaleDateString('en-GB', { 
 			weekday: 'short', 
 			day: 'numeric', 
@@ -277,7 +280,8 @@
 	}
 	
 	function formatEventTime(dateStr) {
-		const date = new Date(dateStr);
+		const date = parseEventDateTimeLocal(dateStr);
+		if (!date) return '';
 		return date.toLocaleTimeString('en-GB', { 
 			hour: '2-digit', 
 			minute: '2-digit'
@@ -287,13 +291,8 @@
 	function getInputDateString(value) {
 		if (!value) return '';
 
-		if (typeof value === 'string') {
-			const dateMatch = value.match(/^(\d{4}-\d{2}-\d{2})/);
-			if (dateMatch) return dateMatch[1];
-		}
-
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return '';
+		const date = parseEventDateTimeLocal(value);
+		if (!date || Number.isNaN(date.getTime())) return '';
 
 		const y = date.getFullYear();
 		const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -304,13 +303,8 @@
 	function getInputTimeString(value) {
 		if (!value) return '';
 
-		if (typeof value === 'string') {
-			const timeMatch = value.match(/[T\s](\d{2}:\d{2})/);
-			if (timeMatch) return timeMatch[1];
-		}
-
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return '';
+		const date = parseEventDateTimeLocal(value);
+		if (!date || Number.isNaN(date.getTime())) return '';
 
 		const h = String(date.getHours()).padStart(2, '0');
 		const m = String(date.getMinutes()).padStart(2, '0');
@@ -765,6 +759,7 @@
 
 	// Event modal functions
 	function openNewEventModal(date = null) {
+		showSharedEventModal = false;
 		editingEvent = null;
 		eventModalTab = 'details'; // Reset tab to details for new events
 		const now = date || new Date();
@@ -798,6 +793,7 @@
 	}
 
 	function openNewEventModalWithTime(date, startTime, endTime) {
+		showSharedEventModal = false;
 		editingEvent = null;
 		eventModalTab = 'details'; // Reset tab to details for new events
 		const defaultCalendar = calendars[0];
@@ -1215,6 +1211,7 @@
 	}
 
 	async function openEditEventModal(event, editScope = null) {
+		showSharedEventModal = false;
 		// If this is a recurring event and no scope specified, show the recurrence edit modal
 		if (event.recurrenceType && event.recurrenceType !== 'none' && !editScope) {
 			pendingRecurrenceEdit = event;
@@ -1873,6 +1870,7 @@
 	let showSharedEventModal = false;
 
 	function openNewSharedEventModal(sharedCalendarId, date = null) {
+		showEventModal = false;
 		editingSharedEvent = null;
 		sharedEventModalTab = 'details'; // Reset tab to details for new events
 		const now = date || new Date();
@@ -1902,6 +1900,7 @@
 	}
 
 	async function openEditSharedEventModal(event, editScope = null) {
+		showEventModal = false;
 		// If this is a recurring event and no scope specified, show the recurrence edit modal
 		if (event.recurrenceType && event.recurrenceType !== 'none' && !editScope) {
 			pendingSharedRecurrenceEdit = event;
