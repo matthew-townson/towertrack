@@ -69,7 +69,7 @@ export async function getUserStats(userId) {
                 SELECT COUNT(*) as count FROM (
                     SELECT DISTINCT PerformanceID
                     FROM Performance
-                    WHERE (${nameConditions}) AND CAST(Changes AS SIGNED) >= 1200 AND CAST(Changes AS SIGNED) < 2500
+                    WHERE (${nameConditions}) AND CAST(Changes AS SIGNED) >= 1250 AND CAST(Changes AS SIGNED) < 5000
                 ) AS matched
             `, allNames);
             quarterCount = quarterResult[0].count;
@@ -126,7 +126,7 @@ export async function getUserStats(userId) {
                         SELECT DISTINCT PerformanceID FROM Performance WHERE (${nameConditions})
                     ) AS matched
                 )
-                    AND CAST(p.Changes AS SIGNED) >= 1200 AND CAST(p.Changes AS SIGNED) < 2500
+                    AND CAST(p.Changes AS SIGNED) >= 1250 AND CAST(p.Changes AS SIGNED) < 5000
                     AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY RingerName
                 ORDER BY count DESC
@@ -156,7 +156,7 @@ export async function getUserStats(userId) {
                         SELECT DISTINCT PerformanceID FROM Performance WHERE (${nameConditions})
                     ) AS matched
                 )
-                    AND CAST(p.Changes AS SIGNED) >= 1200 AND CAST(p.Changes AS SIGNED) < 2500
+                    AND CAST(p.Changes AS SIGNED) >= 1250 AND CAST(p.Changes AS SIGNED) < 2500
                     AND JSON_EXTRACT(ringer.value, '$.conductor') = 1
                     AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY ConductorName

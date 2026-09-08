@@ -98,14 +98,14 @@ export async function load({ locals }) {
 			return `${cwt}-${qtr}-${lb}`;
 		};
 		
-		// Categorize and analyze performances
+		// Categorize and analyse performances
 		const quarterPeals = [];
 		const peals = [];
 		const other = [];
 		
 		userPerformances.forEach(perf => {
 			const changes = Number(perf.Changes || perf.changes || 0);
-			if (changes >= 1200 && changes < 5000) {
+			if (changes >= 1250 && changes < 5000) {
 				quarterPeals.push(perf);
 			} else if (changes >= 5000) {
 				peals.push(perf);

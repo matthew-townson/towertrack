@@ -74,7 +74,7 @@ export async function getTowersWithUserData(userId = null) {
                     if (matched) {
                         const key = String(r.towerID);
                         const changes = Number(r.changes || 0);
-                        if (changes >= 1200 && changes < 5000) quarteredSet.add(key);
+                        if (changes >= 1250 && changes < 5000) quarteredSet.add(key);
                         if (changes >= 5000) pealedSet.add(key);
                     }
                 } catch (err) {
@@ -176,7 +176,7 @@ export async function getUserTowerData(userId) {
                             Note: r.Note
                         };
                         
-                        if (changes >= 1200 && changes < 5000) {
+                        if (changes >= 1250 && changes < 5000) {
                             // Check if already added
                             if (!quarteredTowers.some(t => t.TowerID === r.towerID)) {
                                 quarteredTowers.push(towerData);
