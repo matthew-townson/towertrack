@@ -4,8 +4,39 @@
     padding: 0 1rem;
 }
 
+.landing-page {
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.landing-page__container {
+    display: grid;
+    max-width: 60rem;
+    margin-inline: auto;
+    gap: 1.5rem;
+}
+
+.landing-page__box {
+    padding: 1.5rem;
+    border: 1px solid var(--tt-border);
+    border-radius: 0.5rem;
+    background: var(--tt-surface-raised);
+}
+
+.landing-page__box h2 {
+    margin-top: 0;
+}
+
+.landing-page__image {
+    display: block;
+    width: min(100%, 28rem);
+    height: auto;
+    margin: 1rem auto 0;
+    border-radius: 0.5rem;
+}
+
 .dashboard-section {
-    border-radius: 8px;
+    border-radius: 0.5rem;
     padding: 1.5rem;
     margin-bottom: 2rem;
 }

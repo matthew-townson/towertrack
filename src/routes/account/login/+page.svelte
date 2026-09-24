@@ -8,11 +8,12 @@
 <svelte:head>
     <title>Login | towertracker</title>
     <meta name="description" content="Login to towertracker"/>  
+    <link rel="stylesheet" href="/assets/css/auth.css" />
 </svelte:head>
 
 <Header user={data?.user} />
 
-<main>
+<main class="auth-page">
     <h1>Login</h1>
     <form class="login-box" method="post">
         <label for="username">Username</label>

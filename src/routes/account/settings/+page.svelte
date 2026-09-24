@@ -153,11 +153,13 @@
 <svelte:head>
     <title>Settings | towertracker</title>
     <meta name="description" content="Change account settings"/>
+    <link rel="stylesheet" href="/assets/css/settings.css" />
 </svelte:head>
 
 <Header user={data.user} />
 
-<main class="settings-container">
+<main class="settings-page">
+    <div class="settings-container">
     <div class="settings-sidebar box is-dark is-radiusless is-shadowless">
         <h2 class="has-text-light">Settings</h2>
         <nav class="settings-nav">
@@ -447,6 +449,7 @@
         {/if}
 
 
+    </div>
     </div>
 </main>
 

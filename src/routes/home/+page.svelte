@@ -6,6 +6,7 @@
 
 <svelte:head>
 	<title>Home | towertracker</title>
+	<link rel="stylesheet" href="/assets/css/home.css">
 </svelte:head>
 
 <Header user={data.user} />

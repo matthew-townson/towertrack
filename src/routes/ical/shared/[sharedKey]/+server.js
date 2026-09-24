@@ -1,4 +1,5 @@
 import db from '$lib/server/db.js';
+import { ICAL_TIMEZONE, buildLocationProperties, formatICalDateOnly, formatICalDateTime, formatICalTimestamp, getICalAvailability, parseCalendarDate } from '$lib/server/ical.js';
 
 export async function GET({ params }) {
     const { sharedKey } = params;
@@ -37,7 +38,9 @@ export async function GET({ params }) {
                 e.recurrenceEndDate,
                 u.username as createdByUsername,
                 t.Place as towerPlace,
-                t.Dedicn as towerDedication
+                t.Dedicn as towerDedication,
+                t.Lat as towerLat,
+                t.Long as towerLong
             FROM SharedCalendarEvent e
             JOIN User u ON e.createdBy = u.id
             LEFT JOIN Tower t ON e.towerID = t.TowerID
@@ -96,7 +99,7 @@ export async function GET({ params }) {
 
 function generateICal(calendar, events, invitationsByEventId = {}) {
     const now = new Date();
-    const timestamp = formatICalDate(now);
+    const timestamp = formatICalTimestamp(now);
 
     let ical = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -104,41 +107,32 @@ PRODID:-//TowerTrack//SharedCalendar//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:${escapeICalText(calendar.name)} (Shared)
-X-WR-TIMEZONE:UTC
+X-WR-TIMEZONE:${ICAL_TIMEZONE}
 X-PUBLISHED-TTL:PT5M
 REFRESH-INTERVAL;VALUE=DURATION:PT5M
 `;
 
     for (const event of events) {
         const uid = `shared-event-${event.id}@towertrack`;
-        const startDate = new Date(event.startDate);
+        const startDate = parseCalendarDate(event.startDate);
         
         // For recurring events, endDate should be the duration of a single event
         // For non-recurring events, use the specified endDate or default to 1 hour
         let endDate;
         if (event.recurrenceType && event.recurrenceType !== 'none' && event.endDate) {
             // For recurring events, calculate duration based on first instance
-            const duration = new Date(event.endDate) - startDate;
+            const duration = parseCalendarDate(event.endDate) - startDate;
             endDate = new Date(startDate.getTime() + duration);
         } else if (event.endDate) {
-            endDate = new Date(event.endDate);
+            endDate = parseCalendarDate(event.endDate);
         } else {
             endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour
-        }
-
-        let location = event.location || '';
-        if (event.towerPlace && event.towerDedication) {
-            location = `${event.towerDedication}, ${event.towerPlace}`;
-        }
-
-        // Add coordinates to location if available (for GPS/navigation apps)
-        if (event.coordinates) {
-            location += ` (geo:${event.coordinates})`;
         }
 
         ical += `BEGIN:VEVENT
 UID:${uid}
 DTSTAMP:${timestamp}
+${getICalAvailability(event)}
 `;
 
         if (event.allDay) {
@@ -146,8 +140,8 @@ DTSTAMP:${timestamp}
 DTEND;VALUE=DATE:${formatICalDateOnly(endDate)}
 `;
         } else {
-            ical += `DTSTART:${formatICalDate(startDate)}
-DTEND:${formatICalDate(endDate)}
+            ical += `DTSTART;TZID=${ICAL_TIMEZONE}:${formatICalDateTime(startDate)}
+DTEND;TZID=${ICAL_TIMEZONE}:${formatICalDateTime(endDate)}
 `;
         }
 
@@ -160,10 +154,8 @@ DTEND:${formatICalDate(endDate)}
 `;
         }
 
-        if (location) {
-            ical += `LOCATION:${escapeICalText(location)}
-`;
-        }
+        const locationProperties = buildLocationProperties(event, escapeICalText);
+        if (locationProperties.length) ical += `${locationProperties.join('\n')}\n`;
 
         // Add attendees (invited ringers)
         const invitations = invitationsByEventId[event.id] || [];
@@ -217,20 +209,6 @@ function buildAttendeeProperty(invitation) {
     return null;
 }
 
-function formatICalDate(date) {
-    // Ensure we format as UTC datetime with Z suffix
-    const iso = date.toISOString();
-    return iso.replace(/[-:]/g, '').replace(/\.\d{3}Z/, 'Z');
-}
-
-function formatICalDateOnly(date) {
-    // Format as YYYYMMDD for all-day events (local date, not UTC)
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}${month}${day}`;
-}
-
 function formatEventDescription(description, method, composition) {
     const parts = [];
     
@@ -276,9 +254,9 @@ function generateRRule(event) {
         case 'monthly': freq = 'MONTHLY'; break;
         case 'monthly_nth': {
             freq = 'MONTHLY';
-            const start = new Date(startDate);
-            const dayOfWeek = start.getDay();
-            const nth = Math.ceil(start.getDate() / 7);
+            const start = parseCalendarDate(startDate);
+            const dayOfWeek = start.getUTCDay();
+            const nth = Math.ceil(start.getUTCDate() / 7);
             const weekdays = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
             byDay = `;BYDAY=${nth}${weekdays[dayOfWeek]}`;
             break;
@@ -297,11 +275,11 @@ function generateRRule(event) {
 
     if (recurrenceEndDate) {
         try {
-            const endDate = new Date(recurrenceEndDate);
+            const endDate = parseCalendarDate(recurrenceEndDate);
             // Make sure we're using a valid date
             if (!isNaN(endDate.getTime())) {
                 endDate.setUTCHours(23, 59, 59, 0);
-                rrule += `;UNTIL=${formatICalDate(endDate)}`;
+                rrule += `;UNTIL=${formatICalDateTime(endDate)}`;
             }
         } catch (e) {
             // Skip UNTIL if date parsing fails

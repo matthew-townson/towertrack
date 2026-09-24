@@ -359,8 +359,7 @@
 
 							{#if stats}
 								<hr />
-								<h3 class="subtitle is-5">Statistics</h3>
-								
+								<h3 class="subtitle is-5">Quick Statistics</h3>	
 								
 								<!-- General Stats -->
 								<div class="columns is-mobile is-multiline mb-5">

@@ -1,0 +1,108 @@
+.api-documentation {
+    width: min(100% - 2rem, 56rem);
+    margin-inline: auto;
+    color: var(--tt-text);
+}
+
+.api-documentation > * {
+    max-width: 100%;
+}
+
+.api-documentation .title {
+    margin-bottom: 1rem;
+    color: var(--tt-text);
+}
+
+.api-documentation > p:first-of-type {
+    max-width: 48rem;
+    margin-bottom: 2rem;
+    color: var(--tt-muted);
+    font-size: 1.05rem;
+}
+
+.api-documentation .subtitle {
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--tt-accent);
+    color: var(--tt-text);
+}
+
+.api-documentation code {
+    padding: 0.15rem 0.35rem;
+    border: 1px solid var(--tt-border);
+    border-radius: 0.25rem;
+    background: var(--tt-surface);
+    color: var(--tt-accent);
+    font-size: 0.9em;
+}
+
+.api-documentation > p code:first-child {
+    color: var(--tt-focus);
+    font-weight: 600;
+}
+
+.api-documentation .table {
+    margin: 1rem 0 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--tt-border);
+    border-radius: 0.5rem;
+    background: var(--tt-surface-raised);
+}
+
+.api-documentation .table th,
+.api-documentation .table td {
+    border-color: var(--tt-border);
+    vertical-align: top;
+}
+
+.api-documentation .table th {
+    background: var(--tt-surface);
+    color: var(--tt-text);
+    font-family: 'IBM Plex Sans', 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+.api-documentation .table td {
+    color: var(--tt-muted);
+}
+
+.api-documentation .table td:first-child {
+    width: 12rem;
+    color: var(--tt-text);
+}
+
+.api-documentation ul {
+    margin: 1rem 0 2rem;
+    padding: 1rem 1rem 1rem 2.5rem;
+    border: 1px solid var(--tt-border);
+    border-radius: 0.5rem;
+    background: var(--tt-surface-raised);
+}
+
+.api-documentation li + li {
+    margin-top: 0.75rem;
+}
+
+.api-documentation > p:last-child {
+    padding-top: 1rem;
+    border-top: 1px solid var(--tt-border);
+    color: var(--tt-muted);
+}
+
+@media (max-width: 600px) {
+    .api-documentation {
+        width: min(100% - 1rem, 56rem);
+        padding-inline: 0.75rem;
+    }
+
+    .api-documentation .title {
+        font-size: 2rem;
+    }
+
+    .api-documentation .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
