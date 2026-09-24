@@ -1,113 +1,14 @@
 import { redirect } from '@sveltejs/kit';
-import db from '$lib/server/db.js';
 
-export async function load({ locals }) {
+export async function load({ locals, fetch }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
     
     try {
-        // Get user's grab count
-        const [grabCountResult] = await db.query(
-            `SELECT COUNT(*) as count FROM Grab WHERE userId = ?`,
-            [locals.user.id]
-        );
-        
-        const grabCount = grabCountResult[0]?.count || 0;
-        
-        // Get latest grabs (limited to 3)
-        const [recentGrabs] = await db.query(
-            `SELECT g.towerID, g.ringID, 
-              DATE_FORMAT(
-                STR_TO_DATE(
-                  CONCAT(
-                    IFNULL(g.yearGrabbed, ''),
-                    '-',
-                    IFNULL(g.monthGrabbed, '01'),
-                    '-',
-                    IFNULL(g.dateGrabbed, '01')
-                  ),
-                  '%Y-%m-%d'
-                ),
-                '%Y-%m-%d'
-              ) as dateGrabbed,
-              t.Place, t.Dedicn, t.County, t.Bells, t.Wt
-             FROM Grab g
-             JOIN Tower t ON g.towerID = t.TowerID
-             WHERE g.userId = ?
-             ORDER BY g.yearGrabbed DESC, g.monthGrabbed DESC, g.dateGrabbed DESC, g.lastUpdated DESC
-             LIMIT 3`,
-            [locals.user.id]
-        );
-        
-        const [grabs] = await db.query(
-            `SELECT g.towerID, g.ringID, 
-              DATE_FORMAT(
-                STR_TO_DATE(
-                  CONCAT(
-                    IFNULL(g.yearGrabbed, ''),
-                    '-',
-                    IFNULL(g.monthGrabbed, '01'),
-                    '-',
-                    IFNULL(g.dateGrabbed, '01')
-                  ),
-                  '%Y-%m-%d'
-                ),
-                '%Y-%m-%d'
-              ) as dateGrabbed,
-              t.Place, t.Dedicn, t.County, t.Bells, t.UR, t.Wt
-             FROM Grab g
-             JOIN Tower t ON g.towerID = t.TowerID
-             WHERE g.userID = ?
-             ORDER BY 
-               CASE WHEN g.yearGrabbed IS NULL THEN 1 ELSE 0 END,
-               COALESCE(g.yearGrabbed, 9999) DESC,
-               COALESCE(g.monthGrabbed, 12) DESC,
-               COALESCE(g.dateGrabbed, 31) DESC`,
-            [locals.user.id]
-        );
-        
-        for (const grab of grabs) {
-            const [bellRows] = await db.query(
-                `SELECT gb.bellID, b.BellRole, b.BellName
-                 FROM GrabBell gb
-                 JOIN Bell b ON gb.bellID = b.BellID
-                 WHERE gb.userID = ? AND gb.towerID = ?`,
-                [locals.user.id, grab.towerID]
-            );
-            
-            bellRows.sort((a, b) => {
-              const parseRole = (role) => {
-              const match = role.match(/^(\d+)(.*)$/);
-              if (!match) return { num: Number.MAX_SAFE_INTEGER, suffix: role };
-              return { num: parseInt(match[1], 10), suffix: match[2] };
-              };
-
-              if (a.BellRole === "0extra" && b.BellRole !== "0extra") return -1;
-              if (b.BellRole === "0extra" && a.BellRole !== "0extra") return 1;
-
-              const aRole = parseRole(a.BellRole);
-              const bRole = parseRole(b.BellRole);
-
-              if (!aRole.suffix && !bRole.suffix) {
-              return aRole.num - bRole.num;
-              }
-
-              if (aRole.suffix && bRole.suffix) {
-              if (aRole.num !== bRole.num) {
-                return aRole.num - bRole.num;
-              }
-              return aRole.suffix.localeCompare(bRole.suffix);
-              }
-
-              if (!aRole.suffix && bRole.suffix) return -1;
-              if (aRole.suffix && !bRole.suffix) return 1;
-
-              return 0;
-            });
-
-            grab.bells = bellRows;
-        }
+        const response = await fetch('/api/user-grabs?view=full');
+        if (!response.ok) throw new Error(`User grabs request failed: ${response.status}`);
+        const { grabCount, recentGrabs, grabs } = await response.json();
         
         return {
             user: locals.user,

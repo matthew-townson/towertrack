@@ -2,7 +2,7 @@ import { redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log.js';
 
-export async function load({ locals }) {
+export async function load({ locals, fetch }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
@@ -10,11 +10,9 @@ export async function load({ locals }) {
     // Get user's existing grabs
     let userGrabs = [];
     try {
-        const [rows] = await db.query(
-            `SELECT g.towerID, g.ringID FROM Grab g WHERE g.userID = ?`,
-            [locals.user.id]
-        );
-        userGrabs = rows;
+        const response = await fetch('/api/user-grabs?view=existing');
+        if (!response.ok) throw new Error(`User grabs request failed: ${response.status}`);
+        ({ userGrabs } = await response.json());
     } catch (error) {
         log.error('Error loading user grabs:', error);
     }

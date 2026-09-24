@@ -624,6 +624,7 @@
                 </div>
             {/if}
         </div>
+    </div>
 </main>
 
 <Footer />

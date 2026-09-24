@@ -2,69 +2,23 @@ import { redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log.js';
 
-export async function load({ locals }) {
+export async function load({ locals, fetch }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
 
-    // on load, get tower list for searching
-    let towerList = [];
-    try {
-        const [rows] = await db.query(
-            `SELECT TowerID, RingID, Place, Dedicn, County, Bells, UR FROM Tower ORDER BY Place`
-        );
-        towerList = rows;
-    } catch (error) {
-        log.error('Error loading towers:', error);
-    }
-
-    // on load, get users grabs to allow for updates
+    // load user grabs through the shared API
     let userGrabs = [];
     try {
-        if (locals.user) {
-            const [rows] = await db.query(
-                `SELECT g.towerID, g.ringID, 
-                  DATE_FORMAT(
-                    STR_TO_DATE(
-                      CONCAT(
-                        IFNULL(g.yearGrabbed, ''),
-                        '-',
-                        IFNULL(g.monthGrabbed, '01'),
-                        '-',
-                        IFNULL(g.dateGrabbed, '01')
-                      ),
-                      '%Y-%m-%d'
-                    ),
-                    '%Y-%m-%d'
-                  ) as dateGrabbed,
-                  t.Place, t.Dedicn, t.County, t.Bells
-                 FROM Grab g
-                 JOIN Tower t ON g.towerID = t.TowerID
-                 WHERE g.userID = ?`,
-                [locals.user.id]
-            );
-            userGrabs = rows;
-        } else {
-            throw new Error('User not logged in');
-        }
-
-        // also get grabbed bells (if applicable)
-        if (userGrabs.length > 0) {
-            for (let grab of userGrabs) {
-                const [bellRows] = await db.query(
-                    `SELECT bellID FROM GrabBell WHERE userID = ? AND towerID = ?`,
-                    [locals.user.id, grab.towerID]
-                );
-                grab.bells = bellRows.map(row => row.bellID);
-            }
-        }
+        const response = await fetch('/api/user-grabs?view=existing');
+        if (!response.ok) throw new Error(`User grabs request failed: ${response.status}`);
+        ({ userGrabs } = await response.json());
     } catch (error) {
         log.error('Error loading user grabs:', error);
     }
 
     return {
         user: locals.user,
-        towerList,
         userGrabs
     };
 }
