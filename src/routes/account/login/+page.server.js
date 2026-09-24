@@ -7,7 +7,7 @@ import { checkRateLimit } from '$lib/server/rateLimit';
 export const actions = {
     default: async ({ request, cookies }) => {
         const data = await request.formData();
-        const username = data.get('username');
+        const username = data.get('username').trim();
         const password = data.get('password');
 
         if (!username || !password) {
