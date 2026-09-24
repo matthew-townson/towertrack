@@ -330,12 +330,19 @@
 								This profile is private.
 							</div>
 						{:else}
-							<div class="content mt-3">
-								{#if profile.otherNames}
-									<p><strong>Other names / also goes by:</strong> {profile.otherNames}</p>
-								{/if}
-								<hr />
+						<div class="content mt-3">
+							{#if profile.otherNames}
+							<p><strong>Other names / also goes by:</strong> {profile.otherNames}</p>
+							{/if}
+							{#if settings.dataVisibility}
+								<p class="mb-4">
+									<a href="/u/{profile.username?.replace(/ /g, '-')}/performance-data" class="button is-link is-small">
+										View Full Performance Data →
+									</a>
+								</p>
+							{/if}
 								{#if permission === 0}
+									<hr />
 									<h3 class="subtitle is-6">[DEBUG] Settings</h3>
 									{#if settings}
 										<ul>
@@ -354,13 +361,6 @@
 								<hr />
 								<h3 class="subtitle is-5">Statistics</h3>
 								
-								{#if settings.dataVisibility}
-									<p class="mb-4">
-										<a href="/u/{profile.username?.replace(/ /g, '-')}/performance-data" class="button is-link is-small">
-											View Full Performance Data →
-										</a>
-									</p>
-								{/if}
 								
 								<!-- General Stats -->
 								<div class="columns is-mobile is-multiline mb-5">
