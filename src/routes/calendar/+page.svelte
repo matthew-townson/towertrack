@@ -311,6 +311,13 @@
 		return `${h}:${m}`;
 	}
 
+	function formatLocalDate(date) {
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
 	function parseEventDateTimeLocal(value) {
 		if (!value) return null;
 
@@ -770,9 +777,9 @@
 			description: '',
 			location: '',
 			towerID: null,
-			startDate: now.toISOString().slice(0, 10),
+			startDate: formatLocalDate(now),
 			startTime: '09:00',
-			endDate: now.toISOString().slice(0, 10),
+			endDate: formatLocalDate(now),
 			endTime: '10:00',
 			allDay: false,
 			recurrenceType: 'none',
@@ -803,9 +810,9 @@
 			description: '',
 			location: '',
 			towerID: null,
-			startDate: date.toISOString().slice(0, 10),
+			startDate: formatLocalDate(date),
 			startTime: startTime,
-			endDate: date.toISOString().slice(0, 10),
+			endDate: formatLocalDate(date),
 			endTime: endTime,
 			allDay: false,
 			recurrenceType: 'none',
@@ -1883,9 +1890,9 @@
 			towerID: null,
 			method: '',
 			composition: '',
-			startDate: now.toISOString().slice(0, 10),
+			startDate: formatLocalDate(now),
 			startTime: '09:00',
-			endDate: now.toISOString().slice(0, 10),
+			endDate: formatLocalDate(now),
 			endTime: '10:00',
 			allDay: false,
 			recurrenceType: 'none',
@@ -3250,9 +3257,10 @@
 							<p class="has-text-weight-bold mb-3">📬 Send Invitation</p>
 							
 							<div class="field">
-								<label class="label is-small">Search for user or enter guest name</label>
+								<label class="label is-small" for="invite-search">Search for user or enter guest name</label>
 								<div class="control is-expanded">
 									<input 
+										id="invite-search"
 										class="input" 
 										type="text"
 										placeholder="Type user name or guest name..."
@@ -3273,6 +3281,8 @@
 												on:keydown={(e) => e.key === 'Enter' && selectUserForInvite(user)}
 												on:mouseover={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
 												on:mouseout={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+												on:focus={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+												on:blur={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
 												role="button"
 												tabindex="0"
 											>
@@ -3288,7 +3298,7 @@
 
 							{#if inviteForm.invitedUserId}
 								<div class="field">
-									<label class="label is-small">Selected User</label>
+									<p class="label is-small">Selected User</p>
 									<div class="box p-2 has-background-info-light" style="border-left: 3px solid #3273dc;">
 										<div class="is-flex is-justify-content-space-between is-align-items-center">
 											<span class="is-size-7"><strong>{inviteSearchQuery}</strong></span>
@@ -3307,9 +3317,10 @@
 								</div>
 							{:else}
 								<div class="field">
-									<label class="label is-small">Or enter guest name (if no user account)</label>
+									<label class="label is-small" for="guest-name">Or enter guest name (if no user account)</label>
 									<div class="control">
 										<input 
+											id="guest-name"
 											class="input"
 											type="text"
 											placeholder="Guest name..."
@@ -3702,7 +3713,7 @@
 				{/if}
 				{#if isOwner}
 					<div class="field mt-3">
-						<label class="label" id="add-member-label">Add Member</label>
+						<p class="label" id="add-member-label">Add Member</p>
 						<UserSearch 
 							onUserSelect={addSharedCalendarMember}
 							excludeUserIds={[data.user.id, ...sharedCalendarMembers.map(m => m.userId)]}
@@ -4032,9 +4043,10 @@
 							<p class="has-text-weight-bold mb-3">📬 Send Invitation</p>
 						
 						<div class="field">
-							<label class="label is-small">Search for user or enter guest name</label>
+							<label class="label is-small" for="shared-invite-search">Search for user or enter guest name</label>
 							<div class="control is-expanded">
 								<input 
+									id="shared-invite-search"
 									class="input" 
 									type="text"
 									placeholder="Type user name or guest name..."
@@ -4055,6 +4067,8 @@
 											on:keydown={(e) => e.key === 'Enter' && selectUserForInvite(user)}
 											on:mouseover={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
 											on:mouseout={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+											on:focus={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+											on:blur={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
 											role="button"
 											tabindex="0"
 										>
@@ -4070,7 +4084,7 @@
 
 						{#if inviteForm.invitedUserId}
 							<div class="field">
-								<label class="label is-small">Selected User</label>
+								<p class="label is-small">Selected User</p>
 								<div class="box p-2 has-background-info-light" style="border-left: 3px solid #3273dc;">
 									<div class="is-flex is-justify-content-space-between is-align-items-center">
 										<span class="is-size-7"><strong>{inviteSearchQuery}</strong></span>
@@ -4089,9 +4103,10 @@
 							</div>
 						{:else}
 							<div class="field">
-								<label class="label is-small">Or enter guest name (if no user account)</label>
+								<label class="label is-small" for="shared-guest-name">Or enter guest name (if no user account)</label>
 								<div class="control">
 									<input 
+										id="shared-guest-name"
 										class="input"
 										type="text"
 										placeholder="Guest name..."
@@ -4180,4 +4195,3 @@
 {/if}
 
 <Footer />
-
