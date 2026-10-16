@@ -34,9 +34,30 @@ async function getGrabDetails(userId, limit = '') {
 export async function getUserGrabData(userId, view = 'dashboard') {
     if (view === 'existing') {
         const [grabs] = await db.query(
-            'SELECT towerID, ringID FROM Grab WHERE userID = ?',
+            `SELECT towerID, ringID,
+                    CASE
+                        WHEN yearGrabbed IS NULL OR dateGrabbed IS NULL THEN NULL
+                        ELSE DATE_FORMAT(
+                            STR_TO_DATE(
+                                CONCAT(yearGrabbed, '-', LPAD(monthGrabbed, 2, '0'), '-', LPAD(dateGrabbed, 2, '0')),
+                                '%Y-%m-%d'
+                            ),
+                            '%Y-%m-%d'
+                        )
+                    END AS dateGrabbed
+             FROM Grab
+             WHERE userID = ?`,
             [userId]
         );
+
+        for (const grab of grabs) {
+            const [bells] = await db.query(
+                'SELECT bellID FROM GrabBell WHERE userID = ? AND towerID = ? AND ringID = ?',
+                [userId, grab.towerID, grab.ringID]
+            );
+            grab.selectedBells = bells.map(({ bellID }) => bellID);
+        }
+
         return { userGrabs: grabs };
     }
 
