@@ -1,4 +1,13 @@
 [
+    {
+        "version": "v0.0.12 (beta)",
+        "date": "15-10-2026",
+        "items": [
+            "Further css improvements",
+            "Calendar fixes",
+            "Added nearest tower on search page"
+        ]
+    },
     {   "version": "v0.0.11 (beta)",
         "date": "24-09-2026",
         "items": [
