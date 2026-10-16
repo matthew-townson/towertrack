@@ -108,6 +108,7 @@ async function cleanExistingPerformancesForUser(userId, normalisedNames) {
             await pool.query(`DELETE FROM Performance WHERE PerformanceID = ?`, [perfId]);
         }
     }
+    log.info(`Completed cleaning existing performances for user ID ${userId}`);
 }
 
 export async function importBBData(userId) {
@@ -274,7 +275,7 @@ export async function importBBData(userId) {
         try {
             if (!perfObj || !perfObj.towerID) return;
 
-            log.debug(`addGrab: checking perf ${perfObj.performanceID} (tower=${perfObj.towerID}, ring=${perfObj.ringID}, date=${perfObj.date})`);
+            //log.debug(`addGrab: checking perf ${perfObj.performanceID} (tower=${perfObj.towerID}, ring=${perfObj.ringID}, date=${perfObj.date})`);
 
             const perfRingers = Array.isArray(perfObj.ringers?.ringers) ? perfObj.ringers.ringers : (Array.isArray(perfObj.ringers) ? perfObj.ringers : []);
             if (!perfRingers || perfRingers.length === 0) return;
@@ -283,7 +284,7 @@ export async function importBBData(userId) {
                 const candidate = normName(typeof r.name === 'string' ? r.name.replace(/\s*\(.*?\)\s*$/, '') : r.name);
                 return normalisedNames.includes(candidate);
             });
-            log.debug(`addGrab: matchedRingers for perf ${perfObj.performanceID}: ${matchedRingers.length}`);
+            //log.debug(`addGrab: matchedRingers for perf ${perfObj.performanceID}: ${matchedRingers.length}`);
             if (matchedRingers.length === 0) return;
 
             let bellRows = [];
@@ -304,7 +305,7 @@ export async function importBBData(userId) {
                     
                     if (ringRows && ringRows.length > 0) {
                         const primaryRingID = ringRows[0].RingID;
-                        log.debug(`Using primary RingID ${primaryRingID} for tower ${perfObj.towerID}`);
+                        //log.debug(`Using primary RingID ${primaryRingID} for tower ${perfObj.towerID}`);
                         const [rows] = await pool.query(
                             `SELECT BellID, BellRole, BellName, WeightLbs, Note FROM Bell WHERE TowerID = ? AND RingID = ? ORDER BY CAST(BellRole AS SIGNED) ASC`,
                             [perfObj.towerID, primaryRingID]
@@ -323,10 +324,10 @@ export async function importBBData(userId) {
                 log.error(`Failed to load bells for tower ${perfObj.towerID}: ${err.message}`);
                 return;
             }
-            log.debug(`Loaded ${bellRows.length} bell rows for tower ${perfObj.towerID}`);
+            //log.debug(`Loaded ${bellRows.length} bell rows for tower ${perfObj.towerID}`);
 
             if (!bellRows || bellRows.length === 0) {
-                log.debug(`No bell records for tower ${perfObj.towerID} - cannot map grabbed bells`);
+                //log.debug(`No bell records for tower ${perfObj.towerID} - cannot map grabbed bells`);
                 return;
             }
 
@@ -337,15 +338,15 @@ export async function importBBData(userId) {
             });
             const bellRowsForMapping = numericBellRows.length > 0 ? numericBellRows : bellRows;
             if (numericBellRows.length > 0 && numericBellRows.length !== bellRows.length) {
-                log.debug(`Excluding ${bellRows.length - numericBellRows.length} extra/non-numeric bells from tower ${perfObj.towerID} when calculating grab eligibility`);
+                //log.debug(`Excluding ${bellRows.length - numericBellRows.length} extra/non-numeric bells from tower ${perfObj.towerID} when calculating grab eligibility`);
             }
 
-            log.debug(`Using ${bellRowsForMapping.length} bells for mapping (perf ring count), total physical bells ${bellRows.length}`);
+            //log.debug(`Using ${bellRowsForMapping.length} bells for mapping (perf ring count), total physical bells ${bellRows.length}`);
 
             let numericToPhysical = null;
             if (numericBellRows.length > 0 && numericBellRows.length !== bellRows.length) {
                 numericToPhysical = numericBellRows.map(nb => bellRows.indexOf(nb)).map(i => (i >= 0 ? i : null));
-                log.debug(`numericToPhysical map: ${JSON.stringify(numericToPhysical)}`);
+                //log.debug(`numericToPhysical map: ${JSON.stringify(numericToPhysical)}`);
             } else {
                 numericToPhysical = bellRows.map((_, i) => i);
             }
@@ -353,17 +354,17 @@ export async function importBBData(userId) {
             const towerBellCount = bellRowsForMapping.length;
             const perfBellCount = perfRingers.length;
 
-            log.debug(`perf ${perfObj.performanceID}: perfBellCount=${perfBellCount}, towerBellCount=${towerBellCount}, userMinPercent=${userMinPercent}`);
+            //log.debug(`perf ${perfObj.performanceID}: perfBellCount=${perfBellCount}, towerBellCount=${towerBellCount}, userMinPercent=${userMinPercent}`);
 
             if (perfBellCount > towerBellCount) {
-                log.debug(`Performance ${perfObj.performanceID} uses ${perfBellCount} bells but tower ${perfObj.towerID} only has ${towerBellCount} full-circle bells — skipping grab`);
+                //log.debug(`Performance ${perfObj.performanceID} uses ${perfBellCount} bells but tower ${perfObj.towerID} only has ${towerBellCount} full-circle bells — skipping grab`);
                 return;
             }
 
             const percentOfRing = (perfBellCount / towerBellCount) * 100;
 
             if (percentOfRing < userMinPercent) {
-                log.debug(`Performance ${perfObj.performanceID} uses ${percentOfRing.toFixed(1)}% of tower ${perfObj.towerID} (user requires ${userMinPercent}%) — skipping grab`);
+                //log.debug(`Performance ${perfObj.performanceID} uses ${percentOfRing.toFixed(1)}% of tower ${perfObj.towerID} (user requires ${userMinPercent}%) — skipping grab`);
                 return;
             }
 
@@ -376,7 +377,7 @@ export async function importBBData(userId) {
                     );
                     if (!trows || trows.length === 0) {
                         // ringID does not match current Tower record(s) — use tower only (null ringid)
-                        log.debug(`RingID ${ringIdToUse} for Tower ${perfObj.towerID} not found; will insert Grab with NULL ringID`);
+                        //log.debug(`RingID ${ringIdToUse} for Tower ${perfObj.towerID} not found; will insert Grab with NULL ringID`);
                         ringIdToUse = null;
                     }
                 } catch (err) {
@@ -389,7 +390,7 @@ export async function importBBData(userId) {
             const k = perfBellCount;
             const startIndex = Math.max(0, M - k);
 
-            log.debug(`Mapping: M=${M}, k=${k}, startIndex=${startIndex}`);
+            //log.debug(`Mapping: M=${M}, k=${k}, startIndex=${startIndex}`);
 
             let day = null, month = null, year = null;
             if (perfObj.date) {
@@ -408,7 +409,7 @@ export async function importBBData(userId) {
                 
                 if (!existing || perfDate < existing.date) {
                     towerEarliestPerformance.set(towerKey, { date: perfDate, day, month, year });
-                    log.debug(`Updated earliest performance for tower ${perfObj.towerID} ring ${ringIdToUse}: ${year}-${month}-${day}`);
+                    //log.debug(`Updated earliest performance for tower ${perfObj.towerID} ring ${ringIdToUse}: ${year}-${month}-${day}`);
                 }
             }
 
@@ -418,7 +419,7 @@ export async function importBBData(userId) {
                      VALUES (?, ?, ?)`,
                     [userId, perfObj.towerID, ringIdToUse]
                 );
-                log.debug(`Ensured Grab exists for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
+                //log.debug(`Ensured Grab exists for user ${userId} tower ${perfObj.towerID} ring ${ringIdToUse}`);
             } catch (err) {
                 log.error(`Failed to insert Grab placeholder for user ${userId} tower ${perfObj.towerID}: ${err.message}`);
                 return;
@@ -431,10 +432,10 @@ export async function importBBData(userId) {
                     if (idx >= 0) {
                         const targetIndex = startIndex + idx;
                         const physicalIndex = (numericToPhysical && numericToPhysical[targetIndex] != null) ? numericToPhysical[targetIndex] : targetIndex;
-                        log.debug(`Fallback mapping for ringer "${mr.name}" idx=${idx} -> targetIndex=${targetIndex} physicalIndex=${physicalIndex}`);
+                        //log.debug(`Fallback mapping for ringer "${mr.name}" idx=${idx} -> targetIndex=${targetIndex} physicalIndex=${physicalIndex}`);
                         const bell = bellRows[physicalIndex];
                         if (bell) {
-                            log.debug(`Inserting GrabBell for user ${userId} -> BellID=${bell.BellID} role=${bell.BellRole}`);
+                            //log.debug(`Inserting GrabBell for user ${userId} -> BellID=${bell.BellID} role=${bell.BellRole}`);
                             try {
                                 await pool.query(
                                     `INSERT IGNORE INTO GrabBell (userID, bellID, bellRole, towerID, ringID)
@@ -445,18 +446,18 @@ export async function importBBData(userId) {
                                 log.error(`Failed to insert GrabBell for user ${userId}, bell ${bell?.BellID}: ${err.message}`);
                             }
                         } else {
-                            log.debug(`No bell found at physicalIndex=${physicalIndex} for fallback ringer ${mr.name}`);
+                            //log.debug(`No bell found at physicalIndex=${physicalIndex} for fallback ringer ${mr.name}`);
                         }
                     } else {
-                        log.debug(`Could not locate ringer name "${mr.name}" in perfRingers for fallback mapping`);
+                        //log.debug(`Could not locate ringer name "${mr.name}" in perfRingers for fallback mapping`);
                     }
                 } else {
                     const targetIndex = startIndex + (bellNum - 1);
                     const physicalIndex = (numericToPhysical && numericToPhysical[targetIndex] != null) ? numericToPhysical[targetIndex] : targetIndex;
-                    log.debug(`Explicit bell mapping for ringer "${mr.name}" bellNum=${bellNum} -> targetIndex=${targetIndex} physicalIndex=${physicalIndex}`);
+                    //log.debug(`Explicit bell mapping for ringer "${mr.name}" bellNum=${bellNum} -> targetIndex=${targetIndex} physicalIndex=${physicalIndex}`);
                     const bell = bellRows[physicalIndex];
                     if (bell) {
-                        log.debug(`Inserting GrabBell for user ${userId} -> BellID=${bell.BellID} role=${bell.BellRole}`);
+                        //log.debug(`Inserting GrabBell for user ${userId} -> BellID=${bell.BellID} role=${bell.BellRole}`);
                         try {
                             await pool.query(
                                 `INSERT IGNORE INTO GrabBell (userID, bellID, bellRole, towerID, ringID)
@@ -467,12 +468,12 @@ export async function importBBData(userId) {
                             log.error(`Failed to insert GrabBell for user ${userId}, bell ${bell?.BellID}: ${err.message}`);
                         }
                     } else {
-                        log.debug(`Could not map performance bell ${bellNum} -> physicalIndex ${physicalIndex} for tower ${perfObj.towerID}`);
+                        //log.debug(`Could not map performance bell ${bellNum} -> physicalIndex ${physicalIndex} for tower ${perfObj.towerID}`);
                     }
                 }
             }
 
-            log.info(`Auto-added grab for user ${user.username} on tower ${perfObj.towerID} from performance ${perfObj.performanceID} (ringID=${ringIdToUse})`);
+            //log.debug(`Auto-added grab for user ${user.username} on tower ${perfObj.towerID} from performance ${perfObj.performanceID} (ringID=${ringIdToUse})`);
         } catch (err) {
             log.error(`Error in addGrab for perf ${perfObj?.performanceID}: ${err.message}`);
         }
@@ -504,7 +505,7 @@ export async function importBBData(userId) {
         const data = await xml2js.parseStringPromise(xml, { explicitArray: true });
         const performances = data.performances?.performance || [];
 
-        log.debug(`fetchAndInsert: parsed ${performances.length} performances for name="${name}" length="${length}"`);
+        //log.debug(`fetchAndInsert: parsed ${performances.length} performances for name="${name}" length="${length}"`);
 
         const perfObjs = [];
         for (const perf of performances) {
@@ -525,7 +526,7 @@ export async function importBBData(userId) {
 
         if (perfObjs.length === 0) return;
         const ids = perfObjs.map(p => p.performanceID).filter(Boolean);
-        log.debug(`fetchAndInsert: checking existing DB for ${ids.length} perf IDs`);
+        //log.debug(`fetchAndInsert: checking existing DB for ${ids.length} perf IDs`);
         const existingMap = new Map();
         if (ids.length > 0) {
             try {
@@ -540,7 +541,7 @@ export async function importBBData(userId) {
                         existingMap.set(Number(r.PerformanceID), r.Timestamp ? new Date(r.Timestamp).getTime() : null);
                     }
                 }
-                log.debug(`fetchAndInsert: found ${existingMap.size} existing performances in DB`);
+                //log.debug(`fetchAndInsert: found ${existingMap.size} existing performances in DB`);
             } catch (err) {
                 log.error(`Failed to fetch existing performance IDs: ${err.message}`);
             }
@@ -551,7 +552,7 @@ export async function importBBData(userId) {
             try {
                 // if performance exists, still attempt addGrab, but count as processed
                 if (perfObj.performanceID && existingMap.has(perfObj.performanceID)) {
-                    log.debug(`Performance ${perfObj.performanceID} already exists in DB; skipping Performance upsert and running addGrab`);
+                    //log.debug(`Performance ${perfObj.performanceID} already exists in DB; skipping Performance upsert and running addGrab`);
                     try {
                         await addGrab(perfObj);
                     } catch (err) {
@@ -562,7 +563,7 @@ export async function importBBData(userId) {
                     continue;
                 }
 
-                log.debug(`Upserting performance ${perfObj.performanceID}: tower=${perfObj.towerID}, ring=${perfObj.ringID}, ts=${perfObj.timestamp}`);
+                //log.debug(`Upserting performance ${perfObj.performanceID}: tower=${perfObj.towerID}, ring=${perfObj.ringID}, ts=${perfObj.timestamp}`);
                 
                 const isNew = perfObj.performanceID ? !existingMap.has(perfObj.performanceID) : true;
 
@@ -575,7 +576,7 @@ export async function importBBData(userId) {
                                 [perfObj.towerID, perfObj.ringID]
                             );
                             if (!trows || trows.length === 0) {
-                                log.debug(`Performance ${perfObj.performanceID}: ringID ${perfObj.ringID} for Tower ${perfObj.towerID} not found — clearing ringID before insert`);
+                                //log.debug(`Performance ${perfObj.performanceID}: ringID ${perfObj.ringID} for Tower ${perfObj.towerID} not found — clearing ringID before insert`);
                                 perfObj.ringID = null;
                             }
                         } catch (err) {
@@ -629,7 +630,7 @@ export async function importBBData(userId) {
                 processedCount++;
                 if (isNew) insertedCount++; else updatedCount++;
                 
-                log.debug(`Upsert completed for performance ${perfObj.performanceID}`);
+                //log.debug(`Upsert completed for performance ${perfObj.performanceID}`);
                 try {
                     await addGrab(perfObj);
                 } catch (err) {
@@ -706,7 +707,7 @@ export async function importBBData(userId) {
                          ON DUPLICATE KEY UPDATE lastUpdated = CURRENT_TIMESTAMP`,
                         [userId, towerID, ringID, perfInfo.day, perfInfo.month, perfInfo.year]
                     );
-                    log.debug(`Created Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
+                    //log.debug(`Created Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
                 } else {
                     const existing = existingGrab[0];
                     const existingDate = existing.yearGrabbed 
@@ -720,7 +721,7 @@ export async function importBBData(userId) {
                              WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
                             [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
                         );
-                        log.debug(`Updated Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
+                        //log.debug(`Updated Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
                     } else if (perfInfo.date < existingDate) {
                         // earliest performance is before existing grab date - update to earliest performance
                         await pool.query(
@@ -731,7 +732,7 @@ export async function importBBData(userId) {
                         log.info(`Updated Grab date to earlier performance: ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} (was ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed}) for tower ${towerID}`);
                     } else {
                         // existing grab date is earlier or equal - keep it
-                        log.debug(`Keeping existing earlier grab date ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed} for tower ${towerID}`);
+                        //log.debug(`Keeping existing earlier grab date ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed} for tower ${towerID}`);
                         await pool.query(
                             `UPDATE Grab SET lastUpdated = CURRENT_TIMESTAMP
                              WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
