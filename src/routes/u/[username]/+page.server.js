@@ -62,6 +62,17 @@ export async function load({ params, depends }) {
 		// Get user's tower data for map
 		const towerData = await getUserTowerData(user.id);
 
+		let id = 1;
+
+		// get other names for user
+		const [otherNameRows] = await pool.execute(
+			'SELECT `Name` FROM `OtherNames` WHERE `userId` = ?',
+			[user.id]
+		);
+		
+		// map to array of strings
+		const otherNames = otherNameRows.map((row) => row.Name);
+
 		// public: return sanitized user data and settings
 		return {
 			profile: {
@@ -69,7 +80,7 @@ export async function load({ params, depends }) {
 				username: user.username,
 				email: user.email,
 				permission: user.permission,
-				otherNames: user.otherNames || null,
+				otherNames: otherNames.length > 0 ? otherNames : null,
 				profileImage: user.profileImage || null,
 				isPrivate: false,
 			},

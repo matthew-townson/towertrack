@@ -10,6 +10,7 @@ let bbImportInterval = null;
 let isSchedulerEnabled = true; // Default enabled
 let isBBSchedulerEnabled = true; // Default enabled for BellBoard
 let isBBImportRunning = false;
+const activeUserBBImports = new Set();
 const BB_IMPORT_STALE_MS = 30 * 60 * 1000;
 
 // Delay between importing each user's BB data (to avoid hammering BB servers)
@@ -327,6 +328,34 @@ export function startManualBBImport() {
     return {
         started: true,
         message: 'BellBoard import started for all users.'
+    };
+}
+
+export function startUserBBImport(userId, username) {
+    if (isBBImportRunning || activeUserBBImports.has(userId)) {
+        log.info(`Skipping background BellBoard import for ${username}: an import is already running`);
+        return {
+            started: false,
+            message: 'BellBoard import is already running.'
+        };
+    }
+
+    activeUserBBImports.add(userId);
+
+    // Run after the login response has been scheduled so importing never delays the redirect.
+    setTimeout(() => {
+        importBBData(userId)
+            .catch((error) => {
+                log.error(`Background BellBoard import failed for ${username}: ${error.message}`);
+            })
+            .finally(() => {
+                activeUserBBImports.delete(userId);
+            });
+    }, 0);
+
+    return {
+        started: true,
+        message: 'Background BellBoard import started.'
     };
 }
 

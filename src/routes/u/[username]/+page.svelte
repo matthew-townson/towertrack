@@ -301,9 +301,6 @@
 								<div class="is-flex is-justify-content-space-between is-align-items-start">
 									<div style="flex: 1;">
 										<h1 class="title is-4 mb-1" style="margin-bottom:0.25rem; text-align:left;">{profile.username}</h1>
-										{#if profile.otherNames}
-											<div class="subtitle is-6" style="margin-top:0.25rem; text-align:left;">{profile.otherNames}</div>
-										{/if}
 										{#if profile.permission !== undefined}
 											<div class="is-size-7 has-text-grey" style="text-align:left;">Permission: {profile.permission}</div>
 										{/if}
@@ -332,7 +329,7 @@
 						{:else}
 						<div class="content mt-3">
 							{#if profile.otherNames}
-							<p><strong>Other names / also goes by:</strong> {profile.otherNames}</p>
+							<p><strong>Also goes by:</strong> {profile.otherNames.join(', ')}</p>
 							{/if}
 							{#if settings.dataVisibility}
 								<p class="mb-4">
