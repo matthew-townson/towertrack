@@ -36,6 +36,60 @@ export async function load({ locals }) {
 }
 
 export const actions = {
+    updateUsername: async ({ request, locals }) => {
+        if (!locals.user) {
+            throw redirect(303, '/account/login');
+        }
+
+        const data = await request.formData();
+        const usernameValue = data.get('username');
+        const username = typeof usernameValue === 'string' ? usernameValue.trim() : '';
+
+        if (!username) {
+            return fail(400, { error: true, message: 'Username is required', action: 'updateUsername' });
+        }
+
+        if (!/^[a-zA-Z0-9\s-]{3,50}$/.test(username)) {
+            return fail(400, {
+                error: true,
+                message: 'Username must be 3-50 characters long and can only contain letters, numbers, spaces, and hyphens',
+                action: 'updateUsername'
+            });
+        }
+
+        const [currentUser] = await db.execute('SELECT username FROM User WHERE id = ?', [locals.user.id]);
+        if (currentUser.length === 0) {
+            return fail(400, { error: true, message: 'User not found', action: 'updateUsername' });
+        }
+
+        if (currentUser[0].username === username) {
+            return fail(400, { error: true, message: 'New username is the same as current username', action: 'updateUsername' });
+        }
+
+        const [existingUser] = await db.execute('SELECT id FROM User WHERE username = ? AND id != ?', [username, locals.user.id]);
+        if (existingUser.length > 0) {
+            return fail(400, { error: true, message: 'Username already exists', action: 'updateUsername' });
+        }
+
+        try {
+            await db.execute('UPDATE User SET username = ? WHERE id = ?', [username, locals.user.id]);
+            await db.execute('UPDATE Session SET username = ? WHERE userId = ?', [username, locals.user.id]);
+            log.info(`User ${locals.user.id} changed their username to "${username}"`);
+            return {
+                success: true,
+                message: 'Username updated successfully',
+                action: 'updateUsername',
+                redirect: '/account/settings?section=profile'
+            };
+        } catch (error) {
+            log.error(`Failed to update username for user ${locals.user.id}: ${error.message}`);
+            if (error.code === 'ER_DUP_ENTRY') {
+                return fail(400, { error: true, message: 'Username already exists', action: 'updateUsername' });
+            }
+            return fail(500, { error: true, message: 'Internal server error', action: 'updateUsername' });
+        }
+    },
+
     updateEmail: async ({ request, locals }) => {
         if (!locals.user) {
             throw redirect(303, '/account/login');

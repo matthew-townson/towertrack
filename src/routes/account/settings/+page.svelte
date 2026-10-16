@@ -160,58 +160,82 @@
 
 <main class="settings-page">
     <div class="settings-container">
-    <div class="settings-sidebar box is-dark is-radiusless is-shadowless">
-        <h2 class="has-text-light">Settings</h2>
+    <aside class="settings-sidebar">
+        <div class="settings-sidebar-header">
+            <p class="eyebrow">Account</p>
+            <h2>Settings</h2>
+        </div>
         <nav class="settings-nav">
             <button 
-                class="nav-item {activeSection === 'profile' ? 'active' : ''} has-text-light"
+                class="nav-item {activeSection === 'profile' ? 'active' : ''}"
                 on:click={() => setActiveSection('profile')}
             >
                 Profile
             </button>
             <button 
-                class="nav-item {activeSection === 'aliases' ? 'active' : ''} has-text-light"
+                class="nav-item {activeSection === 'aliases' ? 'active' : ''}"
                 on:click={() => setActiveSection('aliases')}
             >
                 Additional Names
             </button>
             <button 
-                class="nav-item {activeSection === 'privacy' ? 'active' : ''} has-text-light"
+                class="nav-item {activeSection === 'privacy' ? 'active' : ''}"
                 on:click={() => setActiveSection('privacy')}
             >
                 Privacy
             </button>
             <button 
-                class="nav-item {activeSection === 'password' ? 'active' : ''} has-text-light"
+                class="nav-item {activeSection === 'password' ? 'active' : ''}"
                 on:click={() => setActiveSection('password')}
             >
                 Password
             </button>
             <button 
-                class="nav-item {activeSection === 'grabs' ? 'active' : ''} has-text-light"
+                class="nav-item {activeSection === 'grabs' ? 'active' : ''}"
                 on:click={() => setActiveSection('grabs')}
             >
                 Grab Settings
             </button>
-            <a href="/lists" class="nav-item has-text-light" style="text-align: left; cursor: pointer;">
+            <a href="/lists" class="nav-item">
                 User Lists
             </a>
         </nav>
-    </div>
+    </aside>
     
     <div class="settings-content">
         {#if activeSection === 'profile'}
-            <form class="settings-section box is-dark" method="post" action="?/updateEmail">
-                <h2 class="title is-5 has-text-light mb-4">Profile Settings</h2>
-                <div class="field">
-                    <label class="label has-text-light" for="username">Username</label>
-                    <input class="input is-dark" type="text" id="username" name="username" value={data.user?.username ?? ''} readonly disabled />
+            <form class="settings-section" method="post" action="?/updateUsername">
+                <div class="section-heading">
+                    <p class="eyebrow">Profile</p>
+                    <h2>Username</h2>
+                    <p>Enter the name that you use in The Ringing World/BellBoard. If you have other names, you can add them as aliases.</p>
                 </div>
                 <div class="field">
-                    <label class="label has-text-light" for="email">Email</label>
-                    <input class="input is-dark" type="email" id="email" name="email" placeholder="Enter your email address" value={data.user?.email ?? ''} autocomplete="off" required />
+                    <label class="label" for="username">Username</label>
+                    <input class="input" type="text" id="username" name="username" value={data.user?.username ?? ''} maxlength="50" autocomplete="username" required />
                 </div>
-                <button type="submit" class="button is-danger is-fullwidth mt-3">Update Email</button>
+                <button type="submit" class="button is-primary">Update Username</button>
+                {#if form?.action === 'updateUsername' && form?.error}
+                    <div class="notification is-danger mt-3">
+                        <strong>Error:</strong> {form.message}
+                    </div>
+                {:else if form?.action === 'updateUsername' && form?.success}
+                    <div class="notification is-success mt-3">
+                        <strong>Success:</strong> {form.message}
+                    </div>
+                {/if}
+            </form>
+
+            <form class="settings-section" method="post" action="?/updateEmail">
+                <div class="section-heading">
+                    <p class="eyebrow">Profile</p>
+                    <h2>Email address</h2>
+                </div>
+                <div class="field">
+                    <label class="label" for="email">Email</label>
+                    <input class="input" type="email" id="email" name="email" placeholder="Enter your email address" value={data.user?.email ?? ''} autocomplete="email" required />
+                </div>
+                <button type="submit" class="button is-primary">Update Email</button>
                 {#if form?.action === 'updateEmail' && form?.error}
                     <div class="notification is-danger mt-3">
                         <strong>Error:</strong> {form.message}
@@ -223,8 +247,11 @@
                 {/if}
             </form>
 
-            <div class="settings-section box is-dark mt-4">
-                <h2 class="title is-5 has-text-light mb-4">Profile Image</h2>
+            <div class="settings-section">
+                <div class="section-heading">
+                    <p class="eyebrow">Profile</p>
+                    <h2>Profile image</h2>
+                </div>
                 <div class="field mb-4">
                     <div class="mb-3">
                         <p class="has-text-light is-size-7">Upload a profile picture (Max 5MB, JPEG/PNG/WebP/GIF)</p>
@@ -240,9 +267,9 @@
                                 disabled={isUploadingImage}
                             />
                             <span class="file-cta">
-                                <span class="file-label has-text-light">Choose a file…</span>
+                                <span class="file-label">Choose a file…</span>
                             </span>
-                            <span class="file-name has-text-light">
+                            <span class="file-name">
                                 {selectedImageFile?.name || 'No file selected'}
                             </span>
                         </label>
@@ -369,7 +396,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="submit" class="button is-danger is-fullwidth mt-3">Update Privacy Settings</button>
+                <button type="submit" class="button is-primary mt-3">Update Privacy Settings</button>
                 {#if form?.action === 'updatePrivacy' && form?.error}
                     <div class="notification is-danger mt-3">
                         <strong>Error:</strong> {form.message}
@@ -397,7 +424,7 @@
                     <label class="label has-text-light" for="confirmNewPassword">Confirm New Password</label>
                     <input class="input is-dark" type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm your new password" autocomplete="off" required />
                 </div>
-                <button type="submit" class="button is-danger is-fullwidth mt-3">Change Password</button>
+                <button type="submit" class="button is-primary mt-3">Change Password</button>
                 {#if form?.action === 'changePassword' && form?.error}
                     <div class="notification is-danger mt-3">
                         <strong>Error:</strong> {form.message}
@@ -435,7 +462,7 @@
                         Exclude short touches
                     </label>
                 </div>
-                <button type="submit" class="button is-danger is-fullwidth mt-3">Update Grab Settings</button>
+                <button type="submit" class="button is-primary mt-3">Update Grab Settings</button>
                 {#if form?.action === 'updateGrabSettings' && form?.error}
                     <div class="notification is-danger mt-3">
                         <strong>Error:</strong> {form.message}

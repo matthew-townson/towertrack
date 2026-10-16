@@ -1,19 +1,46 @@
 .settings-page {
-    padding: 2rem 1rem;
+    padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+    background: var(--tt-body-bg);
 }
 
 .settings-container {
     display: flex;
-    max-width: 62.5rem;
+    max-width: 70rem;
     margin-inline: auto;
-    gap: 2rem;
+    gap: clamp(1.25rem, 4vw, 3rem);
     align-items: flex-start;
 }
 
 .settings-sidebar {
-    min-width: 13.75rem;
+    min-width: 14rem;
     position: sticky;
     top: 2rem;
+    padding: 1.25rem;
+    border: 1px solid var(--tt-border);
+    border-radius: 0.75rem;
+    background: var(--tt-surface);
+}
+
+.settings-sidebar-header {
+    padding: 0.25rem 0.75rem 1rem;
+    border-bottom: 1px solid var(--tt-border);
+    margin-bottom: 0.75rem;
+}
+
+.settings-sidebar h2,
+.settings-section h2 {
+    margin: 0;
+    color: var(--tt-text);
+    font-family: 'IBM Plex Sans', 'Inter', sans-serif;
+}
+
+.eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--tt-accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .settings-nav {
@@ -23,9 +50,15 @@
 }
 
 .settings-nav .nav-item {
-    justify-content: flex-start;
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0.75rem;
     border: 0;
+    border-radius: 0.5rem;
     background: transparent;
+    color: var(--tt-text);
+    cursor: pointer;
+    font-weight: 600;
     text-align: left;
 }
 
@@ -40,7 +73,49 @@
 }
 
 .settings-section {
+    margin-bottom: 1.25rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--tt-border);
+    border-radius: 0.75rem;
+    background: var(--tt-surface-raised);
+    box-shadow: 0 0.5rem 1.5rem rgba(31, 41, 55, 0.06);
+}
+
+.section-heading {
     margin-bottom: 1.5rem;
+}
+
+.section-heading p:not(.eyebrow) {
+    max-width: 42rem;
+    margin: 0.5rem 0 0;
+    color: var(--tt-muted);
+}
+
+.settings-section .label {
+    color: var(--tt-text);
+}
+
+.settings-section .input,
+.settings-section select {
+    border-color: var(--tt-border);
+    background: var(--tt-surface);
+    color: var(--tt-text);
+}
+
+.settings-section .input:focus,
+.settings-section select:focus {
+    border-color: var(--tt-focus);
+}
+
+.settings-section .button.is-primary {
+    background: #286d78;
+    border-color: #286d78;
+    color: #fff;
+}
+
+.settings-section .button.is-primary:hover {
+    background: #1f5961;
+    border-color: #1f5961;
 }
 
 .alias-item {
@@ -57,6 +132,7 @@
     }
 
     .settings-sidebar {
+        min-width: 0;
         width: 100%;
         position: static;
     }
@@ -64,9 +140,46 @@
     .settings-nav {
         flex-direction: row;
         overflow-x: auto;
+        padding-bottom: 0.25rem;
     }
 
     .settings-nav .nav-item {
         flex: 0 0 auto;
+        width: auto;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .settings-page {
+        padding: 1rem 0.75rem 2rem;
+    }
+
+    .settings-sidebar {
+        padding: 1rem;
+    }
+
+    .settings-sidebar-header {
+        padding-inline: 0.5rem;
+    }
+
+    .settings-section {
+        padding: 1rem;
+    }
+
+    .settings-section .button:not(.is-small) {
+        width: 100%;
+    }
+
+    .settings-section .field.is-grouped {
+        display: block;
+    }
+
+    .settings-section .field.is-grouped .control {
+        margin-bottom: 0.75rem;
+    }
+
+    .settings-section .field.is-grouped .button {
+        width: 100%;
     }
 }

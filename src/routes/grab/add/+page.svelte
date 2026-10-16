@@ -246,19 +246,14 @@
         if (existingGrab) {
             isGrabbed = true;
             if (existingGrab.dateGrabbed) {
-                dateGrabbed = new Date(existingGrab.dateGrabbed).toISOString().split('T')[0];
+                dateGrabbed = existingGrab.dateGrabbed;
                 isDateRequired = true;
             } else {
                 dateGrabbed = '';
                 isDateRequired = false;
             }
             
-            // load pre-existing grabbed bells
-            if (existingGrab.bells && existingGrab.bells.length > 0) {
-                selectedBells = new Set(existingGrab.bells);
-            } else {
-                selectedBells = new Set();
-            }
+            selectedBells = new Set(existingGrab.selectedBells || []);
         } else {
             isGrabbed = true;
             dateGrabbed = '';
@@ -624,6 +619,7 @@
                 </div>
             {/if}
         </div>
+    </div>
     </div>
 </main>
 

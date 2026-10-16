@@ -10,6 +10,10 @@
 	let loading = false;
 	let error = '';
 	let typingTimeout = null;
+	let locationLoading = false;
+	let locationError = '';
+	let nearbyTower = null;
+	let nearbyDistance = null;
 
 	function debounce(fn, wait = 50) {
 		return (...args) => {
@@ -46,6 +50,55 @@
 	}
 
 	const debouncedSearch = debounce(doSearch, 200);
+
+	function findNearbyTower() {
+		if (!navigator.geolocation) {
+			locationError = 'Location search is not supported by your browser.';
+			return;
+		}
+
+		locationLoading = true;
+		locationError = '';
+		navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+			try {
+				const res = await fetch(
+					`/api/nearest-tower?lat=${coords.latitude}&lng=${coords.longitude}&maxDistance=5`
+				);
+				const nearby = await res.json();
+				if (!res.ok) {
+					throw new Error(nearby.error || 'Unable to find nearby towers.');
+				}
+				nearbyTower = nearby.found ? nearby.tower : null;
+				nearbyDistance = nearby.found ? nearby.distanceMeters : null;
+				if (!nearby.found) {
+					locationError = nearby.message || 'No ungrabbed towers found nearby.';
+				}
+			} catch (e) {
+				locationError = e.message || 'Unable to find nearby towers.';
+				nearbyTower = null;
+				nearbyDistance = null;
+			} finally {
+				locationLoading = false;
+			}
+		}, (e) => {
+			locationLoading = false;
+			locationError = e.code === e.PERMISSION_DENIED
+				? 'Location access was denied. You can continue with the search above.'
+				: 'Unable to determine your location. You can continue with the search above.';
+		}, {
+			enableHighAccuracy: false,
+			timeout: 10000,
+			maximumAge: 300000
+		});
+	}
+
+	function formatDistance(meters) {
+		return meters < 1000 ? `${meters}m` : `${(meters / 1000).toFixed(1)}km`;
+	}
+
+	onMount(() => {
+		findNearbyTower();
+	});
 
 	$: if (query !== undefined) {
 		if (!query || query.trim().length < 2) {
@@ -111,6 +164,32 @@
 						</div>
 						<p class="help">Type at least 2 characters. Press Enter to open the top result.</p>
 					</div>
+				</div>
+
+				<div class="box location-search">
+					<div class="location-search-heading">
+						<div>
+							<p class="heading">Find a nearby tower</p>
+							<p class="help">Use your location to find the nearest ungrabbed tower.</p>
+						</div>
+						<button type="button" class="button is-primary" on:click={findNearbyTower} disabled={locationLoading}>
+							{locationLoading ? 'Finding…' : 'Use my location'}
+						</button>
+					</div>
+					{#if locationError}
+						<p class="help is-danger">{locationError}</p>
+					{:else if nearbyTower}
+						<div class="nearby-tower">
+							<div>
+								<strong>{nearbyTower.Place}{nearbyTower.Dedicn ? `, ${nearbyTower.Dedicn}` : ''}</strong>
+								<p class="help">{formatDistance(nearbyDistance)} away · {nearbyTower.Bells} bells</p>
+							</div>
+							<div class="buttons">
+								<a class="button is-small is-info" href={"/tower/" + nearbyTower.TowerID}>Details</a>
+								<a class="button is-small" href={"/grab/add?towerId=" + nearbyTower.TowerID}>Grab</a>
+							</div>
+						</div>
+					{/if}
 				</div>
 
 				{#if error}
