@@ -258,7 +258,7 @@
 <main class="section">
 	<div class="container">
 		<div class="columns is-centered">
-			<div class="column is-two-thirds">
+			<div class="column">
 				{#if !profile}
 					<div class="notification is-warning">Profile not found.</div>
 				{:else}
@@ -360,28 +360,34 @@
 								
 								<!-- General Stats -->
 								<div class="columns is-mobile is-multiline mb-5">
-									<div class="column is-half-mobile is-one-quarter-tablet">
+									<div class="column is-half-mobile is-one-fifth-tablet">
 										<div class="box has-text-centered">
-											<p class="title is-2 mb-2">{totalPerformances}</p>
-											<p class="is-size-7 has-text-weight-semibold">Total Performances</p>
+											<p class="title">{stats.totalChanges}</p>
+											<p class="is-size-7 has-text-weight-semibold">Changes</p>
 										</div>
 									</div>
-									<div class="column is-half-mobile is-one-quarter-tablet">
+									<div class="column is-half-mobile is-one-fifth-tablet">
+										<div class="box has-text-centered">
+											<p class="title is-2 mb-2">{totalPerformances}</p>
+											<p class="is-size-7 has-text-weight-semibold">Performances</p>
+										</div>
+									</div>
+									<div class="column is-half-mobile is-one-fifth-tablet">
+										<div class="box has-text-centered">
+											<p class="title is-2 mb-2">{totalPeals}</p>
+											<p class="is-size-7 has-text-weight-semibold">Peals</p>
+										</div>
+									</div>
+									<div class="column is-half-mobile is-one-fifth-tablet">
 										<div class="box has-text-centered">
 											<p class="title is-2 mb-2">{totalQP}</p>
 											<p class="is-size-7 has-text-weight-semibold">Quarter Peals</p>
 										</div>
 									</div>
-									<div class="column is-half-mobile is-one-quarter-tablet">
+									<div class="column is-half-mobile is-one-fifth-tablet">
 										<div class="box has-text-centered">
 											<p class="title is-2 mb-2">{stats.halfPealCount || 0}</p>
 											<p class="is-size-7 has-text-weight-semibold">Half Peals</p>
-										</div>
-									</div>
-									<div class="column is-half-mobile is-one-quarter-tablet">
-										<div class="box has-text-centered">
-											<p class="title is-2 mb-2">{totalPeals}</p>
-											<p class="is-size-7 has-text-weight-semibold">Peals</p>
 										</div>
 									</div>
 								</div>
@@ -468,53 +474,105 @@
 								<!-- Details Section -->
 								<div id="user-details" class="box mt-4">
 									{#if activeSection === 'quarters'}
-										<h4 class="subtitle is-6">Quarter Peal Details</h4>
+										<h4 class="subtitle is-6">Quarter Peal Statistics</h4>
 										<div class="content">
 											<p><strong>Total Quarter Peals:</strong> {totalQP}</p>
-											{#if stats.leadingQPRingers && stats.leadingQPRingers.length > 0}
-												<p><strong>Leading Ringers:</strong></p>
-												<ol>
-													{#each stats.leadingQPRingers as ringer}
-														<li>{ringer.RingerName} ({ringer.count} performances)</li>
-													{/each}
-												</ol>
-											{/if}
-											{#if stats.leadingQPConductors && stats.leadingQPConductors.length > 0}
-												<p><strong>Leading Conductors:</strong></p>
-												<ol>
-													{#each stats.leadingQPConductors as conductor}
-														<li>{conductor.ConductorName} ({conductor.count} performances)</li>
-													{/each}
-												</ol>
-											{/if}
+											<div class="leading-details-grid">
+												<div>
+													{#if stats.leadingQPRingers && stats.leadingQPRingers.length > 0}
+														<p><strong>Leading Ringers:</strong></p>
+														<ol>
+														{#each stats.leadingQPRingers as ringer}
+															<li>{ringer.RingerName} ({ringer.count} performances)</li>
+														{/each}
+														</ol>
+													{/if}
+												</div>
+												<div>
+													{#if stats.leadingQPConductors && stats.leadingQPConductors.length > 0}
+														<p><strong>Leading Conductors:</strong></p>
+														<ol>
+															{#each stats.leadingQPConductors as conductor}
+																<li>{conductor.ConductorName} ({conductor.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+												<div>
+													{#if stats.leadingQPLocations && stats.leadingQPLocations.length > 0}
+														<p><strong>Leading Locations:</strong></p>
+														<ol>
+															{#each stats.leadingQPLocations as location}
+																<li>{location.Location} ({location.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+												<div>
+													{#if stats.leadingQPMethods && stats.leadingQPMethods.length > 0}
+														<p><strong>Leading Methods:</strong></p>
+														<ol>
+															{#each stats.leadingQPMethods as method}
+																<li>{method.Method} ({method.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+											</div>
 										</div>
 									{:else}
 										<h4 class="subtitle is-6">Peal Statistics</h4>
 										<div class="content">
 											<p><strong>Total Peals:</strong> {totalPeals}</p>
-											{#if stats.leadingPealRingers && stats.leadingPealRingers.length > 0}
-												<p><strong>Leading Ringers:</strong></p>
-												<ol>
-													{#each stats.leadingPealRingers as ringer}
-														<li>{ringer.RingerName} ({ringer.count} performances)</li>
-													{/each}
-												</ol>
-											{/if}
-											{#if stats.leadingPealConductors && stats.leadingPealConductors.length > 0}
-												<p><strong>Leading Conductors:</strong></p>
-												<ol>
-													{#each stats.leadingPealConductors as conductor}
-														<li>{conductor.ConductorName} ({conductor.count} performances)</li>
-													{/each}
-												</ol>
-											{/if}
+											<div class="leading-details-grid">
+												<div>
+													{#if stats.leadingPealRingers && stats.leadingPealRingers.length > 0}
+														<p><strong>Leading Ringers:</strong></p>
+														<ol>
+															{#each stats.leadingPealRingers as ringer}
+																<li>{ringer.RingerName} ({ringer.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+												<div>
+													{#if stats.leadingPealConductors && stats.leadingPealConductors.length > 0}
+														<p><strong>Leading Conductors:</strong></p>
+														<ol>
+															{#each stats.leadingPealConductors as conductor}
+																<li>{conductor.ConductorName} ({conductor.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+												<div>
+													{#if stats.leadingPealLocations && stats.leadingPealLocations.length > 0}
+														<p><strong>Leading Locations:</strong></p>
+														<ol>
+															{#each stats.leadingPealLocations as location}
+																<li>{location.Location} ({location.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+												<div>
+													{#if stats.leadingPealMethods && stats.leadingPealMethods.length > 0}
+														<p><strong>Leading Methods:</strong></p>
+														<ol>
+															{#each stats.leadingPealMethods as method}
+																<li>{method.Method} ({method.count} performances)</li>
+															{/each}
+														</ol>
+													{/if}
+												</div>
+											</div>
 										</div>
 									{/if}
 								</div>
 								
 								<!-- Tower Map -->
 								{#if towerData && (towerData.grabbed?.length > 0 || towerData.quartered?.length > 0 || towerData.pealed?.length > 0)}
-									<div id="tower-map" class="box mt-4">
+									<div id="tower-map" class="box">
 										<h4 class="subtitle is-6">Tower Map</h4>
 										<TowerMap 
 											towers={getMergedTowers()}
@@ -674,5 +732,19 @@
 		</footer>
 	</div>
 </div>
+
+<style>
+	.leading-details-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.5rem;
+	}
+
+	@media (max-width: 768px) {
+		.leading-details-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
 
 <Footer />

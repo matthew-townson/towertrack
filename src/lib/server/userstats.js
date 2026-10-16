@@ -31,7 +31,7 @@ export async function getUserStats(userId) {
             `LOWER(Ringers) LIKE LOWER(CONCAT('%"name":%"', ?, '%"%'))`
         ).join(' OR ');
 
-        let performanceCount, pealCount, quarterCount, halfPealCount, dateTouchCount, leadingQPRingers, leadingQPConductors, leadingPealRingers, leadingPealConductors;
+        let performanceCount, pealCount, quarterCount, halfPealCount, dateTouchCount, leadingQPRingers, leadingQPConductors, leadingQPLocations, leadingQPMethods, leadingPealRingers, leadingPealConductors, leadingPealMethods, leadingPealLocations, totalChanges;
 
         // get number of performances
         try {
@@ -169,6 +169,56 @@ export async function getUserStats(userId) {
             throw queryError;
         }
 
+        // get leading locations (QUARTER PEALS)
+        try {
+            const [leadingQPLocationResult] = await db.execute(`
+                SELECT 
+                    CONCAT_WS(', ',
+                        NULLIF(TRIM(p.Place), ''),
+                        NULLIF(TRIM(p.Dedication), ''),
+                        NULLIF(TRIM(p.County), '')
+                    ) AS Location,
+                    COUNT(*) AS count
+                FROM Performance p
+                WHERE p.PerformanceID IN (
+                    SELECT PerformanceID FROM (
+                        SELECT DISTINCT PerformanceID FROM Performance WHERE (${nameConditions})
+                    ) AS matched
+                )
+                    AND CAST(p.Changes AS SIGNED) >= 1250 AND CAST(p.Changes AS SIGNED) < 5000
+                GROUP BY p.Place, p.Dedication, p.County
+                ORDER BY count DESC
+                LIMIT 10
+            `, allNames);
+            leadingQPLocations = leadingQPLocationResult;
+        } catch (queryError) {
+            log.error(`Error executing leading QP locations query: ${queryError.message}`, queryError);
+            throw queryError;
+        }
+
+        // get leading methods (QUARTER PEALS)
+        try {
+            const [leadingQPMethodResult] = await db.execute(`
+                SELECT 
+                    p.Method,
+                    COUNT(*) as count
+                FROM Performance p
+                WHERE p.PerformanceID IN (
+                    SELECT PerformanceID FROM (
+                        SELECT DISTINCT PerformanceID FROM Performance WHERE (${nameConditions})
+                    ) AS matched
+                )
+                    AND CAST(p.Changes AS SIGNED) >= 1250 AND CAST(p.Changes AS SIGNED) < 5000
+                GROUP BY p.Method
+                ORDER BY count DESC
+                LIMIT 10
+            `, allNames);
+            leadingQPMethods = leadingQPMethodResult;
+        } catch (queryError) {
+            log.error('Error executing leading QP methods query:', queryError);
+            throw queryError;
+        }
+
         // get leading ringers (PEALS)
         try {
             const [leadingPealRingerResult] = await db.execute(`
@@ -230,7 +280,70 @@ export async function getUserStats(userId) {
             throw queryError;
         }
 
-        return { performanceCount, pealCount, quarterCount, halfPealCount, dateTouchCount, leadingQPRingers, leadingQPConductors, leadingPealRingers, leadingPealConductors };
+        // get leading locations (PEALS)
+        try {
+            const [leadingPealLocationResult] = await db.execute(`
+                SELECT 
+                    CONCAT_WS(', ',
+                        NULLIF(TRIM(p.Place), ''),
+                        NULLIF(TRIM(p.Dedication), ''),
+                        NULLIF(TRIM(p.County), '')
+                    ) AS Location,
+                    COUNT(*) as count
+                FROM Performance p
+                WHERE p.PerformanceID IN (
+                    SELECT PerformanceID FROM (
+                        SELECT DISTINCT PerformanceID FROM Performance WHERE (${nameConditions})
+                    ) AS matched
+                )
+                    AND CAST(p.Changes AS SIGNED) >= 5000
+                GROUP BY p.Place, p.Dedication, p.County
+                ORDER BY count DESC
+                LIMIT 10
+            `, allNames);
+            leadingPealLocations = leadingPealLocationResult;
+        } catch (queryError) {
+            log.error('Error executing leading peal locations query:', queryError);
+            throw queryError;
+        }
+
+        // get leading methods (PEALS)
+        try {
+            const [leadingPealMethodResult] = await db.execute(`
+                SELECT 
+                    p.Method,
+                    COUNT(*) as count
+                FROM Performance p
+                WHERE p.PerformanceID IN (
+                    SELECT PerformanceID FROM (
+                        SELECT DISTINCT PerformanceID FROM Performance WHERE (${nameConditions})
+                    ) AS matched
+                )
+                    AND CAST(p.Changes AS SIGNED) >= 5000
+                GROUP BY p.Method
+                ORDER BY count DESC
+                LIMIT 10
+            `, allNames);
+            leadingPealMethods = leadingPealMethodResult;
+        } catch (queryError) {
+            log.error('Error executing leading peal methods query:', queryError);
+            throw queryError;
+        }
+
+        // get total number of changes rung in performances
+        try {
+            const [totalChangesResult] = await db.execute(`
+                SELECT SUM(CAST(Changes AS SIGNED)) as totalChanges
+                FROM Performance
+                WHERE (${nameConditions})
+            `, allNames);
+            totalChanges = totalChangesResult[0].totalChanges || 0;
+        } catch (queryError) {
+            log.error('Error executing total changes query:', queryError);
+            throw queryError;
+        }
+
+        return { performanceCount, pealCount, quarterCount, halfPealCount, dateTouchCount, leadingQPRingers, leadingQPConductors, leadingQPLocations, leadingQPMethods, leadingPealRingers, leadingPealConductors, leadingPealMethods, leadingPealLocations, totalChanges };
     } catch (error) {
         log.error('Error getting user stats', error);
         return null;
