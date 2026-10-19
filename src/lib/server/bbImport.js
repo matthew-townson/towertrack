@@ -722,17 +722,9 @@ export async function importBBData(userId) {
                             [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
                         );
                         //log.debug(`Updated Grab with earliest performance date ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} for tower ${towerID}`);
-                    } else if (perfInfo.date < existingDate) {
-                        // earliest performance is before existing grab date - update to earliest performance
-                        await pool.query(
-                            `UPDATE Grab SET dateGrabbed = ?, monthGrabbed = ?, yearGrabbed = ?, lastUpdated = CURRENT_TIMESTAMP
-                             WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,
-                            [perfInfo.day, perfInfo.month, perfInfo.year, userId, towerID, ringID, ringID]
-                        );
-                        log.info(`Updated Grab date to earlier performance: ${perfInfo.year}-${perfInfo.month}-${perfInfo.day} (was ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed}) for tower ${towerID}`);
                     } else {
-                        // existing grab date is earlier or equal - keep it
-                        //log.debug(`Keeping existing earlier grab date ${existing.yearGrabbed}-${existing.monthGrabbed}-${existing.dateGrabbed} for tower ${towerID}`);
+                        // Existing dates, including manually entered dates, are authoritative.
+                        // Imports may fill an undated grab but must never rewrite it.
                         await pool.query(
                             `UPDATE Grab SET lastUpdated = CURRENT_TIMESTAMP
                              WHERE userID = ? AND towerID = ? AND (ringID = ? OR (ringID IS NULL AND ? IS NULL))`,

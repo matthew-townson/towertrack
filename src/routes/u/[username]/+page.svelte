@@ -2,11 +2,13 @@
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
 	import TowerMap from '$lib/components/TowerMap.svelte';
+    import PerformanceActivityChart from '$lib/components/PerformanceActivityChart.svelte';
 	export let data;
 
 	const profile = data?.profile || {};
 	const settings = data?.settings || {};
 	const stats = data?.stats || null;
+	const dashboard = data?.dashboard || null;
 	const towerData = data?.towerData || null;
 	const permission = data?.permission || null;
 
@@ -18,6 +20,9 @@
 	let imageUploadError = '';
 	let isUploadingImage = false;
 	let showAddToListModal = false;
+	let chartRangeStart = 0;
+	let chartRangeEnd = 0;
+	let chartRangeReady = false;
 	let userLists = [];
 	let addingToList = null;
 	let addToListError = '';
@@ -239,6 +244,93 @@
 
 	$: qpEndAngle = qpPercent * 3.6;
 	$: pealEndAngle = qpEndAngle + (pealPercent * 3.6);
+
+	function formatNumber(value) {
+		return Number(value || 0).toLocaleString('en-GB');
+	}
+
+	function formatDuration(seconds) {
+		const totalSeconds = Math.max(0, Math.round(Number(seconds || 0)));
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const remainingSeconds = totalSeconds % 60;
+		const parts = [];
+		if (hours) parts.push(`${hours}h`);
+		if (minutes || hours) parts.push(`${minutes}m`);
+		parts.push(`${remainingSeconds}s`);
+		return parts.join(' ');
+	}
+
+	function performanceDataLink(params = {}) {
+		const query = new URLSearchParams(params);
+		return `/u/${encodeURIComponent(profile.username).replace(/%20/g, '-')}/performance-data?${query}`;
+	}
+
+	function recordTower(record) {
+		if (!record?.place) return 'Unknown tower';
+		return `${record.place}${record.dedication ? `, ${record.dedication}` : ''}`;
+	}
+
+	function recordPerformanceTitle(record) {
+		return `${formatNumber(record?.changes)} ${record?.method || ''}`.trim();
+	}
+
+	function recordDate(date) {
+		if (!date) return 'Date not recorded';
+		return new Date(date).toLocaleDateString('en-GB', {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric'
+		});
+	}
+
+	function updateChartRangeStart(event) {
+		const nextStart = Number(event.currentTarget.value);
+		chartRangeStart = Math.min(nextStart, chartRangeEnd);
+	}
+
+	function updateChartRangeEnd(event) {
+		const nextEnd = Number(event.currentTarget.value);
+		chartRangeEnd = Math.max(nextEnd, chartRangeStart);
+	}
+
+	$: availablePerformanceMonths = dashboard?.performanceByMonth || [];
+	$: availableGrabMonths = dashboard?.grabsByMonth || [];
+	$: availableChartPeriods = Array.from(new Set([
+		...availablePerformanceMonths.map((period) => period.period),
+		...availableGrabMonths.map((period) => period.period)
+	])).sort();
+	$: if (availableChartPeriods.length && !chartRangeReady) {
+		chartRangeEnd = availableChartPeriods.length - 1;
+		chartRangeStart = Math.max(0, availableChartPeriods.length - 24);
+		chartRangeReady = true;
+	}
+	$: 	if (!availableChartPeriods.length) {
+		chartRangeStart = 0;
+		chartRangeEnd = 0;
+		chartRangeReady = false;
+	}
+	$: selectedChartStart = availableChartPeriods[chartRangeStart];
+	$: selectedChartEnd = availableChartPeriods[chartRangeEnd];
+	$: performanceChartPeriods = availablePerformanceMonths.filter((period) =>
+		period.period >= selectedChartStart && period.period <= selectedChartEnd
+	);
+	$: grabChartPeriods = availableGrabMonths.filter((period) =>
+		period.period >= selectedChartStart && period.period <= selectedChartEnd
+	).map((period) => ({
+		...period,
+		value: period.grabs
+	}));
+	$: displayedChartMonths = Math.max(0, chartRangeEnd - chartRangeStart + 1);
+	$: selectedChartStartLabel = selectedChartStart
+		? new Date(`${selectedChartStart}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+		: 'No data';
+	$: selectedChartEndLabel = selectedChartEnd
+		? new Date(`${selectedChartEnd}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+		: 'No data';
+	$: chartRangeMax = Math.max(1, availableChartPeriods.length - 1);
+	$: chartRangeStartPercent = (chartRangeStart / chartRangeMax) * 100;
+	$: chartRangeEndPercent = (chartRangeEnd / chartRangeMax) * 100;
 </script>
 
 <svelte:head>
@@ -356,7 +448,208 @@
 
 							{#if stats}
 								<hr />
-								<h3 class="subtitle is-5">Quick Statistics</h3>	
+								<div class="level mb-4">
+									<div class="level-left">
+										<div>
+											<h2 class="title is-4 mb-1">Statistics overview</h2>
+											<p class="is-size-7 has-text-grey">A quick view of {profile.username}'s activity.</p>
+										</div>
+									</div>
+									<div class="level-right">
+										{#if isOwnProfile}
+											<a class="button is-small is-link" href="/statistics">Deep dive →</a>
+										{:else if settings.dataVisibility}
+											<a class="button is-small is-link" href={performanceDataLink()}>Full performance data →</a>
+										{/if}
+									</div>
+								</div>
+
+								{#if dashboard}
+									<div class="columns is-multiline is-variable is-2 mb-4">
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<a class="box has-text-centered profile-stat-card" href={performanceDataLink()}>
+												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.performanceCount)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Performances</p>
+											</a>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<a class="box has-text-centered profile-stat-card" href={performanceDataLink({ type: 'peal', minChanges: '5000' })}>
+												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.pealCount)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Peals</p>
+											</a>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<a class="box has-text-centered profile-stat-card" href={performanceDataLink({ type: 'quarter', minChanges: '1250', maxChanges: '2499' })}>
+												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.quarterCount)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Quarter peals</p>
+											</a>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<div class="box has-text-centered profile-stat-card">
+												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.grabCount)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Towers grabbed</p>
+											</div>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<div class="box has-text-centered profile-stat-card">
+												<p class="title is-5 mb-1">{formatNumber(dashboard.summary.totalChanges)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Total changes</p>
+											</div>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<div class="box has-text-centered profile-stat-card">
+												<p class="title is-5 mb-1">{formatDuration(dashboard.summary.totalDurationSeconds)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Ringing time</p>
+											</div>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<div class="box has-text-centered profile-stat-card">
+												<p class="title is-5 mb-1">{formatNumber(dashboard.summary.performancesThisYear)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Performances this year</p>
+											</div>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<div class="box has-text-centered profile-stat-card">
+												<p class="title is-5 mb-1">{formatNumber(dashboard.summary.grabsThisYear)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Grabs this year</p>
+											</div>
+										</div>
+									</div>
+
+									<div class="columns is-multiline is-variable is-3 mb-4">
+										<div class="column is-two-thirds">
+											<div class="box profile-dashboard-card profile-activity-card">
+												<div class="level mb-2">
+													<div class="level-left">
+														<div>
+															<h3 class="subtitle is-5 mb-1">Performance activity</h3>
+															<p class="is-size-7 has-text-grey">{selectedChartStartLabel} to {selectedChartEndLabel} ({displayedChartMonths} months)</p>
+														</div>
+													</div>
+													<div class="level-right">
+														<div class="profile-range-control">
+															<div class="is-flex is-justify-content-space-between is-size-7">
+																<label for="chart-range-start">From</label>
+																<label for="chart-range-end">To</label>
+															</div>
+															<div
+																class="profile-range-slider"
+																style={`--range-start: ${chartRangeStartPercent}%; --range-end: ${chartRangeEndPercent}%`}
+															>
+																<input id="chart-range-start" type="range" min="0" max={Math.max(0, availableChartPeriods.length - 1)} value={chartRangeStart} on:input={updateChartRangeStart} aria-label="Chart range start">
+																<input id="chart-range-end" type="range" min="0" max={Math.max(0, availableChartPeriods.length - 1)} value={chartRangeEnd} on:input={updateChartRangeEnd} aria-label="Chart range end">
+															</div>
+															<div class="is-flex is-justify-content-space-between is-size-7 has-text-grey">
+																<span>{selectedChartStartLabel}</span>
+																<span>{selectedChartEndLabel}</span>
+															</div>
+														</div>
+														<a class="is-size-7 ml-3" href={performanceDataLink()}>View all</a>
+													</div>
+												</div>
+												{#if performanceChartPeriods.length}
+													{#key `performance-${selectedChartStart}-${selectedChartEnd}`}
+														<PerformanceActivityChart
+														periods={performanceChartPeriods}
+														label="Performances"
+														onSelect={(period) => window.location.href = performanceDataLink({
+															year: period.period.slice(0, 4),
+															month: String(Number(period.period.slice(5, 7)) - 1)
+														})}
+														/>
+													{/key}
+												{:else}
+													<p class="has-text-grey">No dated performance data available.</p>
+												{/if}
+											</div>
+											<div class="box profile-dashboard-card profile-activity-card">
+												<div class="level mb-2">
+													<div class="level-left">
+														<div>
+															<h3 class="subtitle is-5 mb-1">Grab activity</h3>
+															<p class="is-size-7 has-text-grey">Monthly towers grabbed, {selectedChartStartLabel} to {selectedChartEndLabel}</p>
+														</div>
+													</div>
+												</div>
+												{#if grabChartPeriods.length}
+													{#key `grabs-${selectedChartStart}-${selectedChartEnd}`}
+														<PerformanceActivityChart
+															periods={grabChartPeriods}
+															label="Grabs"
+															onSelect={() => {}}
+														/>
+													{/key}
+												{:else}
+													<p class="has-text-grey">No dated grab data available.</p>
+												{/if}
+											</div>
+										</div>
+										<div class="column is-one-third">
+											<div class="box profile-dashboard-card">
+												<h3 class="subtitle is-5 mb-3">Personal records</h3>
+												<div class="content is-small">
+													<h4 class="has-text-weight-semibold mb-2">Grabs</h4>
+													{#if dashboard.records.grabs?.heaviestBell}
+														<a class="is-block mb-4" href={`/tower/${dashboard.records.grabs.heaviestBell.towerId}`}>
+															<span class="has-text-grey">Heaviest bell grabbed</span>
+															<strong class="is-block">{dashboard.records.grabs.heaviestBell.weight}</strong>
+															<span class="is-block">{recordTower(dashboard.records.grabs.heaviestBell)}</span>
+															<span class="is-size-7 has-text-grey">{recordDate(dashboard.records.grabs.heaviestBell.date)}</span>
+														</a>
+													{:else}
+														<p class="has-text-grey mb-4">No bell grabs available.</p>
+													{/if}
+
+													<h4 class="has-text-weight-semibold mb-2">Peals</h4>
+													{#if dashboard.records.peals?.heaviestBell}
+														<a class="is-block mb-3" href={`/bellboard/performance?id=${dashboard.records.peals.heaviestBell.performanceId}`}>
+															<span class="has-text-grey">Heaviest bell rung</span>
+															<strong class="is-block">{dashboard.records.peals.heaviestBell.weight}</strong>
+															<span class="is-block">{recordPerformanceTitle(dashboard.records.peals.heaviestBell)}</span>
+															<span class="is-block">{recordTower(dashboard.records.peals.heaviestBell)}</span>
+															<span class="is-size-7 has-text-grey">{recordDate(dashboard.records.peals.heaviestBell.date)}</span>
+														</a>
+													{/if}
+													{#if dashboard.records.peals?.fastestPerformance}
+														<a class="is-block mb-4" href={`/bellboard/performance?id=${dashboard.records.peals.fastestPerformance.performanceId}`}>
+															<span class="has-text-grey">Fastest peal</span>
+															<strong class="is-block">{dashboard.records.peals.fastestPerformance.duration}</strong>
+															<span class="is-block">{recordPerformanceTitle(dashboard.records.peals.fastestPerformance)}</span>
+															<span class="is-block">{recordTower(dashboard.records.peals.fastestPerformance)}</span>
+															<span class="is-size-7 has-text-grey">{recordDate(dashboard.records.peals.fastestPerformance.date)}</span>
+														</a>
+													{:else}
+														<p class="has-text-grey mb-4">No peal duration available.</p>
+													{/if}
+
+													<h4 class="has-text-weight-semibold mb-2">Quarter peals</h4>
+													{#if dashboard.records.quarterPeals?.heaviestBell}
+														<a class="is-block mb-3" href={`/bellboard/performance?id=${dashboard.records.quarterPeals.heaviestBell.performanceId}`}>
+															<span class="has-text-grey">Heaviest bell rung</span>
+															<strong class="is-block">{dashboard.records.quarterPeals.heaviestBell.weight}</strong>
+															<span class="is-block">{recordPerformanceTitle(dashboard.records.quarterPeals.heaviestBell)}</span>
+															<span class="is-block">{recordTower(dashboard.records.quarterPeals.heaviestBell)}</span>
+															<span class="is-size-7 has-text-grey">{recordDate(dashboard.records.quarterPeals.heaviestBell.date)}</span>
+														</a>
+													{/if}
+													{#if dashboard.records.quarterPeals?.fastestPerformance}
+														<a class="is-block" href={`/bellboard/performance?id=${dashboard.records.quarterPeals.fastestPerformance.performanceId}`}>
+															<span class="has-text-grey">Fastest quarter peal</span>
+															<strong class="is-block">{dashboard.records.quarterPeals.fastestPerformance.duration}</strong>
+															<span class="is-block">{recordPerformanceTitle(dashboard.records.quarterPeals.fastestPerformance)}</span>
+															<span class="is-block">{recordTower(dashboard.records.quarterPeals.fastestPerformance)}</span>
+															<span class="is-size-7 has-text-grey">{recordDate(dashboard.records.quarterPeals.fastestPerformance.date)}</span>
+														</a>
+													{:else}
+														<p class="has-text-grey">No quarter peal duration available.</p>
+													{/if}
+												</div>
+											</div>
+										</div>
+									</div>
+								{/if}
+
+								<h3 class="subtitle is-5">Performance breakdown</h3>
 								
 								<!-- General Stats -->
 								<div class="columns is-mobile is-multiline mb-5">
@@ -386,8 +679,8 @@
 									</div>
 									<div class="column is-half-mobile is-one-fifth-tablet">
 										<div class="box has-text-centered">
-											<p class="title is-2 mb-2">{stats.halfPealCount || 0}</p>
-											<p class="is-size-7 has-text-weight-semibold">Half Peals</p>
+											<p class="title is-2 mb-2">{formatNumber(dashboard?.summary?.performancesThisYear || 0)}</p>
+											<p class="is-size-7 has-text-weight-semibold">Performances This Year</p>
 										</div>
 									</div>
 								</div>

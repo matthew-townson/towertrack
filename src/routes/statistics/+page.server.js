@@ -71,7 +71,8 @@ export async function load({ locals }) {
 			const minMatch = duration.match(/(\d+)m/);
 			const hours = hourMatch ? parseInt(hourMatch[1]) : 0;
 			const mins = minMatch ? parseInt(minMatch[1]) : 0;
-			return hours * 60 + mins;
+			const seconds = Number(duration.match(/(\d+)\s*s/)?.[1] || 0);
+			return hours * 3600 + mins * 60 + seconds;
 		};
 		
 		// Helper to parse weight "X-Y-Z" (cwt-qtr-lb) to total pounds
@@ -291,6 +292,81 @@ export async function load({ locals }) {
 		};
 		
 		const grabStats = calculateGrabStats(grabTowers);
+
+		const formatMonth = (date) => {
+			if (!date) return null;
+			const parsed = new Date(date);
+			if (Number.isNaN(parsed.getTime())) return null;
+			return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}`;
+		};
+
+		const performanceByMonth = new Map();
+		const performanceByYear = new Map();
+		let totalChanges = 0;
+		let totalDurationSeconds = 0;
+		userPerformances.forEach((performance) => {
+			const date = new Date(performance.Date || performance.date);
+			if (Number.isNaN(date.getTime())) return;
+			const month = formatMonth(date);
+			const year = String(date.getFullYear());
+			const changes = Number(performance.Changes || performance.changes || 0);
+			const duration = parseDuration(performance.Duration || performance.duration);
+			totalChanges += changes;
+			totalDurationSeconds += duration;
+			performanceByMonth.set(month, {
+				period: month,
+				label: date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }),
+				performances: (performanceByMonth.get(month)?.performances || 0) + 1,
+				changes: (performanceByMonth.get(month)?.changes || 0) + changes
+			});
+			performanceByYear.set(year, {
+				period: year,
+				label: year,
+				performances: (performanceByYear.get(year)?.performances || 0) + 1,
+				changes: (performanceByYear.get(year)?.changes || 0) + changes
+			});
+		});
+
+		const grabsByYear = new Map();
+		grabTowers.forEach((grab) => {
+			const date = new Date(grab.Date || grab.date || grab.createdAt || grab.created_at);
+			if (Number.isNaN(date.getTime())) return;
+			const year = String(date.getFullYear());
+			grabsByYear.set(year, {
+				period: year,
+				label: year,
+				grabs: (grabsByYear.get(year)?.grabs || 0) + 1
+			});
+		});
+
+		const uniqueTowerIds = new Set(grabTowers.map((grab) => grab.towerID).filter(Boolean));
+		const currentYear = new Date().getFullYear();
+		const dashboard = {
+			summary: {
+				performanceCount: userPerformances.length,
+				pealCount: peals.length,
+				halfPealCount: userPerformances.filter((performance) => {
+					const changes = Number(performance.Changes || performance.changes || 0);
+					return changes >= 2500 && changes < 5000;
+				}).length,
+				quarterCount: quarterPeals.length,
+				totalChanges,
+				totalDurationSeconds,
+				grabCount: grabTowers.length,
+				uniqueTowerCount: uniqueTowerIds.size,
+				grabsThisYear: grabTowers.filter((grab) => {
+					const date = new Date(grab.Date || grab.date || grab.createdAt || grab.created_at);
+					return !Number.isNaN(date.getTime()) && date.getFullYear() === currentYear;
+				}).length
+			},
+			performanceByMonth: Array.from(performanceByMonth.values()).sort((a, b) => a.period.localeCompare(b.period)).slice(-24),
+			performanceByYear: Array.from(performanceByYear.values()).sort((a, b) => a.period.localeCompare(b.period)),
+			grabsByYear: Array.from(grabsByYear.values()).sort((a, b) => a.period.localeCompare(b.period)),
+			records: {
+				longestPerformance: [...userPerformances].sort((a, b) => parseDuration(b.Duration || b.duration) - parseDuration(a.Duration || a.duration)).find((performance) => parseDuration(performance.Duration || performance.duration) > 0) || null,
+				mostChanges: [...userPerformances].sort((a, b) => Number(b.Changes || b.changes || 0) - Number(a.Changes || a.changes || 0))[0] || null
+			}
+		};
 		
 		return {
 			user: locals.user,
@@ -298,7 +374,8 @@ export async function load({ locals }) {
 			quarterPealStats,
 			pealStats,
 			otherStats,
-			grabStats
+			grabStats,
+			dashboard
 		};
 	} catch (err) {
 		log.error(`Statistics load error: ${err.message}`);

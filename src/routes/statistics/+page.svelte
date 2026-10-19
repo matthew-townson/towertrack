@@ -1,6 +1,7 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import PerformanceActivityChart from '$lib/components/PerformanceActivityChart.svelte';
 	
 	export let data;
 	
@@ -9,6 +10,7 @@
 	const pealStats = data?.pealStats || null;
 	const otherStats = data?.otherStats || null;
 	const grabStats = data?.grabStats || null;
+	const dashboard = data?.dashboard || null;
 	
 	let activeSection = 'quarters'; // 'quarters', 'peals', 'other', or 'grabs'
 	let hoveredSlice = null;
@@ -54,6 +56,31 @@
 		// Weight is already in the format "X-Y-Z" from the database
 		return `${weight}`;
 	}
+
+	function formatNumber(value) {
+		return Number(value || 0).toLocaleString('en-GB');
+	}
+
+	function formatDuration(seconds) {
+		const totalSeconds = Math.max(0, Math.round(Number(seconds || 0)));
+		const hours = Math.floor(totalSeconds / 3600);
+		const minutes = Math.floor((totalSeconds % 3600) / 60);
+		const remainingSeconds = totalSeconds % 60;
+		const parts = [];
+		if (hours) parts.push(`${hours}h`);
+		if (minutes || hours) parts.push(`${minutes}m`);
+		parts.push(`${remainingSeconds}s`);
+		return parts.join(' ');
+	}
+
+	function performanceDataLink(params = {}) {
+		const query = new URLSearchParams(params);
+		return `/u/${encodeURIComponent(data.user.username).replace(/%20/g, '-')}/performance-data?${query}`;
+	}
+
+	function maxValue(items, key) {
+		return Math.max(1, ...(items || []).map((item) => Number(item[key] || 0)));
+	}
 </script>
 
 <svelte:head>
@@ -74,6 +101,110 @@
 						<p>{data.error}</p>
 					</div>
 				{:else if stats}
+					{#if dashboard}
+						<section class="dashboard-panel">
+							<h2 class="subtitle is-4">At a glance</h2>
+							<div class="dashboard-summary-grid">
+								<a class="dashboard-stat" href={performanceDataLink()}>
+									<strong>{formatNumber(dashboard.summary.performanceCount)}</strong>
+									<span>Performances</span>
+								</a>
+								<a class="dashboard-stat" href={performanceDataLink({ type: 'peal', minChanges: '5000' })}>
+									<strong>{formatNumber(dashboard.summary.pealCount)}</strong>
+									<span>Peals</span>
+								</a>
+								<a class="dashboard-stat" href={performanceDataLink({ type: 'quarter', minChanges: '1250', maxChanges: '2499' })}>
+									<strong>{formatNumber(dashboard.summary.quarterCount)}</strong>
+									<span>Quarter peals</span>
+								</a>
+								<div class="dashboard-stat">
+									<strong>{formatNumber(dashboard.summary.totalChanges)}</strong>
+									<span>Total changes</span>
+								</div>
+								<div class="dashboard-stat">
+									<strong>{formatDuration(dashboard.summary.totalDurationSeconds)}</strong>
+									<span>Ringing time</span>
+								</div>
+								<a class="dashboard-stat" href="/grab">
+									<strong>{formatNumber(dashboard.summary.grabCount)}</strong>
+									<span>Towers grabbed</span>
+								</a>
+								<div class="dashboard-stat">
+									<strong>{formatNumber(dashboard.summary.grabsThisYear)}</strong>
+									<span>Grabs this year</span>
+								</div>
+							</div>
+
+							<div class="dashboard-columns">
+								<div class="dashboard-card">
+									<div class="dashboard-card-heading">
+										<div>
+											<h3 class="subtitle is-5">Performance activity</h3>
+											<p class="dashboard-help">Your last 24 months, grouped by month.</p>
+										</div>
+										<a href={performanceDataLink()}>View all</a>
+									</div>
+									{#if dashboard.performanceByMonth.length}
+										<PerformanceActivityChart
+											periods={dashboard.performanceByMonth}
+											onSelect={(period) => window.location.href = performanceDataLink({
+												year: period.period.slice(0, 4),
+												month: String(Number(period.period.slice(5, 7)) - 1)
+											})}
+										/>
+									{:else}
+										<p class="has-text-grey">No dated performance data available.</p>
+									{/if}
+								</div>
+
+								<div class="dashboard-card">
+									<h3 class="subtitle is-5">Grab activity</h3>
+									<p class="dashboard-help">{formatNumber(dashboard.summary.uniqueTowerCount)} unique towers in your collection.</p>
+									{#if dashboard.grabsByYear.length}
+										<div class="year-list">
+											{#each dashboard.grabsByYear as year}
+												<div class="year-row">
+													<span>{year.label}</span>
+													<div class="year-track"><span style={`width: ${(year.grabs / maxValue(dashboard.grabsByYear, 'grabs')) * 100}%`}></span></div>
+													<strong>{year.grabs}</strong>
+												</div>
+											{/each}
+										</div>
+									{:else}
+										<p class="has-text-grey">No dated grab data available.</p>
+									{/if}
+									<a class="button is-link is-light mt-4" href="/grab">Explore your grabs</a>
+								</div>
+							</div>
+
+							<div class="dashboard-card records-card">
+								<h3 class="subtitle is-5">Personal records</h3>
+								<div class="record-grid">
+									{#if dashboard.records.mostChanges}
+										<a class="record-item" href={`/bellboard/performance?id=${dashboard.records.mostChanges.PerformanceID}`}>
+											<span>Most changes</span>
+											<strong>{formatNumber(dashboard.records.mostChanges.Changes)}</strong>
+											<small>{dashboard.records.mostChanges.Place || 'View performance'}</small>
+										</a>
+									{/if}
+									{#if dashboard.records.longestPerformance}
+										<a class="record-item" href={`/bellboard/performance?id=${dashboard.records.longestPerformance.PerformanceID}`}>
+											<span>Longest performance</span>
+											<strong>{dashboard.records.longestPerformance.Duration}</strong>
+											<small>{dashboard.records.longestPerformance.Place || 'View performance'}</small>
+										</a>
+									{/if}
+									{#if grabStats?.heaviestBell}
+										<a class="record-item" href={`/tower/${grabStats.heaviestBell.towerId}`}>
+											<span>Heaviest grabbed tower</span>
+											<strong>{grabStats.heaviestBell.weight}</strong>
+											<small>{grabStats.heaviestBell.place || 'View tower'}</small>
+										</a>
+									{/if}
+								</div>
+							</div>
+						</section>
+					{/if}
 					<div class="box">
 						<!-- Pie Chart -->
 						{#if totalPerformances > 0}

@@ -1,5 +1,6 @@
 <script>
     import { enhance } from '$app/forms';
+    import { onMount } from 'svelte';
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
     import { convertToHundredweight } from '$lib/mapUtils.js';
@@ -37,6 +38,16 @@
     let showFilters = false;
     let viewType = 'compact';
     let expandedItems = new Set();
+
+    onMount(() => {
+        const params = new URLSearchParams(window.location.search);
+        const queryFilters = {};
+        for (const key of Object.keys(filters)) {
+            const value = params.get(key);
+            if (value !== null) queryFilters[key] = key === 'hasDuration' ? value === 'true' : value;
+        }
+        if (Object.keys(queryFilters).length) filters = { ...filters, ...queryFilters };
+    });
     
     function toggleExpanded(id) {
         if (expandedItems.has(id)) {
