@@ -391,10 +391,18 @@ export async function getUserDashboardStats(userId) {
             return `${cwt}-${Math.floor(remainder / 28)}-${remainder % 28}`;
         };
         const parseDuration = (duration) => {
-            const value = String(duration || '').toLowerCase();
-            return Number(value.match(/(\d+)\s*h/)?.[1] || 0) * 3600
-                + Number(value.match(/(\d+)\s*m/)?.[1] || 0) * 60
-                + Number(value.match(/(\d+)\s*s/)?.[1] || 0);
+            const value = String(duration || '').trim().toLowerCase();
+            if (!value) return 0;
+
+            if (/^\d+(?::\d{1,2}){1,2}$/.test(value)) {
+                const parts = value.split(':').map(Number);
+                if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+                return parts[0] * 60 + parts[1];
+            }
+
+            return Number(value.match(/(\d+(?:\.\d+)?)\s*(?:hours?|h)\b/)?.[1] || 0) * 3600
+                + Number(value.match(/(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|m)\b/)?.[1] || 0) * 60
+                + Number(value.match(/(\d+(?:\.\d+)?)\s*(?:seconds?|secs?|s)\b/)?.[1] || 0);
         };
         const normaliseName = (name) => String(name || '')
             .replace(/\s*\(.*?\)\s*$/, '')
@@ -433,6 +441,23 @@ export async function getUserDashboardStats(userId) {
             weightPounds: parseWeight(bell?.WeightLbs),
             weight: poundsToHundredweight(parseWeight(bell?.WeightLbs))
         });
+        const resolvePerformanceBell = (towerBells, ringers, ringer, ringerIndex) => {
+            const numericBellRows = towerBells.filter((bell) => /^\d+$/.test(String(bell.BellRole || '').trim()));
+            const bellsForMapping = numericBellRows.length ? numericBellRows : towerBells;
+            const startIndex = Math.max(0, bellsForMapping.length - ringers.length);
+            const bellNumber = Number(ringer?.bell);
+
+            if (Number.isFinite(bellNumber) && bellNumber > 0) {
+                const targetIndex = startIndex + bellNumber - 1;
+                if (numericBellRows.length && numericBellRows[targetIndex]) {
+                    const physicalIndex = towerBells.indexOf(numericBellRows[targetIndex]);
+                    return towerBells[physicalIndex] || null;
+                }
+                return bellsForMapping[targetIndex] || null;
+            }
+
+            return bellsForMapping[startIndex + ringerIndex] || null;
+        };
         const heaviestPerformance = async (items) => {
             const records = [];
             for (const performance of items) {
@@ -440,11 +465,7 @@ export async function getUserDashboardStats(userId) {
                 const towerBells = await getBellRows(performance.towerID, performance.ringID);
                 for (const [ringerIndex, ringer] of ringers.entries()) {
                     if (!userNames.includes(normaliseName(ringer?.name))) continue;
-                    const bellNumber = Number(ringer?.bell);
-                    const startIndex = Math.max(0, towerBells.length - ringers.length);
-                    const bell = Number.isFinite(bellNumber) && bellNumber > 0
-                        ? towerBells.find((candidate) => Number(candidate.BellRole) === bellNumber)
-                        : towerBells[startIndex + ringerIndex];
+                    const bell = resolvePerformanceBell(towerBells, ringers, ringer, ringerIndex);
                     if (bell) records.push(performanceRecord(performance, bell));
                 }
             }
@@ -452,17 +473,21 @@ export async function getUserDashboardStats(userId) {
                 .sort((a, b) => b.weightPounds - a.weightPounds)[0] || null;
         };
         const fastestPerformance = (items) => items
-            .map((performance) => ({
-                performanceId: performance.PerformanceID,
-                place: performance.Place,
-                dedication: performance.Dedicn,
-                date: performance.Date,
-                duration: performance.Duration,
-                changes: Number(performance.Changes || 0),
-                method: performance.Method
-            }))
-            .filter((item) => item.duration)
-            .sort((a, b) => parseDuration(a.duration) - parseDuration(b.duration))[0] || null;
+            .map((performance) => {
+                const durationSeconds = parseDuration(performance.Duration);
+                return {
+                    performanceId: performance.PerformanceID,
+                    place: performance.TowerPlace || performance.Place,
+                    dedication: performance.Dedicn,
+                    date: performance.Date,
+                    duration: performance.Duration,
+                    durationSeconds,
+                    changes: Number(performance.Changes || 0),
+                    method: performance.Method
+                };
+            })
+            .filter((item) => item.durationSeconds > 0)
+            .sort((a, b) => a.durationSeconds - b.durationSeconds)[0] || null;
         const pealPerformances = performances.filter((performance) => Number(performance.Changes || 0) >= 5000);
         const quarterPerformances = performances.filter((performance) => {
             const changes = Number(performance.Changes || 0);
