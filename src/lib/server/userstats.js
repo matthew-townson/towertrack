@@ -158,11 +158,10 @@ export async function getUserStats(userId) {
                 )
                     AND CAST(p.Changes AS SIGNED) >= 1250 AND CAST(p.Changes AS SIGNED) < 2500
                     AND JSON_EXTRACT(ringer.value, '$.conductor') = 1
-                    AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY ConductorName
                 ORDER BY count DESC
                 LIMIT 10
-            `, [...allNames, ...allNames]);
+                `, allNames);
             leadingQPConductors = leadingQPConductorResult;
         } catch (queryError) {
             log.error('Error executing leading quarter peal conductors query:', queryError);
@@ -269,11 +268,10 @@ export async function getUserStats(userId) {
                 )
                     AND CAST(p.Changes AS SIGNED) >= 5000
                     AND JSON_EXTRACT(ringer.value, '$.conductor') = 1
-                    AND LOWER(TRIM(SUBSTRING_INDEX(JSON_UNQUOTE(JSON_EXTRACT(ringer.value, '$.name')), '(', 1))) NOT IN (${allNames.map(() => 'LOWER(?)').join(', ')})
                 GROUP BY ConductorName
                 ORDER BY count DESC
                 LIMIT 10
-            `, [...allNames, ...allNames]);
+                `, allNames);
             leadingPealConductors = leadingPealConductorResult;
         } catch (queryError) {
             log.error('Error executing leading peal conductors query:', queryError);
