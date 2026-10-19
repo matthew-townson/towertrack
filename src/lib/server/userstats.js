@@ -400,9 +400,16 @@ export async function getUserDashboardStats(userId) {
                 return parts[0] * 60 + parts[1];
             }
 
-            return Number(value.match(/(\d+(?:\.\d+)?)\s*(?:hours?|h)\b/)?.[1] || 0) * 3600
-                + Number(value.match(/(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|m)\b/)?.[1] || 0) * 60
-                + Number(value.match(/(\d+(?:\.\d+)?)\s*(?:seconds?|secs?|s)\b/)?.[1] || 0);
+            const hours = Number(value.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b/)?.[1] || 0);
+            const explicitMinutes = value.match(/(\d+(?:\.\d+)?)\s*(?:minutes?|mins?|m)\b/);
+            const explicitSeconds = value.match(/(\d+(?:\.\d+)?)\s*(?:seconds?|secs?|s)\b/);
+            const minutes = explicitMinutes
+                ? Number(explicitMinutes[1])
+                : explicitSeconds
+                    ? 0
+                    : Number(value.match(/(?:hours?|hrs?|h)\s+(\d{1,2})(?:\s|$)/)?.[1] || 0);
+            const seconds = Number(explicitSeconds?.[1] || 0);
+            return hours * 3600 + minutes * 60 + seconds;
         };
         const normaliseName = (name) => String(name || '')
             .replace(/\s*\(.*?\)\s*$/, '')
