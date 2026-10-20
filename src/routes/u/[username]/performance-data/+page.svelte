@@ -510,7 +510,7 @@
                 List
             </button>
             <button class:active={viewType === 'detailed'} on:click={() => viewType = 'detailed'}>
-                [Old] Detailed
+                Detailed
             </button>
         </div>
         
