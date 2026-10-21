@@ -186,7 +186,7 @@
 							</div>
 							<div class="buttons">
 								<a class="button is-small is-info" href={"/tower/" + nearbyTower.TowerID}>Details</a>
-								<a class="button is-small" href={"/grab/add?towerId=" + nearbyTower.TowerID}>Grab</a>
+								<a class="button is-small" href={`/grab/add?towerId=${nearbyTower.TowerID}&ringId=${nearbyTower.RingID || 1}`}>Grab</a>
 							</div>
 						</div>
 					{/if}
@@ -225,7 +225,7 @@
 										<div class="media-right">
 											<div class="buttons">
 												<a class="button is-small is-info" href={"/tower/" + t.TowerID}>Details</a>
-												<a class="button is-small" href={"/grab/add?towerId=" + t.TowerID}>Grab</a>
+												<a class="button is-small" href={`/grab/add?towerId=${t.TowerID}&ringId=${t.RingID || 1}`}>Grab</a>
 											</div>
 										</div>
 									</article>

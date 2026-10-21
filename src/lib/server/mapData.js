@@ -4,7 +4,7 @@ import log from '$lib/server/log.js';
 export async function getTowersWithUserData(userId = null) {
     try {
         const [towers] = await db.execute(
-            'SELECT TowerID, RingID, Place, PlaceCL, Dedicn, County, Country, Diocese, Lat, `Long`, Bells, UR, Wt, Note, Practice FROM Tower WHERE Lat IS NOT NULL AND `Long` IS NOT NULL ORDER BY Place'
+            'SELECT TowerID, RingID, Place, Place2, PlaceCL, Dedicn, County, Country, Diocese, Lat, `Long`, Bells, UR, Wt, Note, Affiliations, Practice FROM Tower WHERE Lat IS NOT NULL AND `Long` IS NOT NULL ORDER BY Place'
         );
         
         if (!userId) {
@@ -101,8 +101,8 @@ export async function getTowersWithUserData(userId = null) {
 export async function getUserTowerData(userId) {
     try {
         const [grabbedTowers] = await db.query(`
-            SELECT DISTINCT t.TowerID, t.RingID, t.Place, t.PlaceCL, t.Dedicn, 
-                   t.County, t.Country, t.Diocese, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note
+            SELECT DISTINCT t.TowerID, t.RingID, t.Place, t.Place2, t.PlaceCL, t.Dedicn,
+                   t.County, t.Country, t.Diocese, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note, t.Affiliations
             FROM Tower t
             INNER JOIN Grab g ON t.TowerID = g.towerID
             WHERE g.userID = ? AND t.Lat IS NOT NULL AND t.\`Long\` IS NOT NULL
@@ -137,8 +137,8 @@ export async function getUserTowerData(userId) {
         if (normalisedNames.length > 0) {
             const [perfRows] = await db.query(`
                 SELECT DISTINCT p.towerID, p.changes, p.Ringers,
-                       t.RingID, t.Place, t.PlaceCL, t.Dedicn, 
-                       t.County, t.Country, t.Diocese, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note
+                       t.RingID, t.Place, t.Place2, t.PlaceCL, t.Dedicn,
+                       t.County, t.Country, t.Diocese, t.Lat, t.\`Long\`, t.Bells, t.UR, t.Wt, t.Note, t.Affiliations
                 FROM Performance p
                 INNER JOIN Tower t ON p.towerID = t.TowerID
                 WHERE p.Ringers IS NOT NULL AND t.Lat IS NOT NULL AND t.\`Long\` IS NOT NULL
@@ -164,16 +164,19 @@ export async function getUserTowerData(userId) {
                             TowerID: r.towerID,
                             RingID: r.RingID,
                             Place: r.Place,
+                            Place2: r.Place2,
                             PlaceCL: r.PlaceCL,
                             Dedicn: r.Dedicn,
                             County: r.County,
                             Country: r.Country,
+                            Diocese: r.Diocese,
                             Lat: r.Lat,
                             Long: r.Long,
                             Bells: r.Bells,
                             UR: r.UR,
                             Wt: r.Wt,
-                            Note: r.Note
+                            Note: r.Note,
+                            Affiliations: r.Affiliations
                         };
                         
                         if (changes >= 1250 && changes < 5000) {

@@ -42,6 +42,8 @@
     // svelte-ignore export_let_unused
     export let dioceses = [];
     // svelte-ignore export_let_unused
+    export let affiliations = [];
+    // svelte-ignore export_let_unused
     export let minWtLbs = null;
     // svelte-ignore export_let_unused
     export let maxWtLbs = null;
@@ -50,6 +52,8 @@
     export let selectedCounty = '';
     export let selectedCountry = '';
     export let selectedDiocese = '';
+    export let selectedAffiliation = '';
+    export let selectedNote = '';
     // store weight inputs in hundredweight decimals for UX (1 cwt = 112 lbs)
     export let minWeightCwt = '';
     export let maxWeightCwt = '';
@@ -104,6 +108,18 @@
         if (selectedDiocese && tower.Diocese) {
             if (String(tower.Diocese).toLowerCase() !== String(selectedDiocese).toLowerCase()) return false;
         } else if (selectedDiocese && !tower.Diocese) {
+            return false;
+        }
+
+        if (selectedAffiliation && tower.Affiliations) {
+            if (!String(tower.Affiliations).toLowerCase().includes(String(selectedAffiliation).toLowerCase())) return false;
+        } else if (selectedAffiliation && !tower.Affiliations) {
+            return false;
+        }
+
+        if (selectedNote && tower.Note) {
+            if (!String(tower.Note).toLowerCase().includes(String(selectedNote).toLowerCase())) return false;
+        } else if (selectedNote && !tower.Note) {
             return false;
         }
 
@@ -430,7 +446,7 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed || selectedCounty || selectedCountry || selectedDiocese || minWeightCwt || maxWeightCwt)) {
+    $: if (map && (towers || displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed || selectedCounty || selectedCountry || selectedDiocese || selectedAffiliation || selectedNote || minWeightCwt || maxWeightCwt)) {
         updateDisplayedTowers();
     }
 </script>

@@ -1,25 +1,26 @@
 import { redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log.js';
+import { getUserGrabData } from '$lib/server/userGrabs.js';
 
-export async function load({ locals, fetch }) {
+export async function load({ locals }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
 
-    // load user grabs through the shared API
-    let userGrabs = [];
     try {
-        const response = await fetch('/api/user-grabs?view=existing');
-        if (!response.ok) throw new Error(`User grabs request failed: ${response.status}`);
-        ({ userGrabs } = await response.json());
+        const { userGrabs } = await getUserGrabData(locals.user.id, 'existing');
+        return {
+            user: locals.user,
+            userGrabs
+        };
     } catch (error) {
         log.error('Error loading user grabs:', error);
     }
 
     return {
         user: locals.user,
-        userGrabs
+        userGrabs: []
     };
 }
 
@@ -110,8 +111,8 @@ export const actions = {
 
             // check if tower already grabbed (match only on towerID; ringID ignored)
             const [grabRows] = await db.query(
-                `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ?`,
-                [locals.user.id, towerId]
+                `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                [locals.user.id, towerId, ringId]
             );
 
             const towerAlreadyGrabbed = grabRows.length > 0;
@@ -144,14 +145,14 @@ export const actions = {
                          monthGrabbed = ?, 
                          yearGrabbed = ?,
                          lastUpdated = CURRENT_TIMESTAMP 
-                         WHERE userID = ? AND towerID = ?`,
-                        [day, month, year, locals.user.id, towerId]
+                         WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                        [day, month, year, locals.user.id, towerId, ringId]
                     );
                     
                     // delete any existing grabbed-bell rows for this user+tower (ignore ringID differences)
                     await db.query(
-                        `DELETE FROM GrabBell WHERE userID = ? AND towerID = ?`,
-                        [locals.user.id, towerId]
+                        `DELETE FROM GrabBell WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                        [locals.user.id, towerId, ringId]
                     );
                 } else {
                     await db.query(
@@ -194,13 +195,13 @@ export const actions = {
             } else if (towerAlreadyGrabbed) {
                 // remove grab for this tower (match by user + towerID only)
                 await db.query(
-                    `DELETE FROM Grab WHERE userID = ? AND towerID = ?`,
-                    [locals.user.id, towerId]
+                    `DELETE FROM Grab WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                    [locals.user.id, towerId, ringId]
                 );
                 
                 await db.query(
-                    `DELETE FROM GrabBell WHERE userID = ? AND towerID = ?`,
-                    [locals.user.id, towerId]
+                    `DELETE FROM GrabBell WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                    [locals.user.id, towerId, ringId]
                 );
 
                 log.info(`User ${locals.user.username} (ID: ${locals.user.id}) removed grab for tower ID ${towerId}`);

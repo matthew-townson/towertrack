@@ -1,25 +1,26 @@
 import { redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log.js';
+import { getUserGrabData } from '$lib/server/userGrabs.js';
 
-export async function load({ locals, fetch }) {
+export async function load({ locals }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
 
-    // Get user's existing grabs
-    let userGrabs = [];
     try {
-        const response = await fetch('/api/user-grabs?view=existing');
-        if (!response.ok) throw new Error(`User grabs request failed: ${response.status}`);
-        ({ userGrabs } = await response.json());
+        const { userGrabs } = await getUserGrabData(locals.user.id, 'existing');
+        return {
+            user: locals.user,
+            userGrabs
+        };
     } catch (error) {
         log.error('Error loading user grabs:', error);
     }
 
     return {
         user: locals.user,
-        userGrabs
+        userGrabs: []
     };
 }
 
@@ -84,8 +85,8 @@ export const actions = {
 
                 // Check if already grabbed
                 const [existingGrab] = await db.query(
-                    `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ?`,
-                    [locals.user.id, towerId]
+                    `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                    [locals.user.id, towerId, ringId || 1]
                 );
 
                 const alreadyGrabbed = existingGrab.length > 0;

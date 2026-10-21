@@ -21,6 +21,9 @@
         minChanges: '',
         maxChanges: '',
         association: '',
+        diocese: '',
+        key: '',
+        affiliation: '',
         place: '',
         county: '',
         method: '',
@@ -72,6 +75,8 @@
     $: associations = [...new Set(data?.performances?.map(p => p.Association).filter(Boolean))].sort();
     
     $: counties = [...new Set(data?.performances?.map(p => p.County).filter(Boolean))].sort();
+    $: dioceses = [...new Set(data?.performances?.map(p => p.Diocese).filter(Boolean))].sort();
+    $: affiliations = [...new Set(data?.performances?.flatMap(p => String(p.Affiliations || '').split(',').map(a => a.trim()).filter(Boolean)))].sort();
     
     $: years = [...new Set(data?.performances?.map(p => p.Date ? new Date(p.Date).getFullYear() : null).filter(Boolean))].sort((a, b) => b - a);
 
@@ -133,6 +138,9 @@
         if (filters.place && !perf.Place?.toLowerCase().includes(filters.place.toLowerCase())) return false;
         
         if (filters.county && perf.County !== filters.county) return false;
+        if (filters.diocese && perf.Diocese !== filters.diocese) return false;
+        if (filters.key && !String(perf.Note || '').toLowerCase().includes(filters.key.toLowerCase())) return false;
+        if (filters.affiliation && !String(perf.Affiliations || '').toLowerCase().includes(filters.affiliation.toLowerCase())) return false;
         
         if (filters.method && !perf.Method?.toLowerCase().includes(filters.method.toLowerCase())) return false;
         
@@ -182,6 +190,9 @@
             minChanges: '',
             maxChanges: '',
             association: '',
+            diocese: '',
+            key: '',
+            affiliation: '',
             place: '',
             county: '',
             method: '',
@@ -197,7 +208,7 @@
         };
     }
     
-    $: hasActiveFilters = filters.type !== 'all' || filters.association || filters.place || 
+    $: hasActiveFilters = filters.type !== 'all' || filters.association || filters.diocese || filters.key || filters.affiliation || filters.place ||
         filters.county || filters.method || filters.dateFrom || filters.dateTo || 
         filters.year || filters.month || filters.dayOfMonth || filters.dayOfWeek ||
         filters.hasDuration || filters.conductorName || filters.otherRinger ||
@@ -277,11 +288,12 @@
 <svelte:head>
     <title>{data.targetUser?.username ? `${data.targetUser.username}'s Performance Data` : 'Performance Data'} | towertracker</title>
     <link rel="stylesheet" href="/assets/css/bellboard-summary.css">
+    <link rel="stylesheet" href="/assets/css/profile.css">
 </svelte:head>
 
 <Header user={data.user} />
 
-<main>    
+<main class="performance-data-page">
     <p class="back-link">
         Performance Data for <a href="/u/{data.targetUser?.username?.replace(/ /g, '-')}">{data.targetUser?.username || 'Unknown User'}</a>
     </p>
@@ -351,14 +363,14 @@
         
         <!-- Filter Section -->
         <section class="filter-section">
-            <button class="filter-toggle" on:click={() => showFilters = !showFilters}>
-                {showFilters ? '▼' : '▶'} Filters
-                {#if hasActiveFilters}
-                    <span class="filter-active-badge">Active</span>
-                {/if}
-            </button>
-            
-            {#if showFilters}
+            <div class:open={showFilters} class="performance-filters-drawer">
+                <button type="button" class="performance-filters-tab" on:click={() => showFilters = !showFilters} aria-expanded={showFilters}>
+                    <span>Advanced filters</span>
+                    {#if hasActiveFilters}
+                        <span class="filter-active-dot" aria-label="Filters active" title="Filters active"></span>
+                    {/if}
+                </button>
+
                 <div class="filter-panel">
                     <!-- Quick type filters -->
                     <div class="filter-group">
@@ -429,6 +441,32 @@
                             {/each}
                         </select>
                     </div>
+
+                    <div class="filter-group filter-row">
+                        <div class="filter-field">
+                            <label for="diocese">Diocese:</label>
+                            <select id="diocese" bind:value={filters.diocese}>
+                                <option value="">All Dioceses</option>
+                                {#each dioceses as diocese}
+                                    <option value={diocese}>{diocese}</option>
+                                {/each}
+                            </select>
+                        </div>
+                        <div class="filter-field">
+                            <label for="affiliation">Affiliation:</label>
+                            <select id="affiliation" bind:value={filters.affiliation}>
+                                <option value="">All Affiliations</option>
+                                {#each affiliations as affiliation}
+                                    <option value={affiliation}>{affiliation}</option>
+                                {/each}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="key">Key (database Note):</label>
+                        <input type="text" id="key" bind:value={filters.key} placeholder="Search key or note...">
+                    </div>
                     
                     <!-- Date range -->
                     <div class="filter-group filter-row">
@@ -497,7 +535,7 @@
                         <button class="reset-btn" on:click={resetFilters}>Reset Filters</button>
                     </div>
                 </div>
-            {/if}
+            </div>
             
             <p class="filter-results">
                 Showing {filteredPerformances.length} of {data?.performances?.length || 0} performances

@@ -15,7 +15,8 @@ const grabDetailsQuery = `
         ),
         '%Y-%m-%d'
       ) as dateGrabbed,
-      t.Place, t.Dedicn, t.County, t.Bells, t.UR, t.Wt
+      t.Place, t.Place2, t.PlaceCL, t.Dedicn, t.County, t.Country,
+      t.Bells, t.UR, t.Wt, t.Note, t.Diocese, t.Affiliations
      FROM Grab g
      JOIN Tower t ON g.towerID = t.TowerID
      WHERE g.userID = ?`;
@@ -75,14 +76,36 @@ export async function getUserGrabData(userId, view = 'dashboard') {
                 `SELECT gb.bellID, b.BellRole, b.BellName
                  FROM GrabBell gb
                  JOIN Bell b ON gb.bellID = b.BellID
-                 WHERE gb.userID = ? AND gb.towerID = ?`,
-                [userId, grab.towerID]
+                 WHERE gb.userID = ? AND gb.towerID = ? AND gb.ringID = ?`,
+                [userId, grab.towerID, grab.ringID]
             );
             grab.bells = bellRows;
         }
 
+        const [statisticsRows] = await db.query(
+            `SELECT
+                COUNT(*) AS totalGrabs,
+                COUNT(DISTINCT towerID) AS uniqueTowers,
+                COUNT(DISTINCT ringID) AS uniqueRings
+             FROM Grab
+             WHERE userID = ?`,
+            [userId]
+        );
+        const [bellStatisticsRows] = await db.query(
+            `SELECT
+                COUNT(*) AS individualBells,
+                COUNT(DISTINCT bellID) AS uniqueBells
+             FROM GrabBell
+             WHERE userID = ?`,
+            [userId]
+        );
+
         return {
             grabCount,
+            statistics: {
+                ...statisticsRows[0],
+                ...bellStatisticsRows[0]
+            },
             recentGrabs: grabs.slice(0, 3),
             grabs
         };

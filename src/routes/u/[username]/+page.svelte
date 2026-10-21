@@ -347,7 +347,7 @@
 
 <Header user={data.user} />
 
-<main class="section">
+<main class="section profile-page">
 	<div class="container">
 		<div class="columns is-centered">
 			<div class="column">
@@ -410,6 +410,7 @@
 											<span>Add to List +</span>
 										</button>
 									{/if}
+									<a class="is-size-7 ml-3" href={`/u/${profile.username?.replace(/ /g, '-')}/grabs`}>View all</a>
 								</div>
 							</div>
 						</div>
@@ -427,6 +428,9 @@
 								<p class="mb-4">
 									<a href="/u/{profile.username?.replace(/ /g, '-')}/performance-data" class="button is-link is-small">
 										View Full Performance Data →
+									</a>
+									<a href="/u/{profile.username?.replace(/ /g, '-')}/grabs" class="button is-link is-light is-small ml-2">
+										View Grabbed Towers →
 									</a>
 								</p>
 							{/if}
@@ -465,7 +469,7 @@
 								</div>
 
 								{#if dashboard}
-									<div class="columns is-multiline is-variable is-2 mb-4">
+									<div class="columns is-mobile is-multiline is-variable is-2 mb-4 statistics-overview">
 										<div class="column is-half-mobile is-one-quarter-tablet">
 											<a class="box has-text-centered profile-stat-card" href={performanceDataLink()}>
 												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.performanceCount)}</p>
@@ -485,10 +489,16 @@
 											</a>
 										</div>
 										<div class="column is-half-mobile is-one-quarter-tablet">
-											<div class="box has-text-centered profile-stat-card">
+											<a class="box has-text-centered profile-stat-card" href={`/u/${profile.username?.replace(/ /g, '-')}/grabs`}>
 												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.grabCount)}</p>
 												<p class="is-size-7 has-text-weight-semibold">Towers grabbed</p>
-											</div>
+											</a>
+										</div>
+										<div class="column is-half-mobile is-one-quarter-tablet">
+											<a class="box has-text-centered profile-stat-card" href={`/u/${profile.username?.replace(/ /g, '-')}/grabs`}>
+												<p class="title is-3 mb-1">{formatNumber(dashboard.summary.individualBellCount)}</p>
+												<p class="is-size-7 has-text-weight-semibold">Individual bells grabbed</p>
+											</a>
 										</div>
 										<div class="column is-half-mobile is-one-quarter-tablet">
 											<div class="box has-text-centered profile-stat-card">
@@ -570,13 +580,16 @@
 															<p class="is-size-7 has-text-grey">Monthly towers grabbed, {selectedChartStartLabel} to {selectedChartEndLabel}</p>
 														</div>
 													</div>
+													<div class="level-right">
+														<a class="is-size-7 ml-3" href={`/u/${encodeURIComponent(profile.username).replace(/%20/g, '-')}/grabs`}>View all</a>
+													</div>
 												</div>
 												{#if grabChartPeriods.length}
 													{#key `grabs-${selectedChartStart}-${selectedChartEnd}`}
 														<PerformanceActivityChart
 															periods={grabChartPeriods}
 															label="Grabs"
-															onSelect={() => {}}
+															onSelect={(period) => window.location.href = `/u/${encodeURIComponent(profile.username).replace(/%20/g, '-')}/grabs?month=${period.period}`}
 														/>
 													{/key}
 												{:else}

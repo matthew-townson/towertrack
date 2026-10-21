@@ -100,6 +100,13 @@
 	height: auto;
 }
 
+.grab-map-container {
+	height: 400px;
+	min-height: 280px;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
 .profile-activity-card {
 	display: flex;
 	flex-direction: column;
@@ -202,6 +209,24 @@
 }
 
 @media (max-width: 768px) {
+	.profile-top .column:not(.is-narrow) > .is-flex,
+	.profile-activity-card > .level,
+	.profile-top + .content + .level {
+		display: block !important;
+	}
+
+	.profile-top .column:not(.is-narrow) > .is-flex .button {
+		margin-top: 0.75rem;
+	}
+
+	.profile-top .column:not(.is-narrow) {
+		min-width: 0;
+	}
+
+	.profile-top .column.is-narrow {
+		padding-right: 0;
+	}
+
 	.profile-avatar {
 		width: 72px;
 		height: 72px;
@@ -213,4 +238,339 @@
 	.profile-top .column {
 		padding-left: 0.5rem;
 	}
+
+	.columns.is-multiline > .column.is-two-thirds,
+	.columns.is-multiline > .column.is-one-third {
+		width: 100%;
+		flex: none;
+	}
+
+	.profile-activity-card > .level .level-right {
+		display: block;
+		margin-top: 0.75rem;
+	}
+
+	.profile-activity-card > .level .level-right > .profile-range-control {
+		width: 100%;
+	}
+
+	.profile-activity-card > .level .level-right > a {
+		display: inline-block;
+		margin: 0.5rem 0 0 !important;
+	}
+
+	.profile-activity-card .performance-activity-chart {
+		height: 220px;
+		min-height: 220px;
+		max-height: 220px;
+	}
+
+	.profile-activity-card {
+		padding: 1rem;
+	}
+
+	.profile-dashboard-card {
+		overflow-wrap: anywhere;
+	}
+}
+.grab-filters-drawer,
+.performance-filters-drawer {
+    position: fixed;
+    top: 7rem;
+    right: 0;
+    z-index: 2147483647;
+    width: min(26rem, calc(100vw - 3rem));
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+}
+
+.performance-filters-drawer {
+    position: fixed;
+    top: 7rem;
+    right: 0;
+    z-index: 2147483647;
+    width: min(32rem, calc(100vw - 3rem));
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+}
+
+.performance-filters-drawer.open {
+    transform: translateX(0);
+}
+
+.performance-filters-drawer .filter-panel {
+    max-height: calc(100vh - 9rem);
+    overflow-y: auto;
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bulma-border, #dbdbdb);
+    border-right: 0;
+    border-radius: 0.5rem 0 0 0.5rem;
+    background: var(--bulma-scheme-main, #fff);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+}
+
+.performance-filters-tab {
+    position: absolute;
+    top: 1rem;
+    right: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 8rem;
+    padding: 0.75rem 0.45rem;
+    border: 1px solid var(--bulma-border, #dbdbdb);
+    border-right: 0;
+    border-radius: 0.5rem 0 0 0.5rem;
+    background: var(--bulma-scheme-main, #fff);
+    color: var(--bulma-text, #363636);
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 12%);
+    cursor: pointer;
+}
+
+.performance-filters-tab span:first-child {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 0.04em;
+}
+
+.performance-filters-drawer select {
+    width: 100%;
+    min-height: 2.25em;
+    padding: 0.35em 2em 0.35em 0.75em;
+    border: 1px solid var(--bulma-border, #dbdbdb);
+    border-radius: 4px;
+    background: var(--bulma-scheme-main, #fff);
+    color: var(--bulma-text, #363636);
+}
+
+.grab-filters-drawer.open,
+.performance-filters-drawer.open {
+    transform: translateX(0);
+}
+
+.grab-filters-drawer .filter-panel,
+.performance-filters-drawer .filter-panel {
+    max-height: calc(100vh - 9rem);
+    overflow-y: auto;
+    margin: 0;
+    padding: 1.25rem;
+    border: 1px solid var(--bulma-border, #dbdbdb);
+    border-right: 0;
+    border-radius: 0.5rem 0 0 0.5rem;
+    background: var(--bulma-scheme-main, #fff);
+    box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 18%);
+}
+
+.grab-filters-tab {
+    position: absolute;
+    top: 1rem;
+    right: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 8rem;
+    padding: 0.75rem 0.45rem;
+    border: 1px solid var(--bulma-border, #dbdbdb);
+    border-right: 0;
+    border-radius: 0.5rem 0 0 0.5rem;
+    background: var(--bulma-scheme-main, #fff);
+    color: var(--bulma-text, #363636);
+    box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 12%);
+    cursor: pointer;
+}
+
+.grab-filters-tab span:first-child {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    letter-spacing: 0.04em;
+}
+
+.filter-active-dot {
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    flex: 0 0 0.65rem;
+    border-radius: 50%;
+    background: #f14668;
+    box-shadow: 0 0 0 2px var(--bulma-scheme-main, #fff), 0 0 0 3px #f14668;
+}
+
+.grab-filters-drawer select {
+    width: 100%;
+    min-height: 2.25em;
+    padding: 0.35em 2em 0.35em 0.75em;
+    border: 1px solid var(--bulma-border, #dbdbdb);
+    border-radius: 4px;
+    background: var(--bulma-scheme-main, #fff);
+    color: var(--bulma-text, #363636);
+}
+
+@media screen and (max-width: 768px) {
+    .grab-filters-drawer {
+        top: 5rem;
+        width: calc(100vw - 2.5rem);
+    }
+
+        .grabs-page,
+        .performance-data-page,
+        .profile-page {
+            overflow-x: hidden;
+        }
+
+        .grabs-page .container,
+        .profile-page .container {
+            width: 100%;
+            max-width: none;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        .grabs-page h1.title,
+        .grabs-page > .container > h2,
+        .performance-data-page h1,
+        .profile-page h1 {
+            overflow-wrap: anywhere;
+        }
+
+        .grabs-page .buttons,
+        .grabs-page .field.is-grouped,
+        .profile-page .buttons {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .grabs-page .buttons .button,
+        .grabs-page .field.is-grouped .control,
+        .grabs-page .field.is-grouped .button,
+        .profile-page .buttons .button {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .grabs-page .grab-map-container {
+            height: 300px;
+            min-height: 240px;
+        }
+
+        .grabs-page .filter-section {
+            padding: 0.75rem;
+        }
+
+        .grabs-page .filter-results {
+            overflow-wrap: anywhere;
+        }
+
+        .grab-filters-drawer,
+        .performance-filters-drawer {
+            top: 4.5rem;
+            width: calc(100vw - 2.25rem);
+            max-width: none;
+        }
+
+        .grab-filters-drawer .filter-panel,
+        .performance-filters-drawer .filter-panel {
+            max-height: calc(100vh - 5.5rem);
+            padding: 1rem 0.85rem;
+        }
+
+        .grab-filters-drawer .filter-group,
+        .performance-filters-drawer .filter-group,
+        .grab-filters-drawer .filter-row,
+        .performance-filters-drawer .filter-row {
+            display: block;
+        }
+
+        .grab-filters-drawer .filter-field,
+        .performance-filters-drawer .filter-field {
+            width: 100%;
+            margin-bottom: 0.75rem;
+        }
+
+        .grab-filters-tab,
+        .performance-filters-tab {
+            min-height: 7rem;
+            padding: 0.65rem 0.35rem;
+        }
+
+        .performance-data-page {
+            padding: 0.75rem;
+        }
+
+        .performance-data-page .performance-card,
+        .performance-data-page .compact-item {
+            min-width: 0;
+        }
+
+        .performance-data-page .performance-content {
+            align-items: stretch;
+        }
+
+        .performance-data-page .performance-link {
+            align-self: stretch;
+            text-align: left;
+        }
+
+        .profile-page .profile-top {
+            align-items: flex-start;
+        }
+
+        .profile-page .profile-top .column:not(.is-narrow) > .is-flex {
+            gap: 0.5rem;
+        }
+
+        .profile-page .profile-top .column:not(.is-narrow) > .is-flex > * {
+            min-width: 0;
+        }
+
+        .profile-page .profile-top .column:not(.is-narrow) > .is-flex > a,
+        .profile-page .profile-top .column:not(.is-narrow) > .is-flex > button {
+            align-self: stretch;
+            white-space: normal;
+        }
+
+        .profile-page .profile-activity-card .performance-activity-chart {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .profile-page .profile-stat-card {
+            padding: 0.85rem 0.5rem;
+        }
+
+        .profile-page .statistics-overview > .column {
+            width: 50%;
+            flex: none;
+            padding: 0.5rem;
+        }
+
+        .grabs-page .statistics-overview > .column {
+            width: 50%;
+            flex: none;
+            padding: 0.5rem;
+        }
+
+        .profile-page .statistics-overview .profile-stat-card,
+        .grabs-page .statistics-overview .profile-stat-card {
+            min-height: 100%;
+            margin: 0;
+        }
+
+        .profile-page .level {
+            align-items: flex-start;
+        }
+    }
+
+    .grab-filters-drawer .filter-panel {
+        max-height: calc(100vh - 6rem);
+    }
+
+    .performance-filters-drawer {
+        top: 5rem;
+        width: calc(100vw - 2.5rem);
+    }
+
+    .performance-filters-drawer .filter-panel {
+        max-height: calc(100vh - 6rem);
+    }
 }

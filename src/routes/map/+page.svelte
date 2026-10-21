@@ -35,12 +35,15 @@
     let counties = [];
     let countries = [];
     let dioceses = [];
+    let affiliations = [];
     let minWtLbs = null;
     let maxWtLbs = null;
 
     let selectedCounty = '';
     let selectedCountry = '';
     let selectedDiocese = '';
+    let selectedAffiliation = '';
+    let selectedNote = '';
     let minWeightCwt = '';
     let maxWeightCwt = '';
     let advancedOpen = false;
@@ -84,6 +87,8 @@
             if (val === '1' || val === 'true' || val === 'include') includePealed = true;
             if (val === 'exclude') excludePealed = true;
         }
+        if (urlParams.has('affiliation')) selectedAffiliation = urlParams.get('affiliation') || '';
+        if (urlParams.has('key')) selectedNote = urlParams.get('key') || '';
         
         if (urlParams.has('excludeSpecial')) {
             const val = urlParams.get('excludeSpecial');
@@ -104,6 +109,7 @@
                 counties = data.counties || [];
                 countries = data.countries || [];
                 dioceses = data.dioceses || [];
+                affiliations = data.affiliations || [];
                 minWtLbs = data.minWt ?? null;
                 maxWtLbs = data.maxWt ?? null;
 
@@ -136,6 +142,8 @@
         selectedCounty = '';
         selectedCountry = '';
         selectedDiocese = '';
+        selectedAffiliation = '';
+        selectedNote = '';
         minWeightCwt = minWtLbs ? lbsToCwtDecimal(minWtLbs) : '';
         maxWeightCwt = maxWtLbs ? lbsToCwtDecimal(maxWtLbs) : '';
     }
@@ -184,6 +192,9 @@
                 bind:selectedCounty
                 bind:selectedCountry
                 bind:selectedDiocese
+                bind:affiliations
+                bind:selectedAffiliation
+                bind:selectedNote
                 bind:minWeightCwt
                 bind:maxWeightCwt
                 showLocationTracking={true}
@@ -415,6 +426,27 @@
                                                     <option value={d}>{d}</option>
                                                 {/each}
                                             </select>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label" for="affiliation-select">Affiliation</label>
+                                            <div class="control">
+                                                <div class="select is-fullwidth">
+                                                    <select id="affiliation-select" bind:value={selectedAffiliation}>
+                                                        <option value="">(Any)</option>
+                                                        {#each affiliations as affiliation}
+                                                            <option value={affiliation}>{affiliation}</option>
+                                                        {/each}
+                                                    </select>
+                                                </div>
+
+                                                <div class="field">
+                                                    <label class="label" for="key-filter">Key (database Note)</label>
+                                                    <div class="control">
+                                                        <input id="key-filter" class="input" type="search" bind:value={selectedNote} placeholder="Search key or note">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

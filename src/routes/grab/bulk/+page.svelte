@@ -13,6 +13,29 @@
     let typingTimeouts = {};
     let lastTowerSelectedEntryId = null;
 
+    function sameGrab(grab, tower) {
+        return String(grab.towerID) === String(tower.TowerID) &&
+            String(grab.ringID || 1) === String(tower.RingID || 1);
+    }
+
+    function normalizeDate(value) {
+        if (!value) return '';
+        return String(value).slice(0, 10);
+    }
+
+    function normalizeBellIds(value) {
+        if (Array.isArray(value)) return new Set(value.map(id => String(id)));
+        if (typeof value === 'string') {
+            try {
+                const parsed = JSON.parse(value);
+                return Array.isArray(parsed) ? new Set(parsed.map(id => String(id))) : new Set();
+            } catch {
+                return new Set(value.split(',').map(id => id.trim()).filter(Boolean));
+            }
+        }
+        return new Set();
+    }
+
     function createEmptyEntry() {
         return {
             id: crypto.randomUUID(),
@@ -56,12 +79,9 @@
                         .filter(e => e.id !== entry.id && e.tower)
                         .map(e => `${e.tower.TowerID}-${e.tower.RingID || 1}`)
                 );
-                const alreadyGrabbedIds = new Set(
-                    (data.userGrabs || []).map(g => `${g.towerID}-${g.ringID}`)
-                );
                 entry.searchResults = results.filter(tower => {
                     const key = `${tower.TowerID}-${tower.RingID || 1}`;
-                    return !selectedTowerIds.has(key) && !alreadyGrabbedIds.has(key);
+                    return !selectedTowerIds.has(key);
                 });
             } else {
                 entry.searchResults = [];
@@ -82,17 +102,21 @@
 
     async function selectTower(entry, tower) {
         // Check if tower is already grabbed by user
-        const isAlreadyGrabbed = data.userGrabs?.some(g => 
-            g.towerID === tower.TowerID && g.ringID === (tower.RingID || 1)
-        );
+        const towerId = String(tower.TowerID);
+        const ringId = String(tower.RingID || 1);
+        const existingGrab = data.userGrabs?.find(g => sameGrab(g, tower));
+        const isAlreadyGrabbed = Boolean(existingGrab);
         
         // Check if tower is already in another entry
-        const isInOtherEntry = grabEntries.some(e => 
-            e.id !== entry.id && e.tower?.TowerID === tower.TowerID
+        const isInOtherEntry = grabEntries.some(e =>
+            e.id !== entry.id &&
+            String(e.tower?.TowerID) === towerId &&
+            String(e.tower?.RingID || 1) === ringId
         );
 
         entry.tower = { ...tower, isAlreadyGrabbed, isInOtherEntry };
         entry.searchQuery = `${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}`;
+        entry.dateGrabbed = normalizeDate(existingGrab?.dateGrabbed);
         entry.searchResults = [];
         entry.loading = true;
         grabEntries = grabEntries;
@@ -102,9 +126,9 @@
             const response = await fetch(`/api/bells?towerId=${tower.TowerID}&ringId=${tower.RingID || 1}`);
             if (response.ok) {
                 entry.bells = await response.json();
-                // Start with no bells selected
-                entry.selectedBells = new Set();
-                entry.allBells = false;
+                entry.selectedBells = normalizeBellIds(existingGrab?.selectedBells);
+                entry.allBells = entry.bells.length > 0 &&
+                    entry.bells.every(bell => entry.selectedBells.has(String(bell.BellID)));
             } else {
                 entry.bells = [];
             }
@@ -136,19 +160,21 @@
     }
 
     function toggleBell(entry, bellId) {
-        if (entry.selectedBells.has(bellId)) {
-            entry.selectedBells.delete(bellId);
+        const normalizedBellId = String(bellId);
+        if (entry.selectedBells.has(normalizedBellId)) {
+            entry.selectedBells.delete(normalizedBellId);
         } else {
-            entry.selectedBells.add(bellId);
+            entry.selectedBells.add(normalizedBellId);
         }
         entry.selectedBells = new Set(entry.selectedBells);
-        entry.allBells = entry.bells.length > 0 && entry.bells.every(b => entry.selectedBells.has(b.BellID));
+        entry.allBells = entry.bells.length > 0 &&
+            entry.bells.every(b => entry.selectedBells.has(String(b.BellID)));
         grabEntries = grabEntries;
     }
 
     function toggleAllBells(entry) {
         if (entry.allBells) {
-            entry.selectedBells = new Set(entry.bells.map(b => b.BellID));
+            entry.selectedBells = new Set(entry.bells.map(b => String(b.BellID)));
         } else {
             entry.selectedBells = new Set();
         }
@@ -221,6 +247,7 @@
             grabEntries = grabEntries;
         }
     }
+
 </script>
 
 <svelte:head>
@@ -231,11 +258,20 @@
 
 <Header user={data.user} />
 
-<main>
-    <div class="bulk-grab-container">
-        <h1>Bulk Add Grabs</h1>
-        
-        <a href="/grab" class="button is-light mb-4">← Back to Grabs</a>
+<main class="section">
+    <div class="container bulk-grab-page">
+        <div class="level mb-5">
+            <div class="level-left">
+                <div>
+                    <p class="back-link"><a href="/grab">← Back to Grabs</a></p>
+                    <h1 class="title mb-1" style="text-align: left;">Add grabs in bulk</h1>
+                    <p class="subtitle is-6 mb-0">Build a list of towers, select bells, and save them together.</p>
+                </div>
+            </div>
+            <div class="level-right">
+                <a href="/grab/add" class="button is-link">Add one grab</a>
+            </div>
+        </div>
         
         {#if form?.success}
             <div class="notification is-success">
@@ -249,7 +285,7 @@
             </div>
         {/if}
 
-        <form method="POST" action="?/bulkAddGrabs" use:enhance={() => {
+        <form class="bulk-grab-form box" method="POST" action="?/bulkAddGrabs" use:enhance={() => {
             submitting = true;
             return async ({ result, update }) => {
                 submitting = false;
@@ -329,10 +365,10 @@
                                                 </div>
                                                 <div class="bulk-bells-grid">
                                                     {#each entry.bells as bell}
-                                                        <label class="bulk-bell-checkbox" class:selected={entry.selectedBells.has(bell.BellID)}>
+                                                        <label class="bulk-bell-checkbox" class:selected={entry.selectedBells.has(String(bell.BellID))}>
                                                             <input 
                                                                 type="checkbox" 
-                                                                checked={entry.selectedBells.has(bell.BellID)}
+                                                                checked={entry.selectedBells.has(String(bell.BellID))}
                                                                 on:change={() => toggleBell(entry, bell.BellID)}
                                                             />
                                                             <span class="bulk-bell-role">{bell.BellRole || '?'}</span>

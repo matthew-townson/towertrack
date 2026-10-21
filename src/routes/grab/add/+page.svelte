@@ -21,14 +21,48 @@
     let typingTimeout = null;
     let successMessage = '';
     let suppressSearch = false;
+    let formStateVersion = 0;
     
     // Location-based suggestion state
     let locationLoading = false;
     let locationError = '';
-    let suggestedTower = null;
-    let suggestedDistance = null;
-    let locationWatchId = null;
-    let userLocation = null;
+    let nearbyTower = null;
+    let nearbyDistance = null;
+
+    function sameGrab(grab, tower) {
+        return String(grab.towerID) === String(tower.TowerID) &&
+            String(grab.ringID || 1) === String(tower.RingID || 1);
+    }
+
+    function normalizeDate(value) {
+        if (!value) return '';
+        return String(value).slice(0, 10);
+    }
+
+    function normalizeBellIds(value) {
+        if (Array.isArray(value)) return new Set(value.map(id => String(id)));
+        if (typeof value === 'string') {
+            try {
+                const parsed = JSON.parse(value);
+                return Array.isArray(parsed) ? new Set(parsed.map(id => String(id))) : new Set();
+            } catch {
+                return new Set(value.split(',').map(id => id.trim()).filter(Boolean));
+            }
+        }
+        return new Set();
+    }
+
+    function applyExistingGrab(grab) {
+        isGrabbed = true;
+        dateGrabbed = normalizeDate(grab?.dateGrabbed);
+        isDateRequired = dateGrabbed.length > 0;
+        selectedBells = normalizeBellIds(grab?.selectedBells);
+        formStateVersion += 1;
+    }
+
+    function isBellSelected(bell) {
+        return selectedBells.has(String(bell.BellID));
+    }
     
     function debounce(func, wait) {
         return function(...args) {
@@ -80,9 +114,12 @@
 
     onMount(async () => {
         const towerId = $page.url.searchParams.get('towerId');
+        const ringId = $page.url.searchParams.get('ringId');
         if (towerId) {
             try {
-                const response = await fetch(`/api/tower?id=${towerId}`);
+                const params = new URLSearchParams({ id: towerId });
+                if (ringId) params.set('ringId', ringId);
+                const response = await fetch(`/api/tower?${params}`);
                 if (response.ok) {
                     const tower = await response.json();
                     if (tower) {
@@ -107,14 +144,16 @@
             }
 
             if (form?.selectedBells && Array.isArray(form.selectedBells)) {
-                selectedBells = new Set(form.selectedBells);
+                selectedBells = normalizeBellIds(form.selectedBells);
                 
                 try {
                     const response = await fetch(`/api/bells?towerId=${selectedTower.TowerID}&ringId=${selectedTower.RingID || 1}`);
                     if (response.ok) {
                         towerBells = await response.json();
                         
-                        allBells = towerBells.length > 0 && towerBells.every(bell => selectedBells.has(bell.BellID));
+                        allBells = towerBells.length > 0 &&
+                            towerBells.every(bell => selectedBells.has(String(bell.BellID)));
+                        formStateVersion += 1;
                     }
                 } catch (error) {
                     console.error("Failed to fetch bells:", error);
@@ -127,108 +166,70 @@
         }
         
         if (form?.dateGrabbed) {
-            dateGrabbed = form.dateGrabbed;
+            dateGrabbed = normalizeDate(form.dateGrabbed);
             isDateRequired = true;
         }
         
         // Start location detection if no tower was pre-selected
         if (!$page.url.searchParams.get('towerId') && !form?.selectedTower) {
-            startLocationDetection();
+            findNearbyTower();
         }
         
-        // Cleanup on unmount
-        return () => {
-            if (locationWatchId !== null) {
-                navigator.geolocation.clearWatch(locationWatchId);
-            }
-        };
     });
     
-    async function startLocationDetection() {
+    function findNearbyTower() {
         if (!navigator.geolocation) {
-            locationError = 'Geolocation is not supported by your browser';
+            locationError = 'Location search is not supported by your browser.';
             return;
         }
-        
+
         locationLoading = true;
         locationError = '';
-        
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                await findNearestTower();
-            },
-            (error) => {
+
+        navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+            try {
+                const response = await fetch(
+                    `/api/nearest-tower?lat=${coords.latitude}&lng=${coords.longitude}&maxDistance=5`
+                );
+                const nearby = await response.json();
+                if (!response.ok) {
+                    throw new Error(nearby.error || 'Unable to find nearby towers.');
+                }
+                nearbyTower = nearby.found ? nearby.tower : null;
+                nearbyDistance = nearby.found ? nearby.distanceMeters : null;
+                if (!nearby.found) {
+                    locationError = nearby.message || 'No ungrabbed towers found nearby.';
+                }
+            } catch (error) {
+                console.error('Error finding nearby tower:', error);
+                locationError = error.message || 'Unable to find nearby towers.';
+                nearbyTower = null;
+                nearbyDistance = null;
+            } finally {
                 locationLoading = false;
-                switch (error.code) {
-                    case error.PERMISSION_DENIED:
-                        locationError = 'Location access denied. You can search for towers manually below.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        locationError = 'Location information unavailable.';
-                        break;
-                    case error.TIMEOUT:
-                        locationError = 'Location request timed out.';
-                        break;
-                    default:
-                        locationError = 'Unable to get your location.';
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
             }
-        );
-    }
-    
-    async function findNearestTower() {
-        if (!userLocation) return;
-        
-        locationLoading = true;
-        try {
-            const response = await fetch(
-                `/api/nearest-tower?lat=${userLocation.lat}&lng=${userLocation.lng}&maxDistance=1`
-            );
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.found) {
-                    suggestedTower = result.tower;
-                    suggestedDistance = result.distanceMeters;
-                } else {
-                    suggestedTower = null;
-                    suggestedDistance = null;
-                }
-            }
-        } catch (error) {
-            console.error('Error finding nearest tower:', error);
-        } finally {
+        }, (error) => {
             locationLoading = false;
-        }
+            locationError = error.code === error.PERMISSION_DENIED
+                ? 'Location access was denied. You can continue with the search above.'
+                : 'Unable to determine your location. You can continue with the search above.';
+        }, {
+            enableHighAccuracy: false,
+            timeout: 10000,
+            maximumAge: 300000
+        });
     }
-    
+
     function formatDistance(meters) {
-        if (meters < 1000) {
-            return `${meters}m`;
-        }
-        return `${(meters / 1000).toFixed(1)}km`;
+        return meters < 1000 ? `${meters}m` : `${(meters / 1000).toFixed(1)}km`;
     }
-    
-    async function useSuggestedTower() {
-        if (suggestedTower) {
-            await selectTower(suggestedTower);
-            suggestedTower = null;
-            suggestedDistance = null;
+
+    async function useNearbyTower() {
+        if (nearbyTower) {
+            await selectTower(nearbyTower);
+            nearbyTower = null;
+            nearbyDistance = null;
         }
-    }
-    
-    function dismissSuggestion() {
-        suggestedTower = null;
-        suggestedDistance = null;
     }
 
     async function selectTower(tower) {
@@ -239,26 +240,14 @@
         searchResults = [];
         setTimeout(() => { suppressSearch = false; }, 300);
 
-        const existingGrab = data.userGrabs?.find(grab => 
-            grab.towerID === tower.TowerID && grab.ringID === (tower.RingID || 1)
-        );
+        const existingGrab = data.userGrabs?.find(grab => sameGrab(grab, tower));
         
         if (existingGrab) {
-            isGrabbed = true;
-            if (existingGrab.dateGrabbed) {
-                dateGrabbed = existingGrab.dateGrabbed;
-                isDateRequired = true;
-            } else {
-                dateGrabbed = '';
-                isDateRequired = false;
-            }
-            
-            selectedBells = new Set(existingGrab.selectedBells || []);
+            applyExistingGrab(existingGrab);
         } else {
-            isGrabbed = true;
+            applyExistingGrab(null);
             dateGrabbed = '';
             isDateRequired = false;
-            selectedBells = new Set();
         }
         
         try {
@@ -266,7 +255,9 @@
             if (response.ok) {
                 towerBells = await response.json();
                 
-                allBells = towerBells.length > 0 && towerBells.every(bell => selectedBells.has(bell.BellID));
+                allBells = towerBells.length > 0 &&
+                    towerBells.every(bell => selectedBells.has(String(bell.BellID)));
+                formStateVersion += 1;
             } else {
                 towerBells = [];
             }
@@ -286,19 +277,21 @@
     }
 
     function toggleBell(bellId) {
-        if (selectedBells.has(bellId)) {
-            selectedBells.delete(bellId);
+        const normalizedBellId = String(bellId);
+        if (selectedBells.has(normalizedBellId)) {
+            selectedBells.delete(normalizedBellId);
         } else {
-            selectedBells.add(bellId);
+            selectedBells.add(normalizedBellId);
         }
         selectedBells = selectedBells;
         
-        allBells = towerBells.length > 0 && towerBells.every(bell => selectedBells.has(bell.BellID));
+        allBells = towerBells.length > 0 &&
+            towerBells.every(bell => selectedBells.has(String(bell.BellID)));
     }
 
     function toggleAllBells() {
         if (allBells) {
-            selectedBells = new Set(towerBells.map(bell => bell.BellID));
+            selectedBells = new Set(towerBells.map(bell => String(bell.BellID)));
         } else {
             selectedBells = new Set();
         }
@@ -335,64 +328,53 @@
 <svelte:head>
     <title>Add a Grab | towertracker</title>
     <link rel="stylesheet" href="/assets/css/grab.css">
+    <link rel="stylesheet" href="/assets/css/bellboard-summary.css">
 </svelte:head>
 
 <Header user={data.user} />
 
-<main>
-    <div class="add-grab-container settings-section">
-        <h2>Add a Grab</h2>
-
-        <div class="breadcrumb-nav">
-            <button type="button" class="btn btn-link" on:click={() => history.back()}>← Back to previous page</button>
+<main class="section">
+    <div class="container add-grab-page">
+        <div class="level mb-5">
+            <div class="level-left">
+                <div>
+                    <p class="back-link"><a href="/grab">← Back to Grabs</a></p>
+                    <h1 class="title mb-1" style="text-align: left;">Add a grab</h1>
+                    <p class="subtitle is-6 mb-0">Search for a tower, choose the bells you rang, and save your visit.</p>
+                </div>
+            </div>
+            <div class="level-right">
+                <a href="/grab/bulk" class="button is-link">Add multiple grabs</a>
+            </div>
         </div>
 
-        <!-- Location-based suggestion -->
-        {#if locationLoading}
-            <div class="notification is-info location-suggestion">
-                <span class="icon">📍</span>
-                <span>Detecting your location...</span>
-            </div>
-        {:else if locationError}
-            <div class="notification is-warning location-suggestion">
-                <span class="icon">⚠️</span>
-                <span>{locationError}</span>
-                <button type="button" class="button is-small is-light ml-2" on:click={startLocationDetection}>
-                    Retry
+        <div class="box location-search">
+            <div class="location-search-heading">
+                <div>
+                    <p class="heading">Find a nearby tower</p>
+                    <p class="help">Use your location to find the nearest ungrabbed tower.</p>
+                </div>
+                <button type="button" class="button is-primary" on:click={findNearbyTower} disabled={locationLoading}>
+                    {locationLoading ? 'Finding…' : 'Use my location'}
                 </button>
             </div>
-        {:else if suggestedTower && !selectedTower}
-            <div class="notification is-success location-suggestion suggested-tower-card">
-                <div class="suggestion-header">
-                    <span class="icon">📍</span>
-                    <strong>Nearest ungrabbed tower ({formatDistance(suggestedDistance)} away)</strong>
+            {#if locationError}
+                <p class="help is-danger">{locationError}</p>
+            {:else if nearbyTower && !selectedTower}
+                <div class="nearby-tower">
+                    <div>
+                        <strong>{nearbyTower.Place}{nearbyTower.Dedicn ? `, ${nearbyTower.Dedicn}` : ''}</strong>
+                        <p class="help">{formatDistance(nearbyDistance)} away · {nearbyTower.Bells} bells</p>
+                    </div>
+                    <div class="buttons">
+                        <a class="button is-small is-info" href={"/tower/" + nearbyTower.TowerID}>Details</a>
+                        <button type="button" class="button is-small" on:click={useNearbyTower}>Grab</button>
+                    </div>
                 </div>
-                <div class="suggestion-content">
-                    <p class="tower-name">
-                        <strong>{suggestedTower.Place}</strong>{#if suggestedTower.Dedicn}, {suggestedTower.Dedicn}{/if}
-                    </p>
-                    <p class="tower-details">
-                        {suggestedTower.County || ''}{#if suggestedTower.Country && suggestedTower.Country !== suggestedTower.County}, {suggestedTower.Country}{/if}
-                        • {suggestedTower.Bells} bells
-                        {#if suggestedTower.UR === '1' || suggestedTower.UR === 1}
-                            <span class="tag is-warning is-light ml-2">Unringable</span>
-                        {/if}
-                    </p>
-                </div>
-                <div class="suggestion-actions">
-                    <button type="button" class="button is-primary" on:click={useSuggestedTower}>
-                        Grab this tower
-                    </button>
-                    <button type="button" class="button is-light" on:click={dismissSuggestion}>
-                        Search for another
-                    </button>
-                </div>
-            </div>
-        {/if}
-        
-        <div class="add-grab-container">
-            <div class="settings-section">
-                <div class="search-section">
+            {/if}
+        </div>
+        <div class="box">
+            <div class="search-section">
                     <label for="searchQuery" class="label">Search for a Tower</label>
                     <div class="search-field">
                         <input
@@ -434,60 +416,59 @@
                     </div>
                 </div>            
             {#if selectedTower}
-                <div class="selected-tower-container">
-                    <h3>Selected Tower</h3>
-                    <div class="selected-tower-info">
-                        <p class="tower-name">
-                            <strong>{selectedTower.Place}</strong>{#if selectedTower.Dedicn}, {selectedTower.Dedicn}{/if}
-                        </p>
-                        <p class="tower-location">
-                            {selectedTower.County ? selectedTower.County : ''}{#if selectedTower.Country && selectedTower.Country !== selectedTower.County}, {selectedTower.Country}{/if}
-                        </p>
-                        <p class="tower-bells">
-                            <strong>{selectedTower.Bells} bells</strong>
-                            {#if selectedTower.Wt}
-                                <span class="tenor-weight">• Tenor: {lbsToHundredweight(selectedTower.Wt)}</span>
-                            {/if}
-                            {#if selectedTower.UR === '1' || selectedTower.UR === 1}
-                                <span class="unringable-tag">Unringable</span>
-                            {/if}
-                        </p>
-                    </div>
+                    {#key `${selectedTower.TowerID}-${selectedTower.RingID || 1}-${formStateVersion}`}
+                        <section class="selected-tower-container box">
+                            <div class="level is-mobile mb-4">
+                                <div class="level-left">
+                                    <div>
+                                        <p class="heading mb-1">Selected tower</p>
+                                        <h2 class="title is-4 mb-1" style="text-align: left;">
+                                            {selectedTower.Place}{#if selectedTower.Dedicn}, {selectedTower.Dedicn}{/if}
+                                        </h2>
+                                        <p class="subtitle is-6 mb-0">
+                                            {selectedTower.County || ''}{#if selectedTower.Country && selectedTower.Country !== selectedTower.County}, {selectedTower.Country}{/if}
+                                            · {selectedTower.Bells} bells
+                                            {#if selectedTower.Wt} · Tenor: {lbsToHundredweight(selectedTower.Wt)}{/if}
+                                        </p>
+                                    </div>
+                                </div>
+                                {#if selectedTower.UR === '1' || selectedTower.UR === 1}
+                                    <div class="level-right">
+                                        <span class="tag is-warning">Unringable</span>
+                                    </div>
+                                {/if}
+                            </div>
                     
-                    <form method="POST" action="?/addGrab" use:enhance={() => {
-                        loading = true;
-                        const currentSelectedBells = [...selectedBells];
-                        const currentTowerName = selectedTower ? 
-                            `${selectedTower.Place}${selectedTower.Dedicn ? `, ${selectedTower.Dedicn}` : ''}` :
-                            'Tower';
-                        
-                        return async ({ result, update }) => {
-                            loading = false;
-                            if (result.type === 'success') {
-                                if (result.data && result.data.message) {
-                                    successMessage = result.data.message;
-                                    setTimeout(() => {
-                                        successMessage = '';
-                                    }, 5000);
+                        <form method="POST" action="?/addGrab" use:enhance={() => {
+                            loading = true;
+                            const currentSelectedBells = [...selectedBells];
+
+                            return async ({ result, update }) => {
+                                loading = false;
+                                if (result.type === 'success') {
+                                    if (result.data && result.data.message) {
+                                        successMessage = result.data.message;
+                                        setTimeout(() => {
+                                            successMessage = '';
+                                        }, 5000);
+                                    }
+
+                                    resetFormState();
+                                    await update();
+                                } else {
+                                    const updatedProps = {
+                                        ...result.data,
+                                        selectedBells: currentSelectedBells
+                                    };
+                                    await update({ ...result, data: updatedProps });
                                 }
-                                
-                                resetFormState();
-                                
-                                await update();
-                            } else {
-                                const updatedProps = { 
-                                    ...result.data,
-                                    selectedBells: currentSelectedBells 
-                                };
-                                await update({ ...result, data: updatedProps });
-                            }
-                        };
-                    }}>
+                            };
+                        }}>
                         <input type="hidden" name="towerId" value={selectedTower.TowerID} />
                         <input type="hidden" name="ringId" value={selectedTower.RingID || 1} />
                         <input type="hidden" name="isGrabbed" value={isGrabbed} />
                         
-                        <div class="grab-toggle-container">
+                        <div class="grab-toggle-container box">
                             <label class="grab-toggle">
                                 <span class="grab-label">Have you grabbed this tower?</span>
                                 <div class="toggle-switch-container">
@@ -502,17 +483,16 @@
                         </div>
                         
                         {#if isGrabbed}
-                            <div class="date-grabbed-container">
+                            <div class="date-grabbed-container box">
                                 <div class="date-field-header">
                                     <label for="dateGrabbed" class="label">Date Grabbed (Optional)</label>
                                     <label class="checkbox date-required-toggle">
-                                        <input 
+                                        <input
                                             type="checkbox" 
-                                            bind:checked={isDateRequired}
-                                            on:change={() => {
-                                                if (!isDateRequired && !dateGrabbed) {
-                                                    dateGrabbed = '';
-                                                }
+                                            checked={isDateRequired}
+                                            on:change={(event) => {
+                                                isDateRequired = event.currentTarget.checked;
+                                                if (!isDateRequired) dateGrabbed = '';
                                             }}
                                         />
                                         <span>Include Date</span>
@@ -530,30 +510,34 @@
                             </div>
                             
                             {#if towerBells.length > 0}
-                                <div class="bells-selection-container">
-                                    <div class="bells-header">
-                                        <h4>Select the bells you've rung</h4>
-                                        <label class="checkbox select-all">
-                                            <input 
-                                                type="checkbox" 
-                                                checked={allBells}
-                                                on:change={() => {
-                                                    allBells = !allBells;
-                                                    toggleAllBells();
-                                                }}
-                                            />
-                                            <span>Select All</span>
-                                        </label>
+                                <div class="bells-selection-container box">
+                                    <div class="level is-mobile mb-4">
+                                        <div class="level-left">
+                                            <h3 class="title is-5 mb-0">Bells rung</h3>
+                                        </div>
+                                        <div class="level-right">
+                                            <label class="checkbox select-all">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={allBells}
+                                                    on:change={() => {
+                                                        allBells = !allBells;
+                                                        toggleAllBells();
+                                                    }}
+                                                />
+                                                <span>Select All</span>
+                                            </label>
+                                        </div>
                                     </div>
                                     
                                     <div class="bells-grid-add">
                                         {#each towerBells as bell}
-                                                        <div class="bell-item-add">
+                                            <div class="bell-item-add">
                                                 <div
-                                                    class="bell-box-add {selectedBells.has(bell.BellID) ? 'is-selected' : ''}"
+                                                    class="bell-box-add {isBellSelected(bell) ? 'is-selected' : ''}"
                                                     on:click={() => toggleBell(bell.BellID)}
                                                     role="checkbox"
-                                                    aria-checked={selectedBells.has(bell.BellID)}
+                                                    aria-checked={isBellSelected(bell)}
                                                     tabindex="0"
                                                     on:keydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBell(bell.BellID); } }}
                                                 >
@@ -561,7 +545,8 @@
                                                         <input
                                                             type="checkbox"
                                                             name={"bell_" + bell.BellID}
-                                                            checked={selectedBells.has(bell.BellID)}
+                                                            checked={isBellSelected(bell)}
+                                                            on:click={(event) => event.stopPropagation()}
                                                             on:change={() => toggleBell(bell.BellID)}
                                                         />
                                                         <div class="bell-info-add">
@@ -611,7 +596,8 @@
                             </button>
                         </div>
                     </form>
-                </div>
+                    </section>
+                {/key}
             {/if}
             {#if successMessage}
                 <div class="notification is-success">
@@ -619,7 +605,6 @@
                 </div>
             {/if}
         </div>
-    </div>
     </div>
 </main>
 

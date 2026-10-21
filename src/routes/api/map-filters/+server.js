@@ -13,15 +13,19 @@ export async function GET({ locals }) {
         const [countiesRows] = await db.query(`SELECT DISTINCT County FROM Tower WHERE County IS NOT NULL AND County != '' ORDER BY County`);
         const [countriesRows] = await db.query(`SELECT DISTINCT Country FROM Tower WHERE Country IS NOT NULL AND Country != '' ORDER BY Country`);
         const [dioceseRows] = await db.query(`SELECT DISTINCT Diocese FROM Tower WHERE Diocese IS NOT NULL AND Diocese != '' ORDER BY Diocese`);
+        const [affiliationRows] = await db.query(`SELECT DISTINCT Affiliations FROM Tower WHERE Affiliations IS NOT NULL AND Affiliations != '' ORDER BY Affiliations`);
         const [wtRows] = await db.query(`SELECT MIN(Wt) AS minWt, MAX(Wt) AS maxWt FROM Tower WHERE Wt IS NOT NULL`);
 
         const counties = countiesRows.map(r => r.County).filter(Boolean);
         const countries = countriesRows.map(r => r.Country).filter(Boolean);
         const dioceses = dioceseRows.map(r => r.Diocese).filter(Boolean);
+        const affiliations = [...new Set(affiliationRows
+            .flatMap(r => String(r.Affiliations).split(',').map(value => value.trim()))
+            .filter(Boolean))].sort();
         const minWt = wtRows[0]?.minWt ?? null;
         const maxWt = wtRows[0]?.maxWt ?? null;
 
-        return json({ counties, countries, dioceses, minWt, maxWt });
+        return json({ counties, countries, dioceses, affiliations, minWt, maxWt });
     } catch (err) {
         console.error('Failed to load map filters:', err);
         return json({ error: 'Failed to load filters' }, { status: 500 });

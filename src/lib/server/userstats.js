@@ -368,7 +368,7 @@ export async function getUserDashboardStats(userId) {
                     gb.bellID, gb.bellRole, b.WeightLbs
              FROM Grab g
              LEFT JOIN Tower t ON g.towerID = t.TowerID
-             LEFT JOIN GrabBell gb ON gb.userID = g.userID AND gb.towerID = g.towerID
+             LEFT JOIN GrabBell gb ON gb.userID = g.userID AND gb.towerID = g.towerID AND gb.ringID = g.ringID
              LEFT JOIN Bell b ON b.BellID = gb.bellID
              WHERE g.userID = ?`,
             [userId]
@@ -578,6 +578,9 @@ export async function getUserDashboardStats(userId) {
             return changes >= min && changes <= max;
         }).length;
         const currentYear = new Date().getFullYear();
+        const uniqueGrabKeys = new Set(grabs.map((grab) => `${grab.towerID}:${grab.ringID || ''}`));
+        const uniqueTowers = new Set(grabs.map((grab) => grab.towerID));
+        const uniqueBells = new Set(grabs.filter((grab) => grab.bellID).map((grab) => grab.bellID));
         const performancesThisYear = performances.filter((performance) => {
             const date = new Date(performance.Date);
             return !Number.isNaN(date.getTime()) && date.getFullYear() === currentYear;
@@ -592,8 +595,13 @@ export async function getUserDashboardStats(userId) {
                 totalChanges,
                 totalDurationSeconds,
                 performancesThisYear,
-                grabCount: grabs.length,
-                grabsThisYear: grabs.filter((grab) => Number(grab.yearGrabbed) === currentYear).length
+                grabCount: uniqueGrabKeys.size,
+                uniqueTowerCount: uniqueTowers.size,
+                individualBellCount: grabs.filter((grab) => grab.bellID).length,
+                uniqueBellCount: uniqueBells.size,
+                grabsThisYear: new Set(grabs
+                    .filter((grab) => Number(grab.yearGrabbed) === currentYear)
+                    .map((grab) => `${grab.towerID}:${grab.ringID || ''}`)).size
             },
             performanceByMonth: Array.from(byMonth.values())
                 .sort((a, b) => a.period.localeCompare(b.period)),
