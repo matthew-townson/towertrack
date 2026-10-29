@@ -1,5 +1,14 @@
 [
     {
+        "version": "v0.0.13 (beta)",
+        "date": "29-10-2026",
+        "items": [
+            "You can now view other users' grabs and performances in detail",
+            "Map has been updated with a responsive search bar",
+            "Most recent performances are displayed on the home page"
+        ]
+    },
+    {
         "version": "v0.0.12 (beta)",
         "date": "15-10-2026",
         "items": [

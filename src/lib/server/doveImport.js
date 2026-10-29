@@ -209,6 +209,16 @@ export async function importDoveData() {
         // Disable foreign key checks first (before any operations)
         await connection.query('SET FOREIGN_KEY_CHECKS = 0');
 
+        // Preserve user-selected bells while replacing the Dove catalogue.
+        // Bell IDs are normally stable, but bell role provides a fallback when
+        // Dove assigns a new ID to an unchanged bell.
+        log.info('Preserving user-selected bells before replacing the catalogue...');
+        await connection.query(`
+            CREATE TEMPORARY TABLE preserved_grab_bells AS
+            SELECT gb.userId, gb.bellID, gb.bellRole, gb.towerID, gb.ringID
+            FROM GrabBell gb
+        `);
+
         // Clear dependent tables first (GrabBell references Bell)
         log.info('Clearing GrabBell data (references Bell)...');
         await connection.query('DELETE FROM GrabBell');
@@ -295,6 +305,42 @@ export async function importDoveData() {
                 log.info(`  Bells progress: ${processed}/${filteredBellsData.length}`);
             }
         }
+
+        // Restore visit selections after the new Bell rows exist. Prefer the
+        // original BellID, then match the same tower/ring and bell role.
+        await connection.query(`
+            INSERT IGNORE INTO GrabBell (userId, bellID, bellRole, towerID, ringID)
+            SELECT preserved.userId, bell.BellID, bell.BellRole, preserved.towerID, bell.RingID
+            FROM preserved_grab_bells preserved
+            INNER JOIN Grab grab
+                ON grab.userId = preserved.userId
+               AND grab.towerID = preserved.towerID
+            INNER JOIN Bell bell
+                ON bell.BellID = preserved.bellID
+               AND bell.TowerID = preserved.towerID
+               AND (bell.RingID = preserved.ringID OR (bell.RingID IS NULL AND preserved.ringID IS NULL))
+        `);
+        await connection.query(`
+            INSERT IGNORE INTO GrabBell (userId, bellID, bellRole, towerID, ringID)
+            SELECT preserved.userId, bell.BellID, bell.BellRole, preserved.towerID, bell.RingID
+            FROM preserved_grab_bells preserved
+            INNER JOIN Grab grab
+                ON grab.userId = preserved.userId
+               AND grab.towerID = preserved.towerID
+            INNER JOIN Bell bell
+                ON bell.TowerID = preserved.towerID
+               AND (bell.RingID = preserved.ringID OR (bell.RingID IS NULL AND preserved.ringID IS NULL))
+               AND bell.BellRole = preserved.bellRole
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM Bell exact_bell
+                WHERE exact_bell.BellID = preserved.bellID
+                  AND exact_bell.TowerID = preserved.towerID
+                  AND (exact_bell.RingID = preserved.ringID OR (exact_bell.RingID IS NULL AND preserved.ringID IS NULL))
+            )
+        `);
+        await connection.query('DROP TEMPORARY TABLE preserved_grab_bells');
+        log.info('Restored user-selected bells after catalogue import');
 
         // Optimise tables
         updateProgress({ stage: 'optimizing', message: 'Optimizing tables...' });

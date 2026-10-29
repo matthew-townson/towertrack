@@ -11,6 +11,58 @@ export async function load({ locals }) {
     // total performances
     const [performancesCountResult] = await db.query('SELECT COUNT(*) as count FROM Performance');
 
+    const [recentPerformanceRows] = await db.query(`
+      SELECT PerformanceID, Changes, Date, Method, Place, Dedication, County,
+             Ringers, Duration, Association, TenorWeightLbs, TenorKey, Footnotes
+      FROM Performance
+      WHERE Ringers IS NOT NULL
+      ORDER BY Date DESC, PerformanceID DESC
+      LIMIT 10
+    `);
+    const [userRows] = await db.query('SELECT id, username FROM User');
+    const [aliasRows] = await db.query('SELECT userId, Name FROM OtherNames');
+    const profileNames = new Map();
+    const normaliseRingerName = (name) => String(name || '')
+      .replace(/\s*\(.*?\)\s*$/, '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, ' ');
+    userRows.forEach((user) => {
+      profileNames.set(normaliseRingerName(user.username), user);
+    });
+    aliasRows.forEach((alias) => {
+      const user = userRows.find((candidate) => candidate.id === alias.userId);
+      if (user) profileNames.set(normaliseRingerName(alias.Name), user);
+    });
+
+    const recentPerformances = recentPerformanceRows.map((performance) => {
+      let ringers = [];
+      let footnotes = [];
+      try {
+        const parsed = typeof performance.Ringers === 'string'
+          ? JSON.parse(performance.Ringers)
+          : performance.Ringers;
+        ringers = Array.isArray(parsed?.ringers) ? parsed.ringers : [];
+      } catch {
+        ringers = [];
+      }
+      try {
+        const parsed = typeof performance.Footnotes === 'string'
+          ? JSON.parse(performance.Footnotes)
+          : performance.Footnotes;
+        footnotes = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        footnotes = [];
+      }
+      ringers = ringers.map((ringer) => {
+        const profile = profileNames.get(normaliseRingerName(ringer.name));
+        return profile
+          ? { ...ringer, profile: { username: profile.username } }
+          : ringer;
+      });
+      return { ...performance, ringers, footnotes };
+    });
+
     // total peals
     const [pealCountResult] = await db.query('SELECT COUNT(*) as count FROM Performance WHERE CAST(Changes AS SIGNED) >= 5000');
 
@@ -82,7 +134,8 @@ export async function load({ locals }) {
       pealCount,
       quarterPealCount,
       totalTimeSpent: formatDuration(totalTimeSpent),
-      totalChanges
+      totalChanges,
+      recentPerformances
     };
   } catch (error) {
     console.error('Failed to load user count:', error);
@@ -94,7 +147,8 @@ export async function load({ locals }) {
       pealCount: 0,
       quarterPealCount: 0,
       totalTimeSpent: 0,
-      totalChanges: 0
+      totalChanges: 0,
+      recentPerformances: []
     };
   }
 }

@@ -1,7 +1,81 @@
 .dashboard-container {
-    max-width: 900px;
+    width: 100%;
+    max-width: none;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 1.5rem;
+    display: grid;
+    align-items: start;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 1.5rem;
+}
+
+.home-main {
+    min-height: calc(100vh - 8rem);
+}
+
+.dashboard-left {
+    min-width: 0;
+}
+
+.dashboard-left .dashboard-section {
+    margin-bottom: 1.5rem;
+}
+
+.recent-performances-panel {
+    min-width: 0;
+    height: calc(100vh - 8rem);
+    max-height: calc(100vh - 8rem);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.recent-performances-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+.recent-performances-header h2 {
+    margin: 0;
+}
+
+.recent-performances-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 0.35rem;
+}
+
+.recent-performances-list .performance-card {
+    margin-bottom: 1rem;
+}
+
+.recent-performances-list .performance-card:last-child {
+    margin-bottom: 0;
+}
+
+.no-recent-performances {
+    color: #6b6b6b;
+}
+
+.ringer-profile-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--tt-accent);
+    text-underline-offset: 0.15em;
+}
+
+.ringer-profile-link:hover {
+    color: var(--tt-accent-hover);
 }
 
 .landing-page {
@@ -11,9 +85,22 @@
 
 .landing-page__container {
     display: grid;
-    max-width: 60rem;
+    align-items: start;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    max-width: 100%;
     margin-inline: auto;
     gap: 1.5rem;
+}
+
+.landing-page__content {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 0;
+}
+
+.landing-recent-performances {
+    height: calc(100vh - 8rem);
+    max-height: calc(100vh - 8rem);
 }
 
 .landing-page__box {
@@ -168,7 +255,27 @@
 
 /* removed force-light overrides so home follows prefers-color-scheme media queries */
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    .landing-page__container {
+        display: block;
+    }
+
+    .landing-recent-performances {
+        height: 70vh;
+        margin-top: 1.5rem;
+    }
+
+    .dashboard-container {
+        display: block;
+        padding: 1rem;
+    }
+
+    .recent-performances-panel {
+        height: auto;
+        max-height: 70vh;
+        margin-top: 1.5rem;
+    }
+
     .feature-links {
         grid-template-columns: 1fr;
     }
@@ -222,6 +329,11 @@
 
 /* ==================== Dark Mode Styles ==================== */
 @media (prefers-color-scheme: dark) {
+    .recent-performances-panel {
+        background: #2d3139;
+        border-color: #3b3f45;
+    }
+
     .dashboard-section {
         background: #2d3139;
     }

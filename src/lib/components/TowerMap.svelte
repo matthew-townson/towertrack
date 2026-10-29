@@ -57,6 +57,11 @@
     // store weight inputs in hundredweight decimals for UX (1 cwt = 112 lbs)
     export let minWeightCwt = '';
     export let maxWeightCwt = '';
+    export let towerSearchIds = [];
+    export let towerSearchActive = false;
+    export let towerSearchResults = [];
+    export let filteredTowerSearchResults = [];
+    export let selectedTowerSearchId = null;
     
     // state that parent can read
     export let currentlyDisplayed = 0;
@@ -134,6 +139,11 @@
         }
 
         return true;
+    }
+
+    function matchesTowerSearch(tower) {
+        if (!towerSearchActive) return true;
+        return towerSearchIds.some((id) => String(id) === String(tower.TowerID));
     }
 
     function toggleLocationTracking() {
@@ -272,6 +282,7 @@
         let towersWithDistance = towers
             .filter(tower => tower.Lat && tower.Long);
         
+        towersWithDistance = towersWithDistance.filter(matchesTowerSearch);
         towersWithDistance = filterTowersByBells(towersWithDistance, bellsFilter, isMinimumBells);
         towersWithDistance = filterTowersByUnringable(towersWithDistance, showUnringable);
         towersWithDistance = towersWithDistance.filter(tower => matchesPracticeNight(tower, practiceNightFilter));
@@ -293,6 +304,7 @@
             let towersFromUserLocation = towers
                 .filter(tower => tower.Lat && tower.Long);
             
+            towersFromUserLocation = towersFromUserLocation.filter(matchesTowerSearch);
             towersFromUserLocation = filterTowersByBells(towersFromUserLocation, bellsFilter, isMinimumBells);
             towersFromUserLocation = filterTowersByUnringable(towersFromUserLocation, showUnringable);
             towersFromUserLocation = towersFromUserLocation.filter(tower => matchesPracticeNight(tower, practiceNightFilter));
@@ -316,7 +328,12 @@
             closestTower = null;
         }
         
-    const towersToShow = towersWithDistance.filter(tower => matchesAdvancedFilters(tower)).slice(0, displayLimit);
+        towersWithDistance = towersWithDistance.filter(tower => matchesAdvancedFilters(tower));
+        filteredTowerCount = towersWithDistance.length;
+        filteredTowerSearchResults = towerSearchResults.filter((result) =>
+            towersWithDistance.some((tower) => String(tower.TowerID) === String(result.TowerID))
+        );
+        const towersToShow = towersWithDistance.slice(0, displayLimit);
         
         towersToShow.forEach(tower => {
             const bellCount = parseInt(tower.Bells) || 8;
@@ -355,6 +372,7 @@
     
     $: {
         let filteredTowers = towers.filter(tower => tower.Lat && tower.Long);
+        filteredTowers = filteredTowers.filter(matchesTowerSearch);
         filteredTowers = filterTowersByBells(filteredTowers, bellsFilter, isMinimumBells);
         filteredTowers = filterTowersByUnringable(filteredTowers, showUnringable);
         filteredTowers = filteredTowers.filter(tower => matchesPracticeNight(tower, practiceNightFilter));
@@ -446,8 +464,19 @@
         map.on('moveend', updateDisplayedTowers);
     });
     
-    $: if (map && (towers || displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed || selectedCounty || selectedCountry || selectedDiocese || selectedAffiliation || selectedNote || minWeightCwt || maxWeightCwt)) {
+    $: if (map && (towers || displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed || selectedCounty || selectedCountry || selectedDiocese || selectedAffiliation || selectedNote || minWeightCwt || maxWeightCwt || towerSearchIds || towerSearchActive)) {
         updateDisplayedTowers();
+    }
+
+    $: if (map && selectedTowerSearchId) {
+        const selectedTower = towers.find((tower) =>
+            `${tower.TowerID}:${tower.RingID || 1}` === String(selectedTowerSearchId)
+        );
+        if (selectedTower?.Lat && selectedTower?.Long) {
+            isProgramMove = true;
+            map.setView([selectedTower.Lat, selectedTower.Long], Math.max(map.getZoom(), 12));
+            setTimeout(() => { isProgramMove = false; }, 100);
+        }
     }
 </script>
 
