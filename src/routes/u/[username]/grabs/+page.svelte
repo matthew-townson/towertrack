@@ -228,7 +228,7 @@
                         </p>
                     {/each}
                     <p class="control">
-                        <a class="button is-small is-info" href={`/map?u=${encodeURIComponent(data.targetUser.username)}&grabbed=include`}>See grabs on map</a>
+                        <a class="button is-small is-info" href={`/map?u=${encodeURIComponent(data.targetUser.username)}&grabbed=include`}>See the full map</a>
                     </p>
                 </div>
                 <div class:open={showAdvanced} class="grab-filters-drawer">

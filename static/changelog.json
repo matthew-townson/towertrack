@@ -1,5 +1,13 @@
 [
     {
+        "version": "v0.0.14 (beta)",
+        "date": "30-10-2026",
+        "items": [
+            "User maps can be viewed on the map page",
+            "Changes to location tracking on the map page"
+        ]
+    },
+    {
         "version": "v0.0.13 (beta)",
         "date": "29-10-2026",
         "items": [
