@@ -1,42 +1,60 @@
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
+import db from '$lib/server/db.js';
 import { getTowersWithUserData } from '$lib/server/mapData.js';
 
-// Allow an optional hidden URL parameter `asUser` to view data for another user id.
-// This is intended for admin/debugging use only and is only honoured for users
-// with admin permission (permission === 0). If present and allowed, the
-// server will load tower data for the specified user id instead of the
-// currently authenticated user.
+async function findUser(username) {
+    let [rows] = await db.execute(
+        'SELECT id, username FROM User WHERE username = ? LIMIT 1',
+        [username]
+    );
+
+    if ((!rows || rows.length === 0) && username.includes('-')) {
+        [rows] = await db.execute(
+            'SELECT id, username FROM User WHERE username = ? LIMIT 1',
+            [username.replace(/-/g, ' ')]
+        );
+    }
+
+    return rows?.[0];
+}
+
 export async function load({ locals, url }) {
     if (!locals.user) {
         throw redirect(303, '/account/login');
     }
 
-    // Determine which user id to load data for. By default use the current user.
-    let targetUserId = locals.user.id;
-
     try {
-        const asUser = url.searchParams.get('asUser');
-        if (asUser) {
-            // Only allow if current user is an admin (permission 0)
-            if (locals.user && Number(locals.user.permission) === 0) {
-                const parsed = parseInt(asUser, 10);
-                if (!Number.isNaN(parsed) && parsed > 0) {
-                    targetUserId = parsed;
-                } else {
-                    console.warn(`Invalid asUser parameter ignored: ${asUser}`);
+        const requestedUsername = url.searchParams.get('u');
+        let targetUser = locals.user;
+
+        if (requestedUsername) {
+            targetUser = await findUser(requestedUsername);
+            if (!targetUser) {
+                throw error(404, 'User not found');
+            }
+
+            const isOwnProfile = locals.user.id === targetUser.id;
+            if (!isOwnProfile) {
+                const [settingsRows] = await db.execute(
+                    'SELECT profileVisibility, dataVisibility FROM UserSettings WHERE userId = ? LIMIT 1',
+                    [targetUser.id]
+                );
+                const settings = settingsRows?.[0] || { profileVisibility: 1, dataVisibility: 1 };
+                if (!settings.profileVisibility || !settings.dataVisibility) {
+                    throw error(404, 'User map data is not public');
                 }
-            } else {
-                console.warn(`Non-admin user attempted to use asUser param: ${locals.user?.username || 'unknown'}`);
             }
         }
 
-        const towers = await getTowersWithUserData(targetUserId);
+        const towers = await getTowersWithUserData(targetUser.id);
 
         return {
             user: locals.user,
-            towers
+            towers,
+            mapUser: targetUser
         };
     } catch (error) {
+        if (error?.status) throw error;
         console.error('Failed to fetch tower data:', error);
         return {
             user: locals.user,

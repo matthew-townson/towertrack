@@ -220,6 +220,11 @@
         </div>
     {:else}
         <div class="box p-0 map-wrapper" style="height:100%; min-height:0; margin:0;">
+            {#if data.mapUser && String(data.mapUser.id) !== String(data.user.id)}
+                <div class="notification is-info map-user-display py-2 px-3 mb-0">
+                    Viewing map data for <strong>{data.mapUser.username}</strong>.
+                </div>
+            {/if}
             <TowerMap 
                 towers={data.towers}
                 bind:bellsFilter
