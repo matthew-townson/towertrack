@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, onDestroy } from 'svelte';
     import {
         generatePinSVG,
         convertToHundredweight,
@@ -75,6 +75,8 @@
     let userLocationMarker = null;
     let isTrackingLocation = false;
     let watchId = null;
+    let locationPermission = null;
+    let permissionChangeHandler = null;
     let isProgramMove = false;
     let lastTowerUpdate = 0;
     let queryLocationUsed = false;
@@ -146,6 +148,103 @@
         return towerSearchIds.some((id) => String(id) === String(tower.TowerID));
     }
 
+    function updateUserLocation(position, shouldCenter = false) {
+        const { latitude, longitude } = position.coords;
+
+        userLocation = { lat: latitude, lng: longitude };
+
+        if ((isTrackingLocation || shouldCenter) && map) {
+            const currentZoom = map.getZoom();
+            const minZoom = 12;
+
+            isProgramMove = true;
+            map.setView([latitude, longitude], currentZoom < minZoom ? minZoom : currentZoom);
+
+            setTimeout(() => {
+                isProgramMove = false;
+            }, 100);
+        }
+
+        if (userLocationMarker) {
+            userLocationMarker.setLatLng([latitude, longitude]);
+        } else if (map) {
+            userLocationMarker = window.L.marker([latitude, longitude], {
+                icon: createUserLocationIcon(window.L)
+            }).addTo(map);
+
+            userLocationMarker.bindPopup('<div class="user-popup"><h4>Your Location</h4></div>');
+        }
+
+        if (Math.abs(Date.now() - lastTowerUpdate) > 5000) {
+            updateDisplayedTowers();
+            lastTowerUpdate = Date.now();
+        }
+    }
+
+    function requestInitialLocation() {
+        if (!navigator.geolocation || !map) return;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => updateUserLocation(position, true),
+            (geoError) => console.warn('Unable to get initial location:', geoError.message),
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 60000
+            }
+        );
+    }
+
+    function stopLocationWatch() {
+        if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+        }
+    }
+
+    function startLocationWatch(showErrors = false) {
+        if (!navigator.geolocation || watchId !== null) return;
+
+        watchId = navigator.geolocation.watchPosition(
+            updateUserLocation,
+            (geoError) => {
+                console.warn('Geolocation error:', geoError.message);
+                if (showErrors) {
+                    alert(`Location error: ${geoError.message}`);
+                    isTrackingLocation = false;
+                }
+                if (geoError.code === 1) {
+                    stopLocationWatch();
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 1000
+            }
+        );
+    }
+
+    async function startPassiveLocationWatch() {
+        if (!showLocationTracking || !navigator.geolocation || !navigator.permissions?.query) return;
+
+        try {
+            locationPermission = await navigator.permissions.query({ name: 'geolocation' });
+            permissionChangeHandler = () => {
+                if (locationPermission.state === 'granted') {
+                    startLocationWatch();
+                } else if (locationPermission.state === 'denied') {
+                    stopLocationWatch();
+                }
+            };
+
+            locationPermission.addEventListener('change', permissionChangeHandler);
+            permissionChangeHandler();
+        } catch (error) {
+            console.warn('Unable to check geolocation permission:', error);
+        }
+    }
+
     function toggleLocationTracking() {
         if (!navigator.geolocation) {
             alert('Geolocation is not supported by this browser.');
@@ -158,114 +257,35 @@
         }
 
         if (isTrackingLocation) {
-            if (watchId) {
-                navigator.geolocation.clearWatch(watchId);
-                watchId = null;
-            }
             isTrackingLocation = false;
         } else {
             isTrackingLocation = true;
-            
-            watchId = navigator.geolocation.watchPosition(
-                (position) => {
-                    if (!isTrackingLocation) return;
-                    
-                    const { latitude, longitude } = position.coords;
-                    
-                    userLocation = { lat: latitude, lng: longitude };
-                    
-                    const currentZoom = map.getZoom();
-                    const minZoom = 10;
-                    
-                    isProgramMove = true;
-                    
-                    const targetZoom = currentZoom < minZoom ? minZoom : currentZoom;
-                    map.setView([latitude, longitude], targetZoom);
-                    
-                    setTimeout(() => {
-                        isProgramMove = false;
-                    }, 100);
-                    
-                    if (userLocationMarker) {
-                        userLocationMarker.setLatLng([latitude, longitude]);
-                    } else {
-                        userLocationMarker = window.L.marker([latitude, longitude], {
-                            icon: createUserLocationIcon(window.L)
-                        }).addTo(map);
-                        
-                        userLocationMarker.bindPopup('<div class="user-popup"><h4>Your Location</h4></div>');
-                    }
-                    
-                    if (Math.abs(Date.now() - lastTowerUpdate) > 5000) {
-                        updateDisplayedTowers();
-                        lastTowerUpdate = Date.now();
-                    }
-                },
-                (error) => {
-                    console.warn('Geolocation error:', error.message);
-                    alert(`Location error: ${error.message}`);
+
+            if (userLocation) {
+                const currentZoom = map.getZoom();
+                const minZoom = 12;
+                isProgramMove = true;
+                map.setView([userLocation.lat, userLocation.lng], currentZoom < minZoom ? minZoom : currentZoom);
+                setTimeout(() => {
+                    isProgramMove = false;
+                }, 100);
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                updateUserLocation,
+                (geoError) => {
+                    console.warn('Geolocation error:', geoError.message);
+                    alert(`Location error: ${geoError.message}`);
                     isTrackingLocation = false;
-                    if (watchId) {
-                        navigator.geolocation.clearWatch(watchId);
-                        watchId = null;
-                    }
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 30000,
-                    maximumAge: 1000
+                    timeout: 15000,
+                    maximumAge: 60000
                 }
             );
+            startLocationWatch(true);
         }
-    }
-
-    
-
-    function getUserLocation() {
-        if (!navigator.geolocation) {
-            alert('Geolocation is not supported by this browser.');
-            return;
-        }
-
-        if (!map) {
-            console.warn('Map not initialized yet.');
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                const currentZoom = map.getZoom();
-                const minZoom = 10;
-                
-                userLocation = { lat: latitude, lng: longitude };
-                
-                const targetZoom = currentZoom < minZoom ? minZoom : currentZoom;
-                map.setView([latitude, longitude], targetZoom);
-                
-                if (userLocationMarker) {
-                    map.removeLayer(userLocationMarker);
-                }
-                
-                userLocationMarker = window.L.marker([latitude, longitude], {
-                    icon: createUserLocationIcon(window.L)
-                }).addTo(map);
-                
-                userLocationMarker.bindPopup('<div class="user-popup"><h4>Your Location</h4></div>');
-                
-                updateDisplayedTowers();
-            },
-            (error) => {
-                console.warn('Geolocation error:', error.message);
-                alert(`Location error: ${error.message}. Please check your location permissions.`);
-                userLocation = null;
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 15000,
-                maximumAge: 60000
-            }
-        );
     }
 
     function updateDisplayedTowers() {
@@ -298,8 +318,6 @@
         towersWithDistance = addDistanceToTowers(towersWithDistance, centre, window.L);
         towersWithDistance.sort((a, b) => a.distance - b.distance);
         
-        // advanced filters are applied later via matchesAdvancedFilters
-        
         if (userLocation) {
             let towersFromUserLocation = towers
                 .filter(tower => tower.Lat && tower.Long);
@@ -319,8 +337,6 @@
             
             towersFromUserLocation = addDistanceToTowers(towersFromUserLocation, userLocation, window.L);
             towersFromUserLocation.sort((a, b) => a.distance - b.distance);
-            
-            // apply advanced filters for user-location-sorted list too
             towersFromUserLocation = towersFromUserLocation.filter(tower => matchesAdvancedFilters(tower));
 
             closestTower = towersFromUserLocation.length > 0 ? towersFromUserLocation[0] : null;
@@ -392,19 +408,16 @@
         const L = await import('leaflet');
         window.L = L;
 
-        // wait for container to render properly first
         await new Promise(resolve => setTimeout(resolve, 0));
 
         map = initializeMap(L, mapContainer, initialCenter, initialZoom);
 
-        // force map to recalculate size after init
         setTimeout(() => {
             if (map) {
                 map.invalidateSize();
             }
         }, 100);
 
-        // URL parameters if on map page
         if (typeof window !== 'undefined') {
             try {
                 const params = new URLSearchParams(window.location.search);
@@ -445,23 +458,29 @@
             if (bounds.length > 0) {
                 map.fitBounds(window.L.latLngBounds(bounds), { padding: [20, 20], maxZoom: 10 });
             }
-        } else if (!queryLocationUsed && showLocationTracking) {
-            getUserLocation();
         }
 
+        startPassiveLocationWatch();
+
+        if (!autoFitBounds && !queryLocationUsed) {
+            requestInitialLocation();
+        }
         updateDisplayedTowers();
 
         map.on('movestart', () => {
             if (isTrackingLocation && !isProgramMove) {
                 isTrackingLocation = false;
-                if (watchId) {
-                    navigator.geolocation.clearWatch(watchId);
-                    watchId = null;
-                }
             }
         });
         
         map.on('moveend', updateDisplayedTowers);
+    });
+
+    onDestroy(() => {
+        stopLocationWatch();
+        if (locationPermission && permissionChangeHandler) {
+            locationPermission.removeEventListener('change', permissionChangeHandler);
+        }
     });
     
     $: if (map && (towers || displayLimit || bellsFilter || isMinimumBells || showUnringable || practiceNightFilter || includeGrabbed || excludeGrabbed || includeQuartered || excludeQuartered || includePealed || excludePealed || selectedCounty || selectedCountry || selectedDiocese || selectedAffiliation || selectedNote || minWeightCwt || maxWeightCwt || towerSearchIds || towerSearchActive)) {
@@ -512,7 +531,7 @@
                     </strong>
                 </p>
                 <p>
-                    {closestTower.County || 'Unknown'} • 
+                    {closestTower.County || 'Unknown'}
                     <strong style="color: {getPinColor(parseInt(closestTower.Bells), closestTower.UR === 1 || closestTower.UR === '1')};">
                         {closestTower.Bells || 'Unknown'}
                     </strong> bells
@@ -526,8 +545,8 @@
         <button 
             class="button is-rounded is-small floating-location-btn {isTrackingLocation ? 'tracking has-background-link has-text-white' : 'has-background-white has-text-link'}"
             on:click={toggleLocationTracking} 
-            title={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'} 
-            aria-label={isTrackingLocation ? 'Stop Following Location' : 'Follow My Location'}
+            title={isTrackingLocation ? 'Stop tracking location' : 'Track my location'} 
+            aria-label={isTrackingLocation ? 'Stop tracking location' : 'Track my location'}
         >
             <span class="icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
