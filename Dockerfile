@@ -1,4 +1,4 @@
-FROM oven/bun:1.2 AS builder
+FROM oven/bun:1.4 AS builder
 WORKDIR /app
 
 # Copy package files
@@ -16,7 +16,7 @@ COPY . .
 RUN bun --bun run build
 
 # Production stage
-FROM oven/bun:1.2 AS runner
+FROM oven/bun:1.4 AS runner
 WORKDIR /app
 
 # Install dumb-init for proper signal handling
