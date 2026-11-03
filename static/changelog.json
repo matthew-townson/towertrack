@@ -1,5 +1,13 @@
 [
     {
+        "version": "v0.0.15 HOTFIX (beta)",
+        "date": "03-11-2026",
+        "items": [
+            "Backend: Updated various runtimes and dependencies to fix security vulnerabilities",
+            "Updated protected routes to redirect after login"
+        ]
+    },
+    {
         "version": "v0.0.14 (beta)",
         "date": "30-10-2026",
         "items": [
