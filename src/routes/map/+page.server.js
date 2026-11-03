@@ -1,6 +1,7 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import { getTowersWithUserData } from '$lib/server/mapData.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
 async function findUser(username) {
     let [rows] = await db.execute(
@@ -20,7 +21,7 @@ async function findUser(username) {
 
 export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
 
     try {

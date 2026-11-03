@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import UserSearch from '$lib/components/UserSearch.svelte';
@@ -390,7 +390,7 @@
 		}
 		
 		// Check if we should show an invitation (from notification click)
-		const showInvitationId = $page.url.searchParams.get('showInvitation');
+		const showInvitationId = page.url.searchParams.get('showInvitation');
 		if (showInvitationId) {
 			// Switch to invitations tab and find the matching invitation
 			sidebarTab = 'invitations';

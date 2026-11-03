@@ -1,12 +1,12 @@
-import { redirect } from '@sveltejs/kit';
 import { getWhatsAppLink } from '$lib/server/secretLinks.js';
 import db from '$lib/server/db.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals, fetch }) {
+export async function load({ locals, fetch, url }) {
   // Check if user is logged in
   if (!locals.user) {
     console.error('User not logged in');
-    throw redirect(303, '/');
+    redirectToLogin(url);
   }
 
   // get whatsapp link

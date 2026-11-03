@@ -2,7 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	export let form;
 	export let data;
@@ -11,7 +11,7 @@
 	let activeSection = 'profile';
 
 	onMount(() => {
-		const urlSection = $page.url.searchParams.get('section');
+		const urlSection = page.url.searchParams.get('section');
 		if (urlSection && ['profile','aliases','privacy','password','grabs'].includes(urlSection)) {
 			activeSection = urlSection;
 		}

@@ -1,7 +1,7 @@
 <script>
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     import { goto } from '$app/navigation';
 
     const currentYear = new Date().getFullYear();
@@ -10,16 +10,16 @@
     export let data;
 
     // Use page store values as fallback, but prioritize exported props
-    $: displayStatus = status ?? $page.status ?? 404;
-    $: displayMessage = error?.message ?? $page.error?.message ?? 'An unexpected error occurred';
+    $: displayStatus = status ?? page.status ?? 404;
+    $: displayMessage = error?.message ?? page.error?.message ?? 'An unexpected error occurred';
 
     // Log error details to console for debugging
-    $: if (error || $page.error) {
+    $: if (error || page.error) {
         console.error('Error page rendered:', {
             status: displayStatus,
             message: displayMessage,
-            error: error || $page.error,
-            url: $page.url?.pathname
+            error: error || page.error,
+            url: page.url?.pathname
         });
     }
 

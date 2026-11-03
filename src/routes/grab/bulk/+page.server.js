@@ -1,11 +1,12 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log.js';
 import { getUserGrabData } from '$lib/server/userGrabs.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
 
     try {
@@ -25,9 +26,9 @@ export async function load({ locals }) {
 }
 
 export const actions = {
-    bulkAddGrabs: async ({ request, locals }) => {
+    bulkAddGrabs: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const formData = await request.formData();

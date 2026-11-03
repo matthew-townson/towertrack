@@ -1,18 +1,19 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import argon2 from 'argon2';
 import log from '$lib/server/log.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
     
     // Query database to get complete user info including email and profile image
     const [rows] = await db.execute('SELECT id, username, email, permission, profileImage FROM User WHERE id = ?', [locals.user.id]);
     
     if (rows.length === 0) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
     
     // Get user's aliases
@@ -36,9 +37,9 @@ export async function load({ locals }) {
 }
 
 export const actions = {
-    updateUsername: async ({ request, locals }) => {
+    updateUsername: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -90,9 +91,9 @@ export const actions = {
         }
     },
 
-    updateEmail: async ({ request, locals }) => {
+    updateEmail: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -141,9 +142,9 @@ export const actions = {
         }
     },
 
-    updatePrivacy: async ({ request, locals }) => {
+    updatePrivacy: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -185,9 +186,9 @@ export const actions = {
         }
     },
 
-    updateAlias: async ({ request, locals }) => {
+    updateAlias: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -255,9 +256,9 @@ export const actions = {
         return fail(400, { error: true, message: 'No alias operation specified', action: 'updateAlias' });
     },
 
-    changePassword: async ({ request, locals }) => {
+    changePassword: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -312,9 +313,9 @@ export const actions = {
         }
     },
 
-    updateGrabSettings: async ({ request, locals }) => {
+    updateGrabSettings: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();

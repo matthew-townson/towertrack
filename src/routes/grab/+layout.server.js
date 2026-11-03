@@ -1,8 +1,8 @@
-import { redirect } from '@sveltejs/kit';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export function load({ locals }) {
+export function load({ locals, url }) {
   if (!locals.user) {
-    throw redirect(303, '/account/login');
+    redirectToLogin(url);
   }
   
   return {

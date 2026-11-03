@@ -1,9 +1,9 @@
-import { redirect } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(302, '/login?redirect=/notifications');
+        redirectToLogin(url, '/login', 302);
     }
 
     const [notifications] = await db.query(`

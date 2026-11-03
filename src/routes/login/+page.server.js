@@ -4,9 +4,10 @@ import { createSession } from '$lib/server/session.js';
 import log from '$lib/server/log.js';
 import { checkRateLimit } from '$lib/server/rateLimit';
 import { startUserBBImport } from '$lib/server/scheduler.js';
+import { getPostLoginRedirect } from '$lib/server/auth.js';
 
 export const actions = {
-    default: async ({ request, cookies }) => {
+    default: async ({ request, cookies, url }) => {
         const data = await request.formData();
         const username = data.get('username');
         const password = data.get('password');
@@ -44,6 +45,6 @@ export const actions = {
         // start a bb import on login
         startUserBBImport(result.user.id, result.user.username);
 
-        throw redirect(303, '/home');
+        throw redirect(303, getPostLoginRedirect(url));
     }
 };

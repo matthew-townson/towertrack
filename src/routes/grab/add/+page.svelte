@@ -3,7 +3,7 @@
     import Header from '$lib/components/Header.svelte';
     import Footer from '$lib/components/Footer.svelte';
     import { onMount } from 'svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
     
     export let data;
     export let form;
@@ -113,8 +113,8 @@
     }
 
     onMount(async () => {
-        const towerId = $page.url.searchParams.get('towerId');
-        const ringId = $page.url.searchParams.get('ringId');
+        const towerId = page.url.searchParams.get('towerId');
+        const ringId = page.url.searchParams.get('ringId');
         if (towerId) {
             try {
                 const params = new URLSearchParams({ id: towerId });
@@ -171,7 +171,7 @@
         }
         
         // Start location detection if no tower was pre-selected
-        if (!$page.url.searchParams.get('towerId') && !form?.selectedTower) {
+        if (!page.url.searchParams.get('towerId') && !form?.selectedTower) {
             findNearbyTower();
         }
         

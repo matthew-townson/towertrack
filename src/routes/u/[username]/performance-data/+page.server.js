@@ -1,5 +1,6 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 import { importBBData } from '$lib/server/bbImport.js';
 import log from '$lib/server/log';
 
@@ -229,9 +230,9 @@ export async function load({ params, locals }) {
 }
 
 export const actions = {
-	importBBData: async ({ locals, params }) => {
+	importBBData: async ({ locals, params, url }) => {
 		if (!locals.user) {
-			throw redirect(303, '/account/login');
+			redirectToLogin(url);
 		}
 
 		// only allow importing own data

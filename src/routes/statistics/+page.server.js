@@ -1,11 +1,11 @@
-import { redirect } from '@sveltejs/kit';
+import { redirectToLogin } from '$lib/server/auth.js';
 import pool from '$lib/server/db.js';
 import { getUserStats } from '$lib/server/userstats.js';
 import log from '$lib/server/log.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
 	if (!locals.user) {
-		throw redirect(303, '/account/login');
+		redirectToLogin(url);
 	}
 
 	try {
