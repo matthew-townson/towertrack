@@ -490,14 +490,14 @@
         <div class="box">
             {#if showSuccess}
                 <div class="notification is-success">
-                    <button class="delete" on:click={() => showSuccess = false}></button>
+                    <button class="delete" aria-label="Dismiss success message" on:click={() => showSuccess = false}></button>
                     Event created successfully! Invitations have been sent.
                 </div>
             {/if}
             
             {#if errorMessage}
                 <div class="notification is-danger">
-                    <button class="delete" on:click={() => errorMessage = ''}></button>
+                    <button class="delete" aria-label="Dismiss error message" on:click={() => errorMessage = ''}></button>
                     {errorMessage}
                 </div>
             {/if}
@@ -557,7 +557,7 @@
                                 <div class="selected-tower">
                                     <span class="tag is-medium is-info">
                                         {selectedTower.Place}, {selectedTower.Dedicn}
-                                        <button class="delete is-small" on:click={clearTower}></button>
+                                        <button class="delete is-small" aria-label="Clear selected tower" on:click={clearTower}></button>
                                     </span>
                                 </div>
                             {:else}
@@ -671,10 +671,10 @@
                     
                     <!-- Recurrence -->
                     <div class="field">
-                        <label class="label">Repeat</label>
+                        <label class="label" for="recurrence-type">Repeat</label>
                         <div class="control">
                             <div class="select is-fullwidth">
-                                <select bind:value={eventForm.recurrenceType}>
+                                <select id="recurrence-type" bind:value={eventForm.recurrenceType}>
                                     <option value="none">Does not repeat</option>
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
@@ -778,6 +778,7 @@
                                         {invitedUser.username}
                                         <button 
                                             class="delete is-small" 
+                                            aria-label={`Remove ${invitedUser.username} from invitees`}
                                             on:click={() => removeInvitedUser(invitedUser.id)}
                                         ></button>
                                     </span>
@@ -987,7 +988,7 @@
             <section class="modal-card-body">
                 {#if errorMessage}
                     <div class="notification is-danger">
-                        <button class="delete" on:click={() => errorMessage = ''}></button>
+                        <button class="delete" aria-label="Dismiss error message" on:click={() => errorMessage = ''}></button>
                         {errorMessage}
                     </div>
                 {/if}
@@ -1063,10 +1064,10 @@
                 
                 <!-- Recurrence in edit modal -->
                 <div class="field">
-                    <label class="label">Repeat</label>
+                    <label class="label" for="edit-recurrence-type">Repeat</label>
                     <div class="control">
                         <div class="select is-fullwidth">
-                            <select bind:value={editForm.recurrenceType}>
+                            <select id="edit-recurrence-type" bind:value={editForm.recurrenceType}>
                                 <option value="none">Does not repeat</option>
                                 <option value="daily">Daily</option>
                                 <option value="weekly">Weekly</option>
@@ -1280,7 +1281,6 @@
         margin-bottom: 0;
     }
     
-    .event-stats,
     .invitation-actions {
         display: flex;
         align-items: center;
@@ -1340,7 +1340,6 @@
         }
         
         .event-actions,
-        .event-stats,
         .invitation-actions {
             width: 100%;
             margin-top: 0.5rem;

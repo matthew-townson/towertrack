@@ -1,5 +1,6 @@
 import db from '$lib/server/db.js';
 import { ensurePresetCalendars } from '$lib/server/calendar.js';
+import { ICAL_TIMEZONE, buildLocationProperties, formatICalDateOnly, formatICalDateTime, formatICalTimestamp, getICalAvailability, parseCalendarDate } from '$lib/server/ical.js';
 
 export async function GET({ params }) {
     const { secretKey } = params;
@@ -47,12 +48,15 @@ export async function GET({ params }) {
                 e.startDate,
                 e.endDate,
                 e.allDay,
+                e.status,
                 e.recurrenceType,
                 e.recurrenceInterval,
                 e.recurrenceEndDate,
                 c.name as calendarName,
                 t.Place as towerPlace,
-                t.Dedicn as towerDedication
+                t.Dedicn as towerDedication,
+                t.Lat as towerLat,
+                t.Long as towerLong
             FROM CalendarEvent e
             JOIN UserCalendar c ON e.calendarId = c.id
             LEFT JOIN Tower t ON e.towerID = t.TowerID
@@ -104,7 +108,7 @@ export async function GET({ params }) {
 
 function generateICal(username, events, invitationsByEventId = {}) {
     const now = new Date();
-    const timestamp = formatICalDate(now);
+    const timestamp = formatICalTimestamp(now);
 
     let ical = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -112,20 +116,15 @@ PRODID:-//TowerTrack//Calendar//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:${escapeICalText(username)}'s Bell Ringing Calendar
-X-WR-TIMEZONE:UTC
+X-WR-TIMEZONE:${ICAL_TIMEZONE}
 X-PUBLISHED-TTL:PT5M
 REFRESH-INTERVAL;VALUE=DURATION:PT5M
 `;
 
     for (const event of events) {
         const uid = `event-${event.id}@towertrack`;
-        const startDate = new Date(event.startDate);
-        const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour
-
-        let location = event.location || '';
-        if (event.towerPlace && event.towerDedication) {
-            location = `${event.towerDedication}, ${event.towerPlace}`;
-        }
+        const startDate = parseCalendarDate(event.startDate);
+        const endDate = event.endDate ? parseCalendarDate(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000); // Default 1 hour
 
         // Prefix title with calendar name
         const title = event.calendarName 
@@ -135,6 +134,7 @@ REFRESH-INTERVAL;VALUE=DURATION:PT5M
         ical += `BEGIN:VEVENT
 UID:${uid}
 DTSTAMP:${timestamp}
+${getICalAvailability(event)}
 `;
 
         if (event.allDay) {
@@ -142,8 +142,8 @@ DTSTAMP:${timestamp}
 DTEND;VALUE=DATE:${formatICalDateOnly(endDate)}
 `;
         } else {
-            ical += `DTSTART:${formatICalDate(startDate)}
-DTEND:${formatICalDate(endDate)}
+            ical += `DTSTART;TZID=${ICAL_TIMEZONE}:${formatICalDateTime(startDate)}
+DTEND;TZID=${ICAL_TIMEZONE}:${formatICalDateTime(endDate)}
 `;
         }
 
@@ -156,10 +156,8 @@ DTEND:${formatICalDate(endDate)}
 `;
         }
 
-        if (location) {
-            ical += `LOCATION:${escapeICalText(location)}
-`;
-        }
+        const locationProperties = buildLocationProperties(event, escapeICalText);
+        if (locationProperties.length) ical += `${locationProperties.join('\n')}\n`;
 
         // Add attendees (invited ringers)
         const invitations = invitationsByEventId[event.id] || [];
@@ -186,19 +184,6 @@ DTEND:${formatICalDate(endDate)}
     ical += `END:VCALENDAR`;
 
     return ical;
-}
-
-function formatICalDate(date) {
-    // Format as UTC with Z suffix (required for RRULE UNTIL)
-    return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z/, 'Z');
-}
-
-function formatICalDateOnly(date) {
-    // Format as YYYYMMDD for all-day events (local date, not UTC)
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}${month}${day}`;
 }
 
 function formatEventDescription(description, method, composition) {
@@ -253,9 +238,9 @@ function generateRRule(event) {
         case 'monthly_nth': {
             freq = 'MONTHLY';
             // Calculate the nth weekday
-            const start = new Date(startDate);
-            const dayOfWeek = start.getDay();
-            const nth = Math.ceil(start.getDate() / 7);
+            const start = parseCalendarDate(startDate);
+            const dayOfWeek = start.getUTCDay();
+            const nth = Math.ceil(start.getUTCDate() / 7);
             const weekdays = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
             byDay = `;BYDAY=${nth}${weekdays[dayOfWeek]}`;
             break;
@@ -279,12 +264,12 @@ function generateRRule(event) {
     
     if (recurrenceEndDate) {
         try {
-            const endDate = new Date(recurrenceEndDate);
+            const endDate = parseCalendarDate(recurrenceEndDate);
             // Make sure we're using a valid date
             if (!isNaN(endDate.getTime())) {
                 // Set to end of day in UTC
                 endDate.setUTCHours(23, 59, 59, 0);
-                rrule += `;UNTIL=${formatICalDate(endDate)}`;
+                rrule += `;UNTIL=${formatICalDateTime(endDate)}`;
             }
         } catch (e) {
             // Skip UNTIL if date parsing fails

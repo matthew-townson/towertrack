@@ -1,53 +1,60 @@
-import { redirect } from '@sveltejs/kit';
-import db from '$lib/server/db.js';
 import { getWhatsAppLink } from '$lib/server/secretLinks.js';
+import db from '$lib/server/db.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, fetch, url }) {
   // Check if user is logged in
   if (!locals.user) {
     console.error('User not logged in');
-    throw redirect(303, '/');
+    redirectToLogin(url);
   }
 
   // get whatsapp link
   const whatsappLink = getWhatsAppLink();
   
   try {
-    const [grabCountResult] = await db.query(
-      `SELECT COUNT(*) as count FROM Grab WHERE userId = ?`,
-      [locals.user.id]
+    const response = await fetch('/api/user-grabs?view=dashboard');
+    if (!response.ok) throw new Error(`User grabs request failed: ${response.status}`);
+    const { grabCount, recentGrabs } = await response.json();
+
+    const [performanceRows] = await db.query(
+      `SELECT p.PerformanceID, p.Changes, p.Date, p.Method, p.Place, p.Dedication,
+              p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs,
+              p.TenorKey, p.Footnotes
+       FROM Performance p
+       WHERE p.Ringers IS NOT NULL
+       ORDER BY p.Date DESC, p.PerformanceID DESC
+       LIMIT 10`,
+      []
     );
-    
-    const grabCount = grabCountResult[0]?.count || 0;
-    
-    const [recentGrabs] = await db.query(
-      `SELECT g.towerID, g.ringID, 
-        DATE_FORMAT(
-          STR_TO_DATE(
-            CONCAT(
-              IFNULL(g.yearGrabbed, ''),
-              '-',
-              IFNULL(g.monthGrabbed, '01'),
-              '-',
-              IFNULL(g.dateGrabbed, '01')
-            ),
-            '%Y-%m-%d'
-          ),
-          '%Y-%m-%d'
-        ) as dateGrabbed,
-        t.Place, t.Dedicn, t.County, t.Bells, t.Wt
-       FROM Grab g
-       JOIN Tower t ON g.towerID = t.TowerID AND g.ringID = t.RingID
-       WHERE g.userId = ?
-       ORDER BY g.yearGrabbed DESC, g.monthGrabbed DESC, g.dateGrabbed DESC, g.lastUpdated DESC
-       LIMIT 5`,
-      [locals.user.id]
-    );
+
+    const recentPerformances = performanceRows.map((performance) => {
+      let parsedRingers = [];
+      let footnotes = [];
+      try {
+        const parsed = typeof performance.Ringers === 'string'
+          ? JSON.parse(performance.Ringers)
+          : performance.Ringers;
+        parsedRingers = Array.isArray(parsed?.ringers) ? parsed.ringers : [];
+      } catch {
+        parsedRingers = [];
+      }
+      try {
+        const parsed = typeof performance.Footnotes === 'string'
+          ? JSON.parse(performance.Footnotes)
+          : performance.Footnotes;
+        footnotes = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        footnotes = [];
+      }
+      return { ...performance, ringers: parsedRingers, footnotes };
+    });
     
     return {
       user: locals.user,
       grabCount,
       recentGrabs,
+      recentPerformances,
       whatsappLink
     };
   } catch (error) {
@@ -55,7 +62,8 @@ export async function load({ locals }) {
     return {
       user: locals.user,
       grabCount: 0,
-      recentGrabs: []
+      recentGrabs: [],
+      recentPerformances: []
     };
   }
 }

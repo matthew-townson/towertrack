@@ -1,0 +1,38 @@
+.auth-page {
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.auth-page .login-box {
+    max-width: 25rem;
+    margin-inline: auto;
+    padding: 2rem;
+    border: 1px solid var(--tt-border);
+    border-radius: 0.5rem;
+    background: var(--tt-surface-raised);
+    text-align: left;
+}
+
+.auth-page .login-box label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.auth-page .login-box input {
+    width: 100%;
+}
+
+.auth-page .login-box button {
+    width: 100%;
+    background: var(--tt-accent);
+    color: #fff;
+}
+
+.auth-page .login-box button:hover {
+    background: var(--tt-accent-hover);
+}
+
+.auth-page .login-box .error {
+    margin-top: 1rem;
+}

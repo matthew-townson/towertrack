@@ -35,15 +35,26 @@
     let counties = [];
     let countries = [];
     let dioceses = [];
+    let affiliations = [];
     let minWtLbs = null;
     let maxWtLbs = null;
 
     let selectedCounty = '';
     let selectedCountry = '';
     let selectedDiocese = '';
+    let selectedAffiliation = '';
+    let selectedNote = '';
     let minWeightCwt = '';
     let maxWeightCwt = '';
     let advancedOpen = false;
+    let towerSearchQuery = '';
+    let towerSearchResults = [];
+    let towerSearchLoading = false;
+    let towerSearchTimeout = null;
+    let towerSearchIds = [];
+    let towerSearchActive = false;
+    let filteredTowerSearchResults = [];
+    let selectedTowerSearchId = null;
 
     // Extract unique practice nights (Mon-Sun) from tower.Practice, allow multiple per tower
     $: practiceNights = extractPracticeNights(data.towers);
@@ -84,6 +95,8 @@
             if (val === '1' || val === 'true' || val === 'include') includePealed = true;
             if (val === 'exclude') excludePealed = true;
         }
+        if (urlParams.has('affiliation')) selectedAffiliation = urlParams.get('affiliation') || '';
+        if (urlParams.has('key')) selectedNote = urlParams.get('key') || '';
         
         if (urlParams.has('excludeSpecial')) {
             const val = urlParams.get('excludeSpecial');
@@ -104,6 +117,7 @@
                 counties = data.counties || [];
                 countries = data.countries || [];
                 dioceses = data.dioceses || [];
+                affiliations = data.affiliations || [];
                 minWtLbs = data.minWt ?? null;
                 maxWtLbs = data.maxWt ?? null;
 
@@ -136,8 +150,51 @@
         selectedCounty = '';
         selectedCountry = '';
         selectedDiocese = '';
+        selectedAffiliation = '';
+        selectedNote = '';
         minWeightCwt = minWtLbs ? lbsToCwtDecimal(minWtLbs) : '';
         maxWeightCwt = maxWtLbs ? lbsToCwtDecimal(maxWtLbs) : '';
+    }
+
+    function searchTowers(query) {
+        clearTimeout(towerSearchTimeout);
+        selectedTowerSearchId = null;
+        const trimmedQuery = query.trim();
+        if (trimmedQuery.length < 2) {
+            towerSearchActive = false;
+            towerSearchResults = [];
+            towerSearchIds = [];
+            towerSearchLoading = false;
+            return;
+        }
+
+        towerSearchActive = true;
+        towerSearchLoading = true;
+        towerSearchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`/api/search-towers?query=${encodeURIComponent(trimmedQuery)}`);
+                if (!response.ok) {
+                    towerSearchResults = [];
+                    towerSearchIds = [];
+                    return;
+                }
+                towerSearchResults = await response.json();
+                towerSearchIds = towerSearchResults.map((tower) => String(tower.TowerID));
+            } catch (error) {
+                console.error('Tower search error:', error);
+                towerSearchResults = [];
+                towerSearchIds = [];
+            } finally {
+                towerSearchLoading = false;
+            }
+        }, 200);
+    }
+
+    function selectTowerSearchResult(tower) {
+        selectedTowerSearchId = `${tower.TowerID}:${tower.RingID || 1}`;
+        towerSearchQuery = `${tower.Place}${tower.Dedicn ? `, ${tower.Dedicn}` : ''}`;
+        towerSearchResults = [tower];
+        towerSearchIds = [String(tower.TowerID)];
     }
 </script>
 
@@ -162,7 +219,12 @@
             <p>{data.error}</p>
         </div>
     {:else}
-        <div class="box p-0 map-wrapper" style="height:100%; min-height:0; margin:0;">
+    <div class="box p-0 map-wrapper" style="height:100%; min-height:0; margin:0;">
+        {#if data.mapUser && String(data.mapUser.id) !== String(data.user.id)}
+            <div class="notification is-info map-user-display py-2 px-3 mb-0">
+                Viewing map data for<br><strong><a href={`/u/${data.mapUser.username}`} class="has-text-link">{data.mapUser.username}</a></strong>
+            </div>
+        {/if}
             <TowerMap 
                 towers={data.towers}
                 bind:bellsFilter
@@ -184,8 +246,16 @@
                 bind:selectedCounty
                 bind:selectedCountry
                 bind:selectedDiocese
+                bind:affiliations
+                bind:selectedAffiliation
+                bind:selectedNote
                 bind:minWeightCwt
                 bind:maxWeightCwt
+                {towerSearchIds}
+                {towerSearchActive}
+                {towerSearchResults}
+                bind:filteredTowerSearchResults
+                {selectedTowerSearchId}
                 showLocationTracking={true}
                 showClosestTower={true}
                 showTowerCount={true}
@@ -213,6 +283,43 @@
                 </div>
                 
                 <div class="sidebar-content py-4 px-4">
+                    <div class="field mb-5 tower-search-field">
+                        <label class="label" for="tower-search">Search towers</label>
+                        <div class="control">
+                            <input
+                                id="tower-search"
+                                class="input"
+                                type="search"
+                                placeholder="Start typing to search towers..."
+                                bind:value={towerSearchQuery}
+                                on:input={(event) => searchTowers(event.currentTarget.value)}
+                                autocomplete="off"
+                                aria-autocomplete="list"
+                            />
+                            {#if towerSearchLoading}
+                                <span class="tower-search-loading" aria-label="Searching">Searching…</span>
+                            {/if}
+                        </div>
+                        {#if filteredTowerSearchResults.length > 0}
+                            <div class="tower-search-results">
+                                {#each filteredTowerSearchResults as tower}
+                                    <button
+                                        type="button"
+                                        class="tower-search-result"
+                                        on:click={() => selectTowerSearchResult(tower)}
+                                    >
+                                        <strong>{tower.Place}</strong>
+                                        <span>
+                                            {tower.Dedicn ? `${tower.Dedicn}, ` : ''}{tower.County || tower.Country || ''}
+                                            {tower.Bells ? ` · ${tower.Bells} bells` : ''}
+                                        </span>
+                                    </button>
+                                {/each}
+                            </div>
+                        {:else if towerSearchQuery.trim().length >= 2 && !towerSearchLoading}
+                            <p class="help">No towers found matching your search.</p>
+                        {/if}
+                    </div>
                     <div class="field mb-5">
                         <label class="label" for="bellsFilter">Number of Bells: {bellsFilter}</label>
                         <div class="control">
@@ -415,6 +522,27 @@
                                                     <option value={d}>{d}</option>
                                                 {/each}
                                             </select>
+                                        </div>
+
+                                        <div class="field">
+                                            <label class="label" for="affiliation-select">Affiliation</label>
+                                            <div class="control">
+                                                <div class="select is-fullwidth">
+                                                    <select id="affiliation-select" bind:value={selectedAffiliation}>
+                                                        <option value="">(Any)</option>
+                                                        {#each affiliations as affiliation}
+                                                            <option value={affiliation}>{affiliation}</option>
+                                                        {/each}
+                                                    </select>
+                                                </div>
+
+                                                <div class="field">
+                                                    <label class="label" for="key-filter">Key (database Note)</label>
+                                                    <div class="control">
+                                                        <input id="key-filter" class="input" type="search" bind:value={selectedNote} placeholder="Search key or note">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

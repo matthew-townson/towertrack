@@ -1,10 +1,11 @@
 import { redirect, error } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log';
+import { redirectToLogin } from '$lib/server/auth.js';
 
 export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
 
     const performanceId = url.searchParams.get('id');

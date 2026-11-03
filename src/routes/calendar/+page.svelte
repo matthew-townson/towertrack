@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import UserSearch from '$lib/components/UserSearch.svelte';
@@ -141,7 +141,8 @@
 			case 'monthly': desc += interval === 1 ? 'month' : 'months'; break;
 			case 'monthly_nth': {
 				if (startDate) {
-					const date = new Date(startDate);
+					const date = parseEventDateTimeLocal(startDate);
+					if (!date) break;
 					const weekday = date.getDay();
 					const nth = Math.ceil(date.getDate() / 7);
 					const ordinal = nth <= 4 ? ordinals[nth] : 'last';
@@ -155,7 +156,8 @@
 		}
 		
 		if (endDate) {
-			const end = new Date(endDate);
+			const end = parseEventDateTimeLocal(endDate);
+			if (!end) return desc;
 			desc += ` until ${end.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
 		}
 		
@@ -268,7 +270,8 @@
 	}
 
 	function formatEventDate(dateStr) {
-		const date = new Date(dateStr);
+		const date = parseEventDateTimeLocal(dateStr);
+		if (!date) return '';
 		return date.toLocaleDateString('en-GB', { 
 			weekday: 'short', 
 			day: 'numeric', 
@@ -277,7 +280,8 @@
 	}
 	
 	function formatEventTime(dateStr) {
-		const date = new Date(dateStr);
+		const date = parseEventDateTimeLocal(dateStr);
+		if (!date) return '';
 		return date.toLocaleTimeString('en-GB', { 
 			hour: '2-digit', 
 			minute: '2-digit'
@@ -287,13 +291,8 @@
 	function getInputDateString(value) {
 		if (!value) return '';
 
-		if (typeof value === 'string') {
-			const dateMatch = value.match(/^(\d{4}-\d{2}-\d{2})/);
-			if (dateMatch) return dateMatch[1];
-		}
-
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return '';
+		const date = parseEventDateTimeLocal(value);
+		if (!date || Number.isNaN(date.getTime())) return '';
 
 		const y = date.getFullYear();
 		const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -304,17 +303,19 @@
 	function getInputTimeString(value) {
 		if (!value) return '';
 
-		if (typeof value === 'string') {
-			const timeMatch = value.match(/[T\s](\d{2}:\d{2})/);
-			if (timeMatch) return timeMatch[1];
-		}
-
-		const date = new Date(value);
-		if (Number.isNaN(date.getTime())) return '';
+		const date = parseEventDateTimeLocal(value);
+		if (!date || Number.isNaN(date.getTime())) return '';
 
 		const h = String(date.getHours()).padStart(2, '0');
 		const m = String(date.getMinutes()).padStart(2, '0');
 		return `${h}:${m}`;
+	}
+
+	function formatLocalDate(date) {
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
 	}
 
 	function parseEventDateTimeLocal(value) {
@@ -389,7 +390,7 @@
 		}
 		
 		// Check if we should show an invitation (from notification click)
-		const showInvitationId = $page.url.searchParams.get('showInvitation');
+		const showInvitationId = page.url.searchParams.get('showInvitation');
 		if (showInvitationId) {
 			// Switch to invitations tab and find the matching invitation
 			sidebarTab = 'invitations';
@@ -765,6 +766,7 @@
 
 	// Event modal functions
 	function openNewEventModal(date = null) {
+		showSharedEventModal = false;
 		editingEvent = null;
 		eventModalTab = 'details'; // Reset tab to details for new events
 		const now = date || new Date();
@@ -775,9 +777,9 @@
 			description: '',
 			location: '',
 			towerID: null,
-			startDate: now.toISOString().slice(0, 10),
+			startDate: formatLocalDate(now),
 			startTime: '09:00',
-			endDate: now.toISOString().slice(0, 10),
+			endDate: formatLocalDate(now),
 			endTime: '10:00',
 			allDay: false,
 			recurrenceType: 'none',
@@ -798,6 +800,7 @@
 	}
 
 	function openNewEventModalWithTime(date, startTime, endTime) {
+		showSharedEventModal = false;
 		editingEvent = null;
 		eventModalTab = 'details'; // Reset tab to details for new events
 		const defaultCalendar = calendars[0];
@@ -807,9 +810,9 @@
 			description: '',
 			location: '',
 			towerID: null,
-			startDate: date.toISOString().slice(0, 10),
+			startDate: formatLocalDate(date),
 			startTime: startTime,
-			endDate: date.toISOString().slice(0, 10),
+			endDate: formatLocalDate(date),
 			endTime: endTime,
 			allDay: false,
 			recurrenceType: 'none',
@@ -1215,6 +1218,7 @@
 	}
 
 	async function openEditEventModal(event, editScope = null) {
+		showSharedEventModal = false;
 		// If this is a recurring event and no scope specified, show the recurrence edit modal
 		if (event.recurrenceType && event.recurrenceType !== 'none' && !editScope) {
 			pendingRecurrenceEdit = event;
@@ -1873,6 +1877,7 @@
 	let showSharedEventModal = false;
 
 	function openNewSharedEventModal(sharedCalendarId, date = null) {
+		showEventModal = false;
 		editingSharedEvent = null;
 		sharedEventModalTab = 'details'; // Reset tab to details for new events
 		const now = date || new Date();
@@ -1885,9 +1890,9 @@
 			towerID: null,
 			method: '',
 			composition: '',
-			startDate: now.toISOString().slice(0, 10),
+			startDate: formatLocalDate(now),
 			startTime: '09:00',
-			endDate: now.toISOString().slice(0, 10),
+			endDate: formatLocalDate(now),
 			endTime: '10:00',
 			allDay: false,
 			recurrenceType: 'none',
@@ -1902,6 +1907,7 @@
 	}
 
 	async function openEditSharedEventModal(event, editScope = null) {
+		showEventModal = false;
 		// If this is a recurring event and no scope specified, show the recurrence edit modal
 		if (event.recurrenceType && event.recurrenceType !== 'none' && !editScope) {
 			pendingSharedRecurrenceEdit = event;
@@ -3251,9 +3257,10 @@
 							<p class="has-text-weight-bold mb-3">📬 Send Invitation</p>
 							
 							<div class="field">
-								<label class="label is-small">Search for user or enter guest name</label>
+								<label class="label is-small" for="invite-search">Search for user or enter guest name</label>
 								<div class="control is-expanded">
 									<input 
+										id="invite-search"
 										class="input" 
 										type="text"
 										placeholder="Type user name or guest name..."
@@ -3274,6 +3281,8 @@
 												on:keydown={(e) => e.key === 'Enter' && selectUserForInvite(user)}
 												on:mouseover={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
 												on:mouseout={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+												on:focus={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+												on:blur={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
 												role="button"
 												tabindex="0"
 											>
@@ -3289,7 +3298,7 @@
 
 							{#if inviteForm.invitedUserId}
 								<div class="field">
-									<label class="label is-small">Selected User</label>
+									<p class="label is-small">Selected User</p>
 									<div class="box p-2 has-background-info-light" style="border-left: 3px solid #3273dc;">
 										<div class="is-flex is-justify-content-space-between is-align-items-center">
 											<span class="is-size-7"><strong>{inviteSearchQuery}</strong></span>
@@ -3308,9 +3317,10 @@
 								</div>
 							{:else}
 								<div class="field">
-									<label class="label is-small">Or enter guest name (if no user account)</label>
+									<label class="label is-small" for="guest-name">Or enter guest name (if no user account)</label>
 									<div class="control">
 										<input 
+											id="guest-name"
 											class="input"
 											type="text"
 											placeholder="Guest name..."
@@ -3703,7 +3713,7 @@
 				{/if}
 				{#if isOwner}
 					<div class="field mt-3">
-						<label class="label" id="add-member-label">Add Member</label>
+						<p class="label" id="add-member-label">Add Member</p>
 						<UserSearch 
 							onUserSelect={addSharedCalendarMember}
 							excludeUserIds={[data.user.id, ...sharedCalendarMembers.map(m => m.userId)]}
@@ -4033,9 +4043,10 @@
 							<p class="has-text-weight-bold mb-3">📬 Send Invitation</p>
 						
 						<div class="field">
-							<label class="label is-small">Search for user or enter guest name</label>
+							<label class="label is-small" for="shared-invite-search">Search for user or enter guest name</label>
 							<div class="control is-expanded">
 								<input 
+									id="shared-invite-search"
 									class="input" 
 									type="text"
 									placeholder="Type user name or guest name..."
@@ -4056,6 +4067,8 @@
 											on:keydown={(e) => e.key === 'Enter' && selectUserForInvite(user)}
 											on:mouseover={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
 											on:mouseout={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+											on:focus={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+											on:blur={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
 											role="button"
 											tabindex="0"
 										>
@@ -4071,7 +4084,7 @@
 
 						{#if inviteForm.invitedUserId}
 							<div class="field">
-								<label class="label is-small">Selected User</label>
+								<p class="label is-small">Selected User</p>
 								<div class="box p-2 has-background-info-light" style="border-left: 3px solid #3273dc;">
 									<div class="is-flex is-justify-content-space-between is-align-items-center">
 										<span class="is-size-7"><strong>{inviteSearchQuery}</strong></span>
@@ -4090,9 +4103,10 @@
 							</div>
 						{:else}
 							<div class="field">
-								<label class="label is-small">Or enter guest name (if no user account)</label>
+								<label class="label is-small" for="shared-guest-name">Or enter guest name (if no user account)</label>
 								<div class="control">
 									<input 
+										id="shared-guest-name"
 										class="input"
 										type="text"
 										placeholder="Guest name..."
@@ -4181,4 +4195,3 @@
 {/if}
 
 <Footer />
-

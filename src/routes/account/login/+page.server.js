@@ -3,9 +3,11 @@ import { validateUser } from '$lib/server/validation.js';
 import { createSession } from '$lib/server/session.js';
 import log from '$lib/server/log.js';
 import { checkRateLimit } from '$lib/server/rateLimit';
+import { startUserBBImport } from '$lib/server/scheduler.js';
+import { getPostLoginRedirect } from '$lib/server/auth.js';
 
 export const actions = {
-    default: async ({ request, cookies }) => {
+    default: async ({ request, cookies, url }) => {
         const data = await request.formData();
         const username = data.get('username');
         const password = data.get('password');
@@ -14,6 +16,7 @@ export const actions = {
             return fail(400, { error: true, message: 'Please enter your username and password', username });
         }
 
+        // Check rate limit first, before validation
         const { limited, message } = checkRateLimit(request.headers.get('x-forwarded-for') || 'localhost');
         if (limited) {
             return fail(429, { error: true, message });
@@ -22,6 +25,7 @@ export const actions = {
         const result = await validateUser(username, password);
         
         if (!result.success) {
+            // Only record failed attempt in rate limit on actual validation failure
             checkRateLimit(request.headers.get('x-forwarded-for') || 'localhost');
             return fail(400, { error: true, message: result.message, username });
         }
@@ -37,7 +41,10 @@ export const actions = {
         });
 
         log.info(`User logged in: ${result.user.username}, Permission Level: ${result.user.permission}`);
+        
+        // start a bb import on login
+        startUserBBImport(result.user.id, result.user.username);
 
-        throw redirect(303, '/home');
+        throw redirect(303, getPostLoginRedirect(url));
     }
 };

@@ -37,11 +37,12 @@
 <svelte:head>
     <title>Register | towertracker</title>
     <meta name="description" content="Register for towertracker"/>
+    <link rel="stylesheet" href="/assets/css/auth.css" />
 </svelte:head>
 
 <Header user={data.user} />
 
-<main>
+<main class="auth-page">
     <h1>Sign Up</h1>
     <form class="login-box" method="post">
         <label for="username">Username</label>

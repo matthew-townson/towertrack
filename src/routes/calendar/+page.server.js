@@ -1,11 +1,11 @@
-import { redirect } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import { ensurePresetCalendars } from '$lib/server/calendar.js';
 import { generateRecurringInstances } from '$lib/server/recurrence.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(302, '/login?redirect=/calendar');
+        redirectToLogin(url, '/login', 302);
     }
 
     // Ensure preset calendars exist

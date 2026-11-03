@@ -31,7 +31,7 @@ export async function GET({ url, locals }) {
         const lngDelta = maxDistance / (111.0 * Math.cos(lat * Math.PI / 180)); // adjust for longitude
 
         const [towers] = await db.query(
-            `SELECT TowerID, RingID, Place, Dedicn, County, Country, Bells, UR, Wt, Lat, Long,
+            `SELECT TowerID, RingID, Place, Dedicn, County, Country, Bells, UR, Wt, Lat, \`Long\`,
                     (
                         6371 * acos(
                             cos(radians(?)) * cos(radians(Lat)) * cos(radians(\`Long\`) - radians(?)) +

@@ -2,6 +2,48 @@
  * Recurrence helper functions for calendar events
  */
 
+function parseLocalDateTime(value) {
+    if (!value) return null;
+
+    if (value instanceof Date) {
+        return value;
+    }
+
+    if (typeof value === 'string') {
+        const match = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/);
+        if (match) {
+            const year = Number(match[1]);
+            const month = Number(match[2]) - 1;
+            const day = Number(match[3]);
+            const hour = Number(match[4] || 0);
+            const minute = Number(match[5] || 0);
+            const second = Number(match[6] || 0);
+            return new Date(year, month, day, hour, minute, second);
+        }
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+    return date;
+}
+
+function formatLocalDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function formatLocalDateTime(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
 export function getNthWeekdayInfo(date) {
     const weekday = date.getDay(); // 0 = Sunday, 6 = Saturday
     const dayOfMonth = date.getDate();
@@ -47,21 +89,21 @@ export function generateRecurringInstances(event, rangeStart, rangeEnd) {
     
     // No recurrence, return single instance
     if (!recurrenceType || recurrenceType === 'none') {
-        const eventStart = new Date(startDate);
+        const eventStart = parseLocalDateTime(startDate) || new Date(startDate);
         if (eventStart >= rangeStart && eventStart <= rangeEnd) {
             return [event];
         }
         return [];
     }
     
-    const baseStart = new Date(startDate);
-    const baseEnd = endDate ? new Date(endDate) : null;
+    const baseStart = parseLocalDateTime(startDate) || new Date(startDate);
+    const baseEnd = endDate ? (parseLocalDateTime(endDate) || new Date(endDate)) : null;
     const duration = baseEnd ? baseEnd.getTime() - baseStart.getTime() : 0;
     
     // Determine the actual end date for recurrence
     let recurrenceEnd = rangeEnd;
     if (recurrenceEndDate) {
-        const recEnd = new Date(recurrenceEndDate);
+        const recEnd = parseLocalDateTime(recurrenceEndDate) || new Date(recurrenceEndDate);
         recEnd.setHours(23, 59, 59, 999);
         if (recEnd < recurrenceEnd) {
             recurrenceEnd = recEnd;
@@ -85,11 +127,11 @@ export function generateRecurringInstances(event, rangeStart, rangeEnd) {
             
             instances.push({
                 ...event,
-                startDate: instanceStart,
-                endDate: instanceEnd,
+                startDate: formatLocalDateTime(instanceStart),
+                endDate: instanceEnd ? formatLocalDateTime(instanceEnd) : null,
                 isRecurringInstance: true,
                 originalEventId: event.id,
-                instanceDate: instanceStart.toISOString().split('T')[0]
+                instanceDate: formatLocalDate(instanceStart)
             });
         }
         
@@ -170,7 +212,7 @@ export function getRecurrenceDescription(event) {
             desc += interval === 1 ? 'month' : 'months';
             break;
         case 'monthly_nth': {
-            const date = new Date(startDate);
+            const date = parseLocalDateTime(startDate) || new Date(startDate);
             const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const ordinals = ['', '1st', '2nd', '3rd', '4th', 'last'];
             const { weekday, nth } = getNthWeekdayInfo(date);
@@ -184,7 +226,7 @@ export function getRecurrenceDescription(event) {
     }
     
     if (recurrenceEndDate) {
-        const endDate = new Date(recurrenceEndDate);
+        const endDate = parseLocalDateTime(recurrenceEndDate) || new Date(recurrenceEndDate);
         desc += ` until ${endDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
     }
     

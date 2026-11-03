@@ -10,6 +10,7 @@ export async function GET({ url, locals }) {
     }
 
     const towerId = url.searchParams.get('id');
+    const ringId = url.searchParams.get('ringId');
     
     if (!towerId) {
         return json({ error: 'Tower ID is required' }, { status: 400 });
@@ -18,9 +19,9 @@ export async function GET({ url, locals }) {
     try {
         const [rows] = await db.query(
             `SELECT TowerID, RingID, Place, Dedicn, County, Country, Bells, UR, Wt, Note
-             FROM Tower 
-             WHERE TowerID = ?`,
-            [towerId]
+             FROM Tower
+             WHERE TowerID = ? ${ringId ? 'AND RingID = ?' : ''}`,
+            ringId ? [towerId, ringId] : [towerId]
         );
 
         if (rows.length === 0) {

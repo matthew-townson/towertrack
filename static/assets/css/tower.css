@@ -45,6 +45,39 @@ main {
     filter: brightness(1.1);
 }
 
+.location-search-heading,
+.nearby-tower {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.location-search-heading .heading,
+.nearby-tower p {
+    margin-bottom: 0;
+}
+
+.nearby-tower {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--tt-border);
+}
+
+@media (max-width: 600px) {
+    .location-search-heading,
+    .nearby-tower {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .location-search-heading .button,
+    .nearby-tower .buttons,
+    .nearby-tower .button {
+        width: 100%;
+    }
+}
+
 .tower-content {
     display: grid;
     grid-template-columns: 1fr;

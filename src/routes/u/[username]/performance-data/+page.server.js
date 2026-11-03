@@ -1,5 +1,6 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 import { importBBData } from '$lib/server/bbImport.js';
 import log from '$lib/server/log';
 
@@ -119,8 +120,9 @@ export async function load({ params, locals }) {
     WITH matched_perfs AS (
       SELECT DISTINCT p.PerformanceID, p.Changes,
         COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
-        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
+        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes, t.Diocese, t.Note, t.Affiliations
       FROM Performance p
+      LEFT JOIN Tower t ON t.TowerID = p.TowerID AND t.RingID = p.RingID
       LEFT JOIN (
         SELECT p2.PerformanceID, jt.name
         FROM Performance p2
@@ -141,8 +143,9 @@ export async function load({ params, locals }) {
       
       SELECT DISTINCT p.PerformanceID, p.Changes,
         COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
-        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
+        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes, t.Diocese, t.Note, t.Affiliations
       FROM Performance p
+      LEFT JOIN Tower t ON t.TowerID = p.TowerID AND t.RingID = p.RingID
       JOIN \`User\` u ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(u.username)), '%')
       WHERE u.id = ?
       
@@ -150,12 +153,13 @@ export async function load({ params, locals }) {
       
       SELECT DISTINCT p.PerformanceID, p.Changes,
         COALESCE(JSON_LENGTH(p.Ringers, '$.ringers'), 0) AS bell_count,
-        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes
+        p.Date, p.Method, p.Place, p.Dedication, p.County, p.Ringers, p.Duration, p.Association, p.TenorWeightLbs, p.TenorKey, p.Footnotes, t.Diocese, t.Note, t.Affiliations
       FROM Performance p
+      LEFT JOIN Tower t ON t.TowerID = p.TowerID AND t.RingID = p.RingID
       JOIN OtherNames onm ON LOWER(JSON_UNQUOTE(p.Ringers)) LIKE CONCAT('%', LOWER(TRIM(onm.Name)), '%')
       WHERE onm.userId = ?
     )
-    SELECT PerformanceID, Changes, bell_count, Date, Method, Place, Dedication, County, Ringers, Duration, Association, TenorWeightLbs, TenorKey, Footnotes
+    SELECT PerformanceID, Changes, bell_count, Date, Method, Place, Dedication, County, Ringers, Duration, Association, TenorWeightLbs, TenorKey, Footnotes, Diocese, Note, Affiliations
     FROM matched_perfs
     ORDER BY Date DESC, PerformanceID DESC;
     `;
@@ -207,6 +211,9 @@ export async function load({ params, locals }) {
 			Association: r.Association,
 			TenorWeightLbs: r.TenorWeightLbs,
 			TenorKey: r.TenorKey,
+			Diocese: r.Diocese,
+			Note: r.Note,
+			Affiliations: r.Affiliations,
 			ringers: ringers,
 			footnotes: footnotes,
 			classification: classifyChanges(Number(r.Changes || 0), Number(r.bell_count || 0))
@@ -223,9 +230,9 @@ export async function load({ params, locals }) {
 }
 
 export const actions = {
-	importBBData: async ({ locals, params }) => {
+	importBBData: async ({ locals, params, url }) => {
 		if (!locals.user) {
-			throw redirect(303, '/account/login');
+			redirectToLogin(url);
 		}
 
 		// only allow importing own data

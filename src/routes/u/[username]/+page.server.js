@@ -1,9 +1,8 @@
 import { error } from '@sveltejs/kit';
 import pool from '$lib/server/db.js';
-import { getUserStats } from '$lib/server/userstats.js';
 import { getUserTowerData } from '$lib/server/mapData.js';
 
-export async function load({ params, depends }) {
+export async function load({ params, depends, fetch }) {
 	depends('app:profile');
 	
 	const { username } = params;
@@ -57,10 +56,30 @@ export async function load({ params, depends }) {
 			};
 		}
 
-		const userStats = await getUserStats(user.id);
+		let dashboard = null;
+		let userStats = null;
+		if (settings.dataVisibility) {
+			const dashboardResponse = await fetch(`/api/user-stats/${encodeURIComponent(user.username).replace(/%20/g, '-')}`);
+			if (dashboardResponse.ok) {
+				const statistics = await dashboardResponse.json();
+				userStats = statistics.stats;
+				dashboard = statistics.dashboard;
+			}
+		}
 		
 		// Get user's tower data for map
 		const towerData = await getUserTowerData(user.id);
+
+		let id = 1;
+
+		// get other names for user
+		const [otherNameRows] = await pool.execute(
+			'SELECT `Name` FROM `OtherNames` WHERE `userId` = ?',
+			[user.id]
+		);
+		
+		// map to array of strings
+		const otherNames = otherNameRows.map((row) => row.Name);
 
 		// public: return sanitized user data and settings
 		return {
@@ -69,12 +88,13 @@ export async function load({ params, depends }) {
 				username: user.username,
 				email: user.email,
 				permission: user.permission,
-				otherNames: user.otherNames || null,
+				otherNames: otherNames.length > 0 ? otherNames : null,
 				profileImage: user.profileImage || null,
 				isPrivate: false,
 			},
 			settings,
 			stats: userStats,
+			dashboard,
 			towerData
 		};
 	} catch (err) {

@@ -71,7 +71,7 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD:-towertrackpass}
       DB_NAME: towertracker
       WHATSAPP_LINK: ${WHATSAPP_LINK:-https://chat.whatsapp.com/yourlink}
-    command: bun --bun run dev --host
+    command: sh -c "bun install --frozen-lockfile && bun --bun run dev --host"
     profiles:
       - dev
 

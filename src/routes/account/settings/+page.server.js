@@ -1,18 +1,19 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import argon2 from 'argon2';
 import log from '$lib/server/log.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
     
     // Query database to get complete user info including email and profile image
     const [rows] = await db.execute('SELECT id, username, email, permission, profileImage FROM User WHERE id = ?', [locals.user.id]);
     
     if (rows.length === 0) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
     
     // Get user's aliases
@@ -36,9 +37,63 @@ export async function load({ locals }) {
 }
 
 export const actions = {
-    updateEmail: async ({ request, locals }) => {
+    updateUsername: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
+        }
+
+        const data = await request.formData();
+        const usernameValue = data.get('username');
+        const username = typeof usernameValue === 'string' ? usernameValue.trim() : '';
+
+        if (!username) {
+            return fail(400, { error: true, message: 'Username is required', action: 'updateUsername' });
+        }
+
+        if (!/^[a-zA-Z0-9\s-]{3,50}$/.test(username)) {
+            return fail(400, {
+                error: true,
+                message: 'Username must be 3-50 characters long and can only contain letters, numbers, spaces, and hyphens',
+                action: 'updateUsername'
+            });
+        }
+
+        const [currentUser] = await db.execute('SELECT username FROM User WHERE id = ?', [locals.user.id]);
+        if (currentUser.length === 0) {
+            return fail(400, { error: true, message: 'User not found', action: 'updateUsername' });
+        }
+
+        if (currentUser[0].username === username) {
+            return fail(400, { error: true, message: 'New username is the same as current username', action: 'updateUsername' });
+        }
+
+        const [existingUser] = await db.execute('SELECT id FROM User WHERE username = ? AND id != ?', [username, locals.user.id]);
+        if (existingUser.length > 0) {
+            return fail(400, { error: true, message: 'Username already exists', action: 'updateUsername' });
+        }
+
+        try {
+            await db.execute('UPDATE User SET username = ? WHERE id = ?', [username, locals.user.id]);
+            await db.execute('UPDATE Session SET username = ? WHERE userId = ?', [username, locals.user.id]);
+            log.info(`User ${locals.user.id} changed their username to "${username}"`);
+            return {
+                success: true,
+                message: 'Username updated successfully',
+                action: 'updateUsername',
+                redirect: '/account/settings?section=profile'
+            };
+        } catch (error) {
+            log.error(`Failed to update username for user ${locals.user.id}: ${error.message}`);
+            if (error.code === 'ER_DUP_ENTRY') {
+                return fail(400, { error: true, message: 'Username already exists', action: 'updateUsername' });
+            }
+            return fail(500, { error: true, message: 'Internal server error', action: 'updateUsername' });
+        }
+    },
+
+    updateEmail: async ({ request, locals, url }) => {
+        if (!locals.user) {
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -87,9 +142,9 @@ export const actions = {
         }
     },
 
-    updatePrivacy: async ({ request, locals }) => {
+    updatePrivacy: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -131,9 +186,9 @@ export const actions = {
         }
     },
 
-    updateAlias: async ({ request, locals }) => {
+    updateAlias: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -201,9 +256,9 @@ export const actions = {
         return fail(400, { error: true, message: 'No alias operation specified', action: 'updateAlias' });
     },
 
-    changePassword: async ({ request, locals }) => {
+    changePassword: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();
@@ -258,9 +313,9 @@ export const actions = {
         }
     },
 
-    updateGrabSettings: async ({ request, locals }) => {
+    updateGrabSettings: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const data = await request.formData();

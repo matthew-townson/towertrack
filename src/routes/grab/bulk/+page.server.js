@@ -1,34 +1,34 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import db from '$lib/server/db.js';
 import log from '$lib/server/log.js';
+import { getUserGrabData } from '$lib/server/userGrabs.js';
+import { redirectToLogin } from '$lib/server/auth.js';
 
-export async function load({ locals }) {
+export async function load({ locals, url }) {
     if (!locals.user) {
-        throw redirect(303, '/account/login');
+        redirectToLogin(url);
     }
 
-    // Get user's existing grabs
-    let userGrabs = [];
     try {
-        const [rows] = await db.query(
-            `SELECT g.towerID, g.ringID FROM Grab g WHERE g.userID = ?`,
-            [locals.user.id]
-        );
-        userGrabs = rows;
+        const { userGrabs } = await getUserGrabData(locals.user.id, 'existing');
+        return {
+            user: locals.user,
+            userGrabs
+        };
     } catch (error) {
         log.error('Error loading user grabs:', error);
     }
 
     return {
         user: locals.user,
-        userGrabs
+        userGrabs: []
     };
 }
 
 export const actions = {
-    bulkAddGrabs: async ({ request, locals }) => {
+    bulkAddGrabs: async ({ request, locals, url }) => {
         if (!locals.user) {
-            throw redirect(303, '/account/login');
+            redirectToLogin(url);
         }
 
         const formData = await request.formData();
@@ -86,8 +86,8 @@ export const actions = {
 
                 // Check if already grabbed
                 const [existingGrab] = await db.query(
-                    `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ?`,
-                    [locals.user.id, towerId]
+                    `SELECT towerID FROM Grab WHERE userID = ? AND towerID = ? AND ringID = ?`,
+                    [locals.user.id, towerId, ringId || 1]
                 );
 
                 const alreadyGrabbed = existingGrab.length > 0;

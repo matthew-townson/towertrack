@@ -178,7 +178,7 @@ onMount(() => {
             <a class="navbar-item" href="/u/{userSlug}" on:click={closeMenus}>My Profile</a>
             <a class="navbar-item" href="/statistics" on:click={closeMenus}>Statistics</a>
             <a class="navbar-item" href="/u/{userSlug}/performance-data" on:click={closeMenus}>Performance Data</a>
-            <a class="navbar-item" href="/grab" on:click={closeMenus}>Grabs</a>
+            <a class="navbar-item" href="/u/{userSlug}/grabs" on:click={closeMenus}>Grabs</a>
           </div>
         </div>
 
@@ -320,4 +320,3 @@ onMount(() => {
 		</div>
 	</div>
 {/if}
-

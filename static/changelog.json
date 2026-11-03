@@ -1,57 +1,65 @@
 [
     {
-        "version": "v0.0.1 (beta)",
-        "date": "25-09-2025",
+        "version": "v0.0.14 (beta)",
+        "date": "30-10-2026",
         "items": [
-            "Initial release of towertracker!",
-            "Add grabs and import BellBoard data to automatically track grabs",
-            "Map view enabled with future improvements coming"
+            "User maps can be viewed on the map page",
+            "Changes to location tracking on the map page"
         ]
     },
     {
-        "version": "v0.0.2 (beta)",
-        "date": "25-09-2025",
+        "version": "v0.0.13 (beta)",
+        "date": "29-10-2026",
         "items": [
-            "Added additional map filters for Grabbed/Quartered/Pealed"
+            "You can now view other users' grabs and performances in detail",
+            "Map has been updated with a responsive search bar",
+            "Most recent performances are displayed on the home page"
         ]
     },
     {
-        "version": "v0.0.3 (beta)",
-        "date": "26-09-2025",
+        "version": "v0.0.12 (beta)",
+        "date": "15-10-2026",
         "items": [
-            "Fixed grabs not registering when performances already indexed by other users",
-            "Added progress bar to performance update page"
+            "Further css improvements",
+            "Calendar fixes",
+            "Added nearest tower on search page"
+        ]
+    },
+    {   "version": "v0.0.11 (beta)",
+        "date": "24-09-2026",
+        "items": [
+            "Consolidated formatting",
+            "Consolidated data requests to internal API endpoints - public access to API to follow",
+            "Calendar BST time fixed"
         ]
     },
     {
-        "version": "v0.0.3 HOTFIX (beta)",
-        "date": "04-10-2025",
+        "version": "v0.0.10 (beta)",
+        "date": "30-05-2026",
         "items": [
-            "Perf duplicating issue resolved",
-            "Perfs import correctly after broken update"
+            "Calendar update - added calendar view to organise ringing events",
+            "Changes to the top navigation bar",
+            "Notifications for invitations to events",
+            "General bug fixes",
+            "CSS fixes"
         ]
     },
     {
-        "version": "v0.0.4 (beta)",
-        "date": "29-10-2025",
+        "version": "v0.0.9 (beta)",
+        "date": "28-01-2026",
         "items": [
-            "Some more changes to CSS for light mode users (more coming)",
-            "Added more granular settings to map filtering"
+            "Added user profile images :)",
+            "Added user searching",
+            "Lists [Alpha feature - work in progress]"
         ]
     },
     {
-        "version": "v0.0.5 (beta)",
-        "date": "29-10-2025",
+        "version": "v0.0.8 (beta)",
+        "date": "27-01-2026",
         "items": [
-            "Added first instance of profiles"
-        ]
-    },
-    {
-        "version": "v0.0.6 (beta)",
-        "date": "11-11-2025",
-        "items": [
-            "Added leading ringers for peals/quarters",
-            "Added per-user tower map"
+            "Added bulk grabs feature (finally)",
+            "Added location-based grabbing",
+            "Updated css"
         ]
     },
     {
@@ -66,32 +74,58 @@
         ]
     },
     {
-        "version": "v0.0.8 (beta)",
-        "date": "27-01-2026",
+        "version": "v0.0.6 (beta)",
+        "date": "11-11-2025",
         "items": [
-            "Added bulk grabs feature (finally)",
-            "Added location-based grabbing",
-            "Updated css"
+            "Added leading ringers for peals/quarters",
+            "Added per-user tower map"
         ]
     },
     {
-        "version": "v0.0.9 (beta)",
-        "date": "28-01-2026",
+        "version": "v0.0.5 (beta)",
+        "date": "29-10-2025",
         "items": [
-            "Added user profile images :)",
-            "Added user searching",
-            "Lists [Alpha feature - work in progress]"
+            "Added first instance of profiles"
         ]
     },
     {
-        "version": "v0.0.10 (beta)",
-        "date": "30-05-2026",
+        "version": "v0.0.4 (beta)",
+        "date": "29-10-2025",
         "items": [
-            "Calendar update - added calendar view to organise ringing events",
-            "Changes to the top navigation bar",
-            "Notifications for invitations to events",
-            "General bug fixes",
-            "CSS fixes"
+            "Some more changes to CSS for light mode users (more coming)",
+            "Added more granular settings to map filtering"
+        ]
+    },
+    {
+        "version": "v0.0.3 HOTFIX (beta)",
+        "date": "04-10-2025",
+        "items": [
+            "Perf duplicating issue resolved",
+            "Perfs import correctly after broken update"
+        ]
+    },
+    {
+        "version": "v0.0.3 (beta)",
+        "date": "26-09-2025",
+        "items": [
+            "Fixed grabs not registering when performances already indexed by other users",
+            "Added progress bar to performance update page"
+        ]
+    },
+    {
+        "version": "v0.0.2 (beta)",
+        "date": "25-09-2025",
+        "items": [
+            "Added additional map filters for Grabbed/Quartered/Pealed"
+        ]
+    },
+    {
+        "version": "v0.0.1 (beta)",
+        "date": "25-09-2025",
+        "items": [
+            "Initial release of towertracker!",
+            "Add grabs and import BellBoard data to automatically track grabs",
+            "Map view enabled with future improvements coming"
         ]
     }
 ]

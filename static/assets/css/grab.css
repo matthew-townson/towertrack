@@ -4,6 +4,152 @@
     margin-bottom: 2rem;
 }
 
+.add-grab-page,
+.bulk-grab-page {
+    max-width: 1000px;
+}
+
+.add-grab-page .back-link,
+.bulk-grab-page .back-link {
+    margin-bottom: 0.5rem;
+}
+
+.add-grab-page .back-link button {
+    color: #3e8ed0;
+}
+
+.add-grab-form,
+.bulk-grab-form {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.add-grab-form .search-section {
+    margin-bottom: 0;
+}
+
+.add-grab-form .search-input,
+.bulk-grab-form .bulk-search-input {
+    min-height: 2.75rem;
+    border-radius: 6px;
+}
+
+.add-grab-form .selected-tower-container {
+    margin-top: 1.5rem;
+    border-radius: 8px;
+}
+
+.add-grab-form .form-actions {
+    border-top: 1px solid rgba(127, 127, 127, 0.2);
+    padding-top: 1.25rem;
+}
+
+.bulk-grab-form {
+    padding: 1.25rem;
+}
+
+.bulk-grab-form .bulk-grab-list {
+    margin-bottom: 1.25rem;
+}
+
+.bulk-grab-form .compact-item {
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .add-grab-page > .level,
+    .bulk-grab-page > .level {
+        display: block;
+    }
+
+    .add-grab-page > .level .level-right,
+    .bulk-grab-page > .level .level-right {
+        margin-top: 1rem;
+    }
+
+    .add-grab-page > .level .button,
+    .bulk-grab-page > .level .button {
+        width: 100%;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .add-grab-form,
+    .bulk-grab-form {
+        background: #23262b;
+        border: 1px solid #3b3f45;
+    }
+
+    .add-grab-page .back-link button {
+        color: #8ee3ef;
+    }
+}
+
+/* Final page-level layout overrides */
+.add-grab-page > .level,
+.bulk-grab-page > .level {
+    align-items: flex-end;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.add-grab-page > .level .level-left,
+.bulk-grab-page > .level .level-left {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.add-grab-page > .level .level-right,
+.bulk-grab-page > .level .level-right {
+    flex: 0 0 auto;
+    margin-left: 2rem;
+}
+
+.add-grab-page .add-grab-form,
+.bulk-grab-page .bulk-grab-form {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.add-grab-page .add-grab-form {
+    padding: 1.5rem;
+}
+
+.bulk-grab-page .bulk-grab-form {
+    padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .add-grab-page,
+    .bulk-grab-page {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .add-grab-page > .level,
+    .bulk-grab-page > .level {
+        display: flex;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .add-grab-page > .level .level-right,
+    .bulk-grab-page > .level .level-right {
+        margin: 1rem 0 0;
+        width: 100%;
+    }
+
+    .add-grab-page > .level .level-right .button,
+    .bulk-grab-page > .level .level-right .button {
+        width: 100%;
+    }
+
+    .add-grab-page .add-grab-form,
+    .bulk-grab-page .bulk-grab-form {
+        padding: 1rem;
+    }
+}
+
 .stat-card {
     padding: 1.5rem;
     border-radius: 8px;
@@ -252,7 +398,7 @@
     .action-buttons {
         flex-direction: column;
     }
-    
+
     .button {
         width: 100%;
         justify-content: center;
@@ -278,7 +424,54 @@
     }
 }
 
-/* Location suggestion styles */
+/* Nearby tower search */
+.location-search {
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+}
+
+.location-search-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.location-search-heading .heading {
+    margin-bottom: 0.25rem;
+}
+
+.location-search-heading .help {
+    margin-top: 0;
+}
+
+.nearby-tower {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bulma-border, #dbdbdb);
+}
+
+.nearby-tower .help {
+    margin-top: 0.25rem;
+}
+
+@media screen and (max-width: 768px) {
+    .location-search-heading,
+    .nearby-tower {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .location-search-heading .button,
+    .nearby-tower .buttons {
+        width: 100%;
+    }
+}
+
 .location-suggestion {
     max-width: 700px;
     margin: 0 auto 1.5rem auto;
@@ -1921,5 +2114,4 @@ input:checked + .toggle-slider:before {
     .compact-link:hover {
         background: rgba(142, 227, 239, 0.1);
     }
-}
 }
