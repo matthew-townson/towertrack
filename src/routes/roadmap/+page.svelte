@@ -19,9 +19,8 @@
             <div class="box">
                 <h2 class="title is-4">Upcoming Features/Fixes</h2>
                 <p>
-                    - Improvements to map filtering<br>
-                    - User profiles<br>
-                    - Statistics and analysis of BellBoard data and grabs<br>
+                    - Data migration features (backup and restore)<br>
+                    - Refinements to statistics and analysis<br>
                 </p>
             </div>
 		</div>

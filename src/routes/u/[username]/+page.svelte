@@ -429,7 +429,7 @@
 									<a href="/u/{profile.username?.replace(/ /g, '-')}/performance-data" class="button is-link is-small">
 										View Full Performance Data →
 									</a>
-									<a href="/u/{profile.username?.replace(/ /g, '-')}/grabs" class="button is-link is-light is-small ml-2">
+									<a href="/u/{profile.username?.replace(/ /g, '-')}/grabs" class="button is-link is-small ml-2">
 										View Grabbed Towers →
 									</a>
 								</p>
@@ -1013,7 +1013,7 @@
 					{#each userLists as list (list.id)}
 						<div class="column is-full-mobile is-half-tablet">
 							<div class="box" style="background-color: rgba(255,255,255,0.05);">
-								<h4 class="subtitle is-6 has-text-light mb-2">{list.name}</h4>
+								<h4 class="subtitle is-6 mb-2">{list.name}</h4>
 								{#if list.description}
 									<p class="is-size-7 has-text-grey mb-2">{list.description}</p>
 								{/if}

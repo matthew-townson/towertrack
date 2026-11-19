@@ -863,12 +863,12 @@
                             </div>
                             <div class="event-actions">
                                 {#if event.recurrenceType && event.recurrenceType !== 'none'}
-                                    <span class="tag is-info is-light mr-2" title="Recurring event">
+                                    <span class="tag is-info mr-2" title="Recurring event">
                                         <span class="icon"><i class="fas fa-repeat"></i></span>
                                     </span>
                                 {/if}
                                 {#if event.invitationCount > 0}
-                                    <span class="tag is-light mr-2">
+                                    <span class="tag mr-2">
                                         <span class="icon"><i class="fas fa-users"></i></span>
                                         <span>{event.acceptedCount}/{event.invitationCount}</span>
                                     </span>
@@ -1138,7 +1138,7 @@
                 </div>
                 
                 {#if editingEvent.invitationCount > 0}
-                    <div class="notification is-info is-light">
+                    <div class="notification is-info">
                         <span class="icon"><i class="fas fa-info-circle"></i></span>
                         Changes will be automatically applied to all {editingEvent.invitationCount} invited users' calendars.
                     </div>

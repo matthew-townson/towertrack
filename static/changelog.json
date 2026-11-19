@@ -1,5 +1,13 @@
 [
     {
+        "version": "v0.0.16 HOTFIX (beta)",
+        "date": "19-11-2026",
+        "items": [
+            "Added privacy policy",
+            "Updated formatting"
+        ]
+    },
+    {
         "version": "v0.0.15 HOTFIX (beta)",
         "date": "03-11-2026",
         "items": [

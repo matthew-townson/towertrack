@@ -173,7 +173,7 @@
 									{:else}
 										<p class="has-text-grey">No dated grab data available.</p>
 									{/if}
-									<a class="button is-link is-light mt-4" href="/grab">Explore your grabs</a>
+									<a class="button is-link mt-4" href="/grab">Explore your grabs</a>
 								</div>
 							</div>
 

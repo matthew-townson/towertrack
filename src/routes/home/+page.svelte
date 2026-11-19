@@ -26,7 +26,7 @@
 	<div class="dashboard-container">
 		<div class="dashboard-left">
 		<div class="dashboard-section">
-			<h1>Welcome back {data.user.username}!</h1>
+			<h1>Welcome {data.user.username}!</h1>
 			<h2>Tower grabbing</h2>
             <p class="section-description">Track the towers you've rung at and the bells you've grabbed.</p>
 	        

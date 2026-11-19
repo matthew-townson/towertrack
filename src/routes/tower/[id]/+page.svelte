@@ -54,13 +54,13 @@
         </div>
         
         <div class="tower-actions">
-            <a href="/grab/add?towerId={data.tower.TowerID}&ringId={data.tower.RingID || 1}" class="button action-button edit-grab-button has-text-white">
+            <a href="/grab/add?towerId={data.tower.TowerID}&ringId={data.tower.RingID || 1}" class="button action-button edit-grab-button">
                 {data.userGrab ? 'Edit Grab' : 'Add Grab'}
             </a>
-            <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button has-text-white" target="_blank" rel="noopener noreferrer">
+            <a href="https://dove.cccbr.org.uk/tower/{data.tower.TowerID}" class="button dove-button" target="_blank" rel="noopener noreferrer">
                 View on Dove
             </a>
-            <a href="https://bb.ringingworld.co.uk/search?dove_tower={data.tower.TowerID}" class="button bb-button has-text-white" target="_blank" rel="noopener noreferrer">
+            <a href="https://bb.ringingworld.co.uk/search?dove_tower={data.tower.TowerID}" class="button bb-button" target="_blank" rel="noopener noreferrer">
                 View on BellBoard
             </a>
             {#if data.tower.Lat && data.tower.Long}
@@ -186,7 +186,7 @@
                             </div>
                         {/if}
                         <div class="grab-actions">
-                            <a href="/grab/add?towerId={data.tower.TowerID}&ringId={data.tower.RingID || 1}" class="button edit-grab-button has-text-white">
+                            <a href="/grab/add?towerId={data.tower.TowerID}&ringId={data.tower.RingID || 1}" class="button edit-grab-button">
                                 Edit Grab
                             </a>
                         </div>

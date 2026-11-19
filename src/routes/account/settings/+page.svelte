@@ -254,7 +254,7 @@
                 </div>
                 <div class="field mb-4">
                     <div class="mb-3">
-                        <p class="has-text-light is-size-7">Upload a profile picture (Max 5MB, JPEG/PNG/WebP/GIF)</p>
+                        <p class="is-size-7">Upload a profile picture (Max 5MB, JPEG/PNG/WebP/GIF)</p>
                     </div>
                     <div class="file is-dark">
                         <label class="file-label">
@@ -315,32 +315,32 @@
 
         {#if activeSection === 'aliases'}
             <form id="alias-form" class="settings-section box is-dark" method="post" action="?/updateAlias">
-                <h2 class="title is-5 has-text-light mb-4">Additional Names</h2>
+                <h2 class="title is-5 mb-4">Additional Names</h2>
                 <div class="notification is-info mb-4">
                     Add other variations of your name as they may appear on BellBoard or other ringing records.
                 </div>
                 <div class="field">
-                    <div class="label has-text-light">Your Username</div>
+                    <div class="label">Your Username</div>
                     <div class="control is-flex is-align-items-center is-justify-content-space-between">
                         <span>
-                            <span class="has-text-weight-semibold has-text-light">{data.user?.username ?? ''}</span>
+                            <span class="has-text-weight-semibold">{data.user?.username ?? ''}</span>
                             &nbsp;-&nbsp;
                             <a href="https://bb.ringingworld.co.uk/search.php?ringer={data.user?.username ?? ''}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank" class="has-text-link">Link</a>
                         </span>
-                        <span class="tag is-info is-light">Username</span>
+                        <span class="tag is-info">Username</span>
                     </div>
                 </div>
                 {#if data.aliases && data.aliases.length > 0}
                     {#each data.aliases as alias}
                         <div class="field">
-                            <div class="label has-text-light">Alias</div>
+                            <div class="label">Alias</div>
                             <div class="control is-flex is-align-items-center is-justify-content-space-between">
                                 <span>
-                                    <span class="has-text-weight-semibold has-text-light">{alias.Name}</span>
+                                    <span class="has-text-weight-semibold">{alias.Name}</span>
                                     &nbsp;-&nbsp;
                                     <a href="https://bb.ringingworld.co.uk/search.php?ringer={alias.Name}&bells_type=tower&automated_ringing=0&simulated_sound=0&pagesize=9999" target="_blank" class="has-text-link">Link</a>
                                 </span>
-                                <button type="button" on:click={() => removeAlias(alias.id)} class="button is-danger is-light is-small">Remove</button>
+                                <button type="button" on:click={() => removeAlias(alias.id)} class="button is-danger is-small">Remove</button>
                             </div>
                         </div>
                     {/each}
@@ -373,9 +373,9 @@
 
         {#if activeSection === 'privacy'}
             <form class="settings-section box is-dark" method="post" action="?/updatePrivacy">
-                <h2 class="title is-5 has-text-light mb-4">Privacy Settings</h2>
+                <h2 class="title is-5 mb-4">Privacy Settings</h2>
                 <div class="field">
-                    <label class="label has-text-light" for="profileVisibility">Profile Visibility</label>
+                    <label class="label" for="profileVisibility">Profile Visibility</label>
                     <div class="control">
                         <div class="select is-dark is-fullwidth">
                             <select id="profileVisibility" name="profileVisibility">
@@ -386,7 +386,7 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label class="label has-text-light" for="dataVisibility">Data Visibility</label>
+                    <label class="label" for="dataVisibility">Data Visibility</label>
                     <div class="control">
                         <div class="select is-dark is-fullwidth">
                             <select id="dataVisibility" name="dataVisibility">
@@ -411,17 +411,17 @@
 
         {#if activeSection === 'password'}
             <form class="settings-section box is-dark" method="post" action="?/changePassword">
-                <h2 class="title is-5 has-text-light mb-4">Change Password</h2>
+                <h2 class="title is-5 mb-4">Change Password</h2>
                 <div class="field">
-                    <label class="label has-text-light" for="currentPassword">Current Password</label>
+                    <label class="label" for="currentPassword">Current Password</label>
                     <input class="input is-dark" type="password" id="currentPassword" name="currentPassword" placeholder="Enter your current password" autocomplete="off" required />
                 </div>
                 <div class="field">
-                    <label class="label has-text-light" for="newPassword">New Password</label>
+                    <label class="label" for="newPassword">New Password</label>
                     <input class="input is-dark" type="password" id="newPassword" name="newPassword" placeholder="8 character minimum (At least one letter and one number)" autocomplete="off" required />
                 </div>
                 <div class="field">
-                    <label class="label has-text-light" for="confirmNewPassword">Confirm New Password</label>
+                    <label class="label" for="confirmNewPassword">Confirm New Password</label>
                     <input class="input is-dark" type="password" id="confirmNewPassword" name="confirmNewPassword" placeholder="Confirm your new password" autocomplete="off" required />
                 </div>
                 <button type="submit" class="button is-primary mt-3">Change Password</button>
@@ -439,12 +439,12 @@
 
         {#if activeSection === 'grabs'}
             <form class="settings-section box is-dark" method="post" action="?/updateGrabSettings">
-                <h2 class="title is-5 has-text-light mb-4">Grab Settings</h2>
+                <h2 class="title is-5 mb-4">Grab Settings</h2>
                 <div class="notification is-info mb-4">
                     Configure what qualifies as a "grab" when importing BellBoard data.
                 </div>
                 <div class="field">
-                    <label class="label has-text-light" for="bellsPercent">Percentage of Bells</label>
+                    <label class="label" for="bellsPercent">Percentage of Bells</label>
                     <div class="control">
                         <input class="input is-dark" type="number" id="bellsPercent" name="bellsPercent" 
                                value={data.grabSettings?.bellsPercent} 
@@ -452,7 +452,7 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label class="checkbox has-text-light" for="excludeShortTouches">
+                    <label class="checkbox" for="excludeShortTouches">
                         <input 
                             type="checkbox" 
                             id="excludeShortTouches" 

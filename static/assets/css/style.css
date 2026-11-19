@@ -6,6 +6,8 @@
     --tt-body-bg: #ffffff;
     --tt-surface: #f7f8fa;
     --tt-surface-raised: #ffffff;
+    --tt-surface-hover: #eef0f3;
+    --tt-surface-muted: #f1f3f5;
     --tt-border: rgba(31, 41, 55, 0.14);
     --tt-text: #26313d;
     --tt-muted: #5f6b78;
@@ -17,6 +19,8 @@
         --tt-body-bg: #14161a;
         --tt-surface: #1d2127;
         --tt-surface-raised: #23262b;
+        --tt-surface-hover: #30353d;
+        --tt-surface-muted: #292d33;
         --tt-border: rgba(255, 255, 255, 0.14);
         --tt-text: #f3f4f6;
         --tt-muted: #a1a1aa;
@@ -63,6 +67,62 @@ h6 {
     font-family: 'IBM Plex Sans', 'Inter', sans-serif;
 }
 
+h1,
+.title.is-1 {
+    font-size: clamp(2rem, 4vw, 2.5rem);
+}
+
+h2,
+.title.is-2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+h3,
+.title.is-3,
+.subtitle.is-3 {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+
+h4,
+.title.is-4,
+.subtitle.is-4 {
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+}
+
+h5,
+.title.is-5,
+.subtitle.is-5 {
+    font-size: 1.125rem;
+}
+
+h6,
+.title.is-6,
+.subtitle.is-6 {
+    font-size: 1rem;
+}
+
+.title,
+.subtitle {
+    line-height: 1.25;
+}
+
+@media (max-width: 768px) {
+    h1,
+    .title.is-1 {
+        font-size: 1.875rem;
+    }
+
+    h2,
+    .title.is-2 {
+        font-size: 1.5rem;
+    }
+
+    h3,
+    .title.is-3 {
+        font-size: 1.25rem;
+    }
+}
+
 button,
 input,
 select,
@@ -86,4 +146,47 @@ a {
 
 .footer {
     margin-top: auto;
+}
+
+.box,
+.card,
+.modal-card,
+.navbar-dropdown,
+.dropdown-menu {
+    background: var(--tt-surface-raised);
+    color: var(--tt-text);
+}
+
+.input,
+.textarea,
+.select select {
+    border-color: var(--tt-border);
+    background: var(--tt-surface-raised);
+    color: var(--tt-text);
+}
+
+.table,
+.table td,
+.table th {
+    background: var(--tt-surface-raised);
+    color: var(--tt-text);
+}
+
+.table thead td,
+.table thead th,
+.table tfoot td,
+.table tfoot th {
+    background: var(--tt-surface);
+    color: var(--tt-text);
+}
+
+.notification {
+    background: var(--tt-surface);
+    color: var(--tt-text);
+}
+
+.menu-list a:hover,
+.menu-list a:focus {
+    background: var(--tt-surface-hover);
+    color: var(--tt-text);
 }

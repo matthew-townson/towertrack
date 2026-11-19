@@ -2280,7 +2280,7 @@
 											{/if}
 											{#if event.invitationCount > 0}
 												<p class="is-size-7">
-													<span class="tag is-small is-light">{event.invitationCount} invited</span>
+													<span class="tag is-small">{event.invitationCount} invited</span>
 												</p>
 											{/if}
 										</div>
@@ -2555,7 +2555,7 @@
 								{#if viewingEvent.endDate && formatEventDate(viewingEvent.endDate) !== formatEventDate(viewingEvent.startDate)}
 									<span> - {formatEventDate(viewingEvent.endDate)}</span>
 								{/if}
-								<span class="tag is-light ml-2">All day</span>
+								<span class="tag ml-2">All day</span>
 							{:else}
 								<span>{formatEventDate(viewingEvent.startDate)} {formatEventTime(viewingEvent.startDate)}</span>
 								{#if viewingEvent.endDate}
@@ -2574,10 +2574,10 @@
 						<span class="calendar-dot mr-2" style="background-color: {viewingEvent.calendarColour}"></span>
 						<span>{viewingEvent.calendarName || eventCalendar?.name || 'Calendar'}</span>
 						{#if isFromInvitation}
-							<span class="tag is-info is-light ml-2">From Invitation</span>
+							<span class="tag is-info ml-2">From Invitation</span>
 						{/if}
 						{#if viewingEvent.status === 'tentative'}
-							<span class="tag is-warning is-light ml-2">Maybe</span>
+							<span class="tag is-warning ml-2">Maybe</span>
 						{/if}
 					</div>
 
@@ -2672,7 +2672,7 @@
 												<span>{viewingEvent.organiserUsername}</span>
 											</a>
 											<span class="ml-auto">
-												<span class="tag is-primary is-light">Organiser</span>
+												<span class="tag is-primary">Organiser</span>
 											</span>
 										</div>
 									{/if}
@@ -2692,15 +2692,15 @@
 											{/if}
 											<span class="ml-auto">
 												{#if invite.status === 'accepted'}
-													<span class="tag is-success is-light">Accepted</span>
+													<span class="tag is-success">Accepted</span>
 												{:else if invite.status === 'declined'}
-													<span class="tag is-danger is-light">Declined</span>
+													<span class="tag is-danger">Declined</span>
 												{:else if invite.status === 'maybe'}
-													<span class="tag is-warning is-light">Maybe</span>
+													<span class="tag is-warning">Maybe</span>
 												{:else if invite.status === 'guest'}
-													<span class="tag is-info is-light">Guest</span>
+													<span class="tag is-info">Guest</span>
 												{:else}
-													<span class="tag is-light">Pending</span>
+													<span class="tag">Pending</span>
 												{/if}
 											</span>
 										</div>
@@ -2753,7 +2753,7 @@
 								{#if viewingSharedEvent.endDate && formatEventDate(viewingSharedEvent.endDate) !== formatEventDate(viewingSharedEvent.startDate)}
 									<span> - {formatEventDate(viewingSharedEvent.endDate)}</span>
 								{/if}
-								<span class="tag is-light ml-2">All day</span>
+								<span class="tag ml-2">All day</span>
 							{:else}
 								<span>{formatEventDate(viewingSharedEvent.startDate)} {formatEventTime(viewingSharedEvent.startDate)}</span>
 								{#if viewingSharedEvent.endDate}
@@ -2771,7 +2771,7 @@
 					<div class="is-flex is-align-items-center mb-3">
 						<span class="calendar-dot mr-2" style="background-color: {viewingSharedEvent.calendarColour}"></span>
 						<span>{viewingSharedEvent.calendarName}</span>
-						<span class="tag is-info is-light ml-2">(Shared)</span>
+						<span class="tag is-info ml-2">(Shared)</span>
 					</div>
 
 					<!-- Tower -->
@@ -2883,7 +2883,7 @@
 			</header>
 			<section class="modal-card-body event-modal-body">
 			{#if isFromInvitation}
-				<div class="notification is-warning is-light mb-4">
+				<div class="notification is-warning mb-4">
 					This event was added from an invitation and cannot be edited. Contact the organiser to make changes.
 				</div>
 			{/if}
@@ -3237,13 +3237,13 @@
 				</div>
 
 				{#if editingEvent && editingEvent.status === 'tentative'}
-					<div class="notification is-warning is-light">
+					<div class="notification is-warning">
 						<strong>Tentative</strong> - You responded "maybe" to this event invitation.
 					</div>
 				{/if}
 
 				{#if editingEvent && editingEvent.sourceEventId}
-					<div class="notification is-info is-light">
+					<div class="notification is-info">
 						This event was added from an invitation.
 					</div>
 				{/if}
@@ -3363,15 +3363,15 @@
 													{/if}
 													<div>
 														{#if invitation.isPending}
-															<span class="tag is-warning is-light is-size-7">Pending</span>
+															<span class="tag is-warning is-size-7">Pending</span>
 														{:else if invitation.status === 'accepted'}
-															<span class="tag is-success is-light is-size-7">Accepted</span>
+															<span class="tag is-success is-size-7">Accepted</span>
 														{:else if invitation.status === 'declined'}
-															<span class="tag is-danger is-light is-size-7">Declined</span>
+															<span class="tag is-danger is-size-7">Declined</span>
 														{:else if invitation.status === 'maybe'}
-															<span class="tag is-info is-light is-size-7">Maybe</span>
+															<span class="tag is-info is-size-7">Maybe</span>
 														{:else}
-															<span class="tag is-light is-size-7">Pending</span>
+															<span class="tag is-size-7">Pending</span>
 														{/if}
 													</div>
 												</div>
@@ -3390,7 +3390,7 @@
 						</div>
 					</div>
 					{:else if editingEvent?.recurrenceType && editingEvent?.recurrenceType !== 'none' && editingEvent?.editScope !== 'single'}
-						<div class="notification is-info is-light">
+						<div class="notification is-info">
 							<p class="is-size-7">Invitations can only be sent when editing a specific event instance.</p>
 						</div>
 					{/if}
@@ -3614,7 +3614,7 @@
 						<input id="shared-cal-colour" class="input" type="color" bind:value={sharedCalendarForm.colour} style="height: 40px; padding: 4px;" />
 					</div>
 				</div>
-				<div class="notification is-info is-light">
+				<div class="notification is-info">
 					<p class="is-size-7">After creating the calendar, you can invite other users to edit it from the manage menu.</p>
 				</div>
 			</section>
@@ -3639,9 +3639,9 @@
 					<span class="calendar-dot mr-2" style="background-color: {managingSharedCalendar.colour}"></span>
 					{managingSharedCalendar.name}
 					{#if !isOwner}
-						<span class="tag is-light ml-2">{managingSharedCalendar.role}</span>
+						<span class="tag ml-2">{managingSharedCalendar.role}</span>
 					{:else}
-						<span class="tag is-primary is-light ml-2">Owner</span>
+						<span class="tag is-primary ml-2">Owner</span>
 					{/if}
 				</p>
 				<button class="delete" aria-label="close" on:click={() => showManageSharedCalendarModal = false}></button>
@@ -3676,7 +3676,7 @@
 					<div class="shared-member-item is-flex is-align-items-center mb-2 p-2">
 						<span class="has-text-weight-medium">{managingSharedCalendar.ownerUsername}</span>
 						<span class="ml-auto">
-							<span class="tag is-primary is-light">Owner</span>
+							<span class="tag is-primary">Owner</span>
 						</span>
 					</div>
 
@@ -3702,7 +3702,7 @@
 									Remove
 								</button>
 							{:else}
-								<span class="tag is-light ml-2" class:is-info={member.role === 'viewer'}>{member.role}</span>
+								<span class="tag ml-2" class:is-info={member.role === 'viewer'}>{member.role}</span>
 							{/if}
 						</div>
 					{/each}
@@ -3805,7 +3805,7 @@
 			<header class="modal-card-head">
 				<p class="modal-card-title">
 					{editingSharedEvent ? 'Edit Shared Event' : 'New Shared Event'}
-					<span class="tag is-info is-light ml-2">Shared</span>
+					<span class="tag is-info ml-2">Shared</span>
 				</p>
 				<button class="delete" aria-label="close" on:click={() => showSharedEventModal = false}></button>
 			</header>
@@ -4149,15 +4149,15 @@
 												{/if}
 												<div>
 													{#if invitation.isPending}
-														<span class="tag is-warning is-light is-size-7">Pending</span>
+														<span class="tag is-warning is-size-7">Pending</span>
 													{:else if invitation.status === 'accepted'}
-														<span class="tag is-success is-light is-size-7">Accepted</span>
+														<span class="tag is-success is-size-7">Accepted</span>
 													{:else if invitation.status === 'declined'}
-														<span class="tag is-danger is-light is-size-7">Declined</span>
+														<span class="tag is-danger is-size-7">Declined</span>
 													{:else if invitation.status === 'maybe'}
-														<span class="tag is-info is-light is-size-7">Maybe</span>
+														<span class="tag is-info is-size-7">Maybe</span>
 													{:else}
-														<span class="tag is-light is-size-7">Pending</span>
+														<span class="tag is-size-7">Pending</span>
 													{/if}
 												</div>
 											</div>
@@ -4176,7 +4176,7 @@
 					</div>
 				</div>
 				{:else if sharedEventForm.recurrenceType && sharedEventForm.recurrenceType !== 'none' && editingSharedEvent?.editScope !== 'single'}
-					<div class="notification is-info is-light mt-4">
+					<div class="notification is-info mt-4">
 						<p class="is-size-7">Invitations can only be sent when editing a specific event instance.</p>
 					</div>
 				{/if}

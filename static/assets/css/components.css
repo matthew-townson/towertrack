@@ -10,6 +10,10 @@
     color: #fff;
 }
 
+.custom-banner-bg .navbar-brand .title {
+    color: #fff;
+}
+
 .custom-banner-bg > .navbar-brand > .navbar-item:hover,
 .custom-banner-bg > .navbar-brand > .navbar-item:focus,
 .custom-banner-bg .navbar-menu > .navbar-start > .navbar-item:not(.has-dropdown):hover,
@@ -65,6 +69,12 @@
 
 .custom-footer-compact {
     padding-block: 0.5rem;
+}
+
+.custom-footer-bg,
+.custom-footer-bg .content,
+.custom-footer-bg a {
+    color: #fff;
 }
 
 .notification-bell {
@@ -173,6 +183,53 @@
 @media (max-width: 1023px) {
     .custom-banner-bg .navbar-menu {
         background: var(--tt-surface-raised);
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-item,
+    .custom-banner-bg .navbar-menu .navbar-link {
+        width: 100%;
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-item {
+        box-sizing: border-box;
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 0;
+        background: transparent;
+        text-align: left;
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-item.has-dropdown > .navbar-link::after {
+        display: block !important;
+        width: 0.45rem;
+        height: 0.45rem;
+        flex: 0 0 auto;
+        margin-left: 0.75rem;
+        border: 0 solid currentColor !important;
+        border-right-width: 2px !important;
+        border-bottom-width: 2px !important;
+        content: '';
+        transform: rotate(45deg);
+        transition: transform 0.18s ease;
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-item.has-dropdown.is-active > .navbar-link::after {
+        transform: rotate(225deg);
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-item.has-dropdown .navbar-dropdown {
+        display: none;
+        position: static;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .custom-banner-bg .navbar-menu .navbar-item.has-dropdown.is-active .navbar-dropdown {
+        display: block;
     }
 
     .custom-banner-bg .navbar-menu .navbar-item,

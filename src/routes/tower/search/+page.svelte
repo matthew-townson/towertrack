@@ -213,7 +213,7 @@
 														{t.Place}{t.Dedicn ? `, ${t.Dedicn}` : ''}
 													</a>
 													{#if t.UR === '1' || t.UR === 1}
-														<span class="tag is-danger is-light" style="margin-left:0.5rem;">U/R</span>
+														<span class="tag is-danger" style="margin-left:0.5rem;">U/R</span>
 													{/if}
 												</p>
 												<p class="is-size-7 has-text-grey">

@@ -543,7 +543,7 @@
     
     {#if showLocationTracking}
         <button 
-            class="button is-rounded is-small floating-location-btn {isTrackingLocation ? 'tracking has-background-link has-text-white' : 'has-background-white has-text-link'}"
+            class="button is-rounded is-small floating-location-btn {isTrackingLocation ? 'is-link tracking' : ''}"
             on:click={toggleLocationTracking} 
             title={isTrackingLocation ? 'Stop tracking location' : 'Track my location'} 
             aria-label={isTrackingLocation ? 'Stop tracking location' : 'Track my location'}

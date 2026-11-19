@@ -212,14 +212,14 @@
 
 <Header user={data.user} />
 
-<main class="section map-page" style="padding:0; margin:0; flex:1 1 auto;">
+<main class="section map-page">
     {#if data.error}
         <div class="notification is-danger">
             <h3 class="title is-5">❗Error</h3>
             <p>{data.error}</p>
         </div>
     {:else}
-    <div class="box p-0 map-wrapper" style="height:100%; min-height:0; margin:0;">
+    <div class="box p-0 map-wrapper">
         {#if data.mapUser && String(data.mapUser.id) !== String(data.user.id)}
             <div class="notification is-info map-user-display py-2 px-3 mb-0">
                 Viewing map data for<br><strong><a href={`/u/${data.mapUser.username}`} class="has-text-link">{data.mapUser.username}</a></strong>
@@ -264,7 +264,7 @@
             />
             
             <button 
-                class="button is-rounded is-small floating-sidebar-btn has-background-white has-text-grey"
+                class="button is-rounded is-small floating-sidebar-btn"
                 on:click={toggleSidebar}
                 title="Toggle Controls"
                 aria-label="Toggle Controls"
@@ -276,7 +276,7 @@
                 </span>
             </button>
             
-            <aside class="sidebar {sidebarOpen ? 'open' : ''} box p-0" style="max-width: 350px;">
+            <aside class="sidebar {sidebarOpen ? 'open' : ''} box p-0">
                 <div class="sidebar-header py-3 px-4 is-flex is-align-items-center is-justify-content-space-between">
                     <h3 class="title is-6 mb-0">Tower Filter</h3>
                     <button class="delete close-btn" on:click={toggleSidebar} aria-label="Close sidebar"></button>

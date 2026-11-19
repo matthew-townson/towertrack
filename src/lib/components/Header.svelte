@@ -137,10 +137,10 @@ onMount(() => {
 <nav class="navbar has-shadow is-spaced custom-banner-bg" aria-label="main navigation">
   <div class="navbar-brand">
     <a class="navbar-item" href="/">
-      <h1 class="title is-4 has-text-white">towertracker</h1>
+      <h1 class="title is-4">towertracker</h1>
     </a>
     <button type="button"
-      class="navbar-burger has-text-white"
+      class="navbar-burger"
       aria-label="menu"
       aria-expanded={menuOpen}
       on:click|stopPropagation={() => menuOpen = !menuOpen}
@@ -154,10 +154,10 @@ onMount(() => {
   <div class="navbar-menu" class:is-active={menuOpen}>
     <div class="navbar-start">
       {#if user}
-        <a class="navbar-item has-text-white" href="/home" on:click={closeMenus}>Home</a>
+        <a class="navbar-item" href="/home" on:click={closeMenus}>Home</a>
 
         <div class="navbar-item has-dropdown" class:is-active={activeDropdown === 'explore'}>
-          <button class="navbar-link has-text-white" type="button" on:click|stopPropagation={() => toggleDropdown('explore')}>
+          <button class="navbar-link" type="button" aria-expanded={activeDropdown === 'explore'} on:click|stopPropagation={() => toggleDropdown('explore')}>
             Explore
           </button>
           <div class="navbar-dropdown">
@@ -171,7 +171,7 @@ onMount(() => {
         </div>
 
         <div class="navbar-item has-dropdown" class:is-active={activeDropdown === 'activity'}>
-          <button class="navbar-link has-text-white" type="button" on:click|stopPropagation={() => toggleDropdown('activity')}>
+          <button class="navbar-link" type="button" aria-expanded={activeDropdown === 'activity'} on:click|stopPropagation={() => toggleDropdown('activity')}>
             My Activity
           </button>
           <div class="navbar-dropdown">
@@ -183,7 +183,7 @@ onMount(() => {
         </div>
 
         <div class="navbar-item has-dropdown" class:is-active={activeDropdown === 'organise'}>
-          <button class="navbar-link has-text-white" type="button" on:click|stopPropagation={() => toggleDropdown('organise')}>
+          <button class="navbar-link" type="button" aria-expanded={activeDropdown === 'organise'} on:click|stopPropagation={() => toggleDropdown('organise')}>
             Organise
           </button>
           <div class="navbar-dropdown">
@@ -193,15 +193,15 @@ onMount(() => {
           </div>
         </div>
       {:else}
-        <a class="navbar-item has-text-white" href="/">Home</a>
-        <a class="navbar-item has-text-white" href="/about">About</a>
+        <a class="navbar-item" href="/">Home</a>
+        <a class="navbar-item" href="/about">About</a>
       {/if}
     </div>
 
     <div class="navbar-end">
       {#if user}
         {#if user.permission === 0}
-          <a class="navbar-item has-text-white" href="/admin" on:click={closeMenus}>Admin</a>
+          <a class="navbar-item" href="/admin" on:click={closeMenus}>Admin</a>
         {/if}
 
         <div class="navbar-item has-dropdown" class:is-active={notificationsOpen}>
@@ -209,6 +209,7 @@ onMount(() => {
             class="navbar-link notification-bell"
             on:click|stopPropagation={() => { notificationsOpen = !notificationsOpen; activeDropdown = null; }}
             aria-label="Notifications"
+            aria-expanded={notificationsOpen}
           >
             🔔
             {#if unreadCount > 0}
@@ -268,7 +269,7 @@ onMount(() => {
         </div>
 
         <div class="navbar-item has-dropdown" class:is-active={activeDropdown === 'user'}>
-          <button class="navbar-link has-text-white" type="button" on:click|stopPropagation={() => toggleDropdown('user')}>{user.username}</button>
+          <button class="navbar-link" type="button" aria-expanded={activeDropdown === 'user'} on:click|stopPropagation={() => toggleDropdown('user')}>{user.username}</button>
           <div class="navbar-dropdown is-right">
             <a class="navbar-item" href="/notifications" on:click={closeMenus}>Notifications {#if unreadCount > 0}<span class="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>{/if}</a>
             <a class="navbar-item" href="/account/settings" on:click={closeMenus}>Settings</a>
@@ -277,8 +278,8 @@ onMount(() => {
           </div>
         </div>
       {:else}
-        <a class="navbar-item has-text-white" href="/account/register">Register</a>
-        <a class="navbar-item has-text-white" href="/account/login">Login</a>
+        <a class="navbar-item" href="/account/register">Register</a>
+        <a class="navbar-item" href="/account/login">Login</a>
       {/if}
     </div>
   </div>

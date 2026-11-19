@@ -31,8 +31,8 @@
     overflow: hidden;
     padding: 1.5rem;
     border-radius: 0.5rem;
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--tt-surface-raised);
+    border: 1px solid var(--tt-border);
 }
 
 .recent-performances-header {
@@ -112,6 +112,23 @@
 
 .landing-page__box h2 {
     margin-top: 0;
+    margin-bottom: 0.75rem;
+    color: var(--tt-text);
+}
+
+.landing-page__box h1 {
+    margin: 0 0 0.75rem;
+    color: var(--tt-accent);
+}
+
+.landing-page__box p {
+    max-width: 48rem;
+    margin-inline: auto;
+}
+
+.recent-performances-header h2 {
+    font-size: 1.25rem;
+    line-height: 1.35;
 }
 
 .landing-page__image {
@@ -211,8 +228,8 @@
 
 /* ==================== Default (Light) Styles - ensure light accessibility by default ==================== */
 .dashboard-section {
-    background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: var(--tt-surface-raised);
+    border: 1px solid var(--tt-border);
 }
 
 .dashboard-section h2 {

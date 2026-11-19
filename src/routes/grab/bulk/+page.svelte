@@ -314,10 +314,10 @@
                                     {entry.selectedBells.size}/{entry.bells.length} selected
                                 </span>
                                 {#if entry.tower.isAlreadyGrabbed}
-                                    <span class="tag is-warning is-light">Already grabbed</span>
+                                    <span class="tag is-warning">Already grabbed</span>
                                 {/if}
                                 {#if entry.tower.isInOtherEntry}
-                                    <span class="tag is-danger is-light">Duplicate</span>
+                                    <span class="tag is-danger">Duplicate</span>
                                 {/if}
                                 <span class="compact-expand-icon">{entry.expanded ? '▼' : '▶'}</span>
                             </button>
@@ -326,10 +326,10 @@
                                 <div class="compact-details">
                                     <div class="compact-details-content">
                                         <div class="buttons bulk-entry-actions">
-                                            <button type="button" class="button is-small is-light" on:click={() => clearEntry(entry)}>
+                                            <button type="button" class="button is-small" on:click={() => clearEntry(entry)}>
                                                 Change Tower
                                             </button>
-                                            <button type="button" class="button is-small is-danger is-light" on:click={() => removeEntry(entry.id)}>
+                                            <button type="button" class="button is-small is-danger" on:click={() => removeEntry(entry.id)}>
                                                 Remove
                                             </button>
                                         </div>
